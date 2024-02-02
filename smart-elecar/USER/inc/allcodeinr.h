@@ -1,7 +1,7 @@
 #ifndef _ALLCODEINR_H
 #define _ALLCODEINR_H
 #include "keyboard.h"
-// 定义按键引脚
+#include "MyCode.h"
 
 // 电池电压的设置
 #define BAT_VOL_PIN ADC_P15
@@ -33,4 +33,5 @@ uint16 key = 0;
 uint16 date_len = 0;
 uint16 key_mode = 0;
 /***************************************************************************************************/
+
 #endif

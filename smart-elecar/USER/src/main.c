@@ -25,7 +25,7 @@
 /********************************初始化操作函数**********/
 void initall_PID();			// PID结构体内误差清理
 void arangement_init(); // 初始化设定
-void parameter_init(); // 初始化设定
+void parameter_init();	// 初始化设定
 /***************************************************************************************************/
 
 /********************************运动模式操作函数**********/
@@ -38,10 +38,7 @@ void right_infrared(); // 右红外避障
 /***************************************************************************************************/
 
 /********************************电机输出和电磁电压检测操作函数**********/
-// void motor_output();//电机PWM输出
-// void brushes_out();//无刷电机输出
 void ADC_battery_quire(); // 获取电池的电压数值
-// void counte_quire();//获得编码器脉冲个数
 /***************************************************************************************************/
 
 /********************************显示屏操作函数**********/
@@ -54,10 +51,9 @@ void Element_Idef(); // 元素识别
 
 /********************************PID相关函数**********/
 void PID_all_set();
-// void pid_servo(void);	  // pid输出
 /****************************************************/
 void start_dection(); // 发车检测
-
+void stop_dection();	// 停车检测
 /*
  * 系统频率，可查看board.h中的 FOSC 宏定义修改。
  * board.h文件中FOSC的值设置为0,则程序自动设置系统频率为33.1776MHZ
@@ -68,95 +64,67 @@ void start_dection(); // 发车检测
 void main()
 {
 	arangement_init(); // 初始化设定
-	parameter_init();//参数初始化
-	// gyro_flag=0;
-	// motor_flag=0;
-	// outward_basin=1;
-	// trace_flag=1;
-	// OUTP_flag=0;
+	parameter_init();	 // 参数初始化
 	while (1)
 	{
 		if (gyro_flag)
 		{
 			MPU_Acquire();
 		}
-		// wireless_read(1);						 // 无线转串口入出
+		wireless_read(1);						 // 无线转串口入出
 		system_display();						 // 显示界面
 		Button_Scan();							 // 按钮扫描
-		start_dection();						 // 发车检测
 		resetelec_Init();						 // 电感最大最小值检测
 		wireless_send(uart_mode, 5); // 无线转串口输出
+		start_dection();						 // 发车检测
+		stop_dection();							 // 停车检测
 	}
 }
 
 void start_dection() // 发车检测
 {
-	if (start_flag == 1)
+	if (jiangxing_No_1.start_flag == 1)
 	{
+		switch (jiangxing_No_1.start_mode)
+		{
+		case 0:
+		{
+			jiangxing_No_1.stop_flag = 0; // 停车置零
+			initall_PID();
+			// 初始化读取积分零漂
+			motor_flag = 0;
+			gyro_flag = 1; //
+			yaw_output = 0.0f;
+			pitch = 0.0f;
+			distance_L = 0;
+			distance_R = 0;
+			/////////////////////////////////////////
+			// 显示屏开关关闭
+			button_switch = 0;
+			display_switch = 0;
+			// 陀螺仪初始化
+			motor_flag = 1;
+			Target_speed = base_speed; // 速度控制
+			//////////////////////
+			jiangxing_No_1.start_flag = 0; // 清除标志位
+																		 /////////////////////
+		}
+		break;
 
-		// 初始化发车//无刷启动
-		// PID结构体清零
-		brusheless_flag = 1;
-		brusheless_duty = 800;
-		delay_ms(1500);
-		HRTRIG_flag = 1; // 停车
-		stop_flag = 0;	 // 停车归零
-		OUTP_flag = 0;	 // 出库设置
-		// outward_basin = 0; // 初始化出库
-		initall_PID();
-		// 初始化读取积分零漂
-		motor_flag = 0;
-		gyro_flag = 1;
-		yaw_output = 0.0f;
-		pitch = 4.0f;
-		// 元素初始化/////////////
-		roundcount = 0;
-		leftRound = 0;
-		rightRound = 0;
-		UpSlope = 0;
-		distance_L = 0;
-		distance_R = 0;
-		isr_counter_start = isr_count_flag; // 霍尔防误判
-		block_timer_count = 0;							// 避障计数归零
-		blockcount_flag = 0;								// 避障标志位
-		block_count = 0;										// 计数清零
-		/////////////////////////////////////////
-		// 显示屏开关关闭
-		button_switch = 0;
-		display_switch = 0;
-		OUTP_flag = 0;		 // 出库设置
-		outward_basin = 1; // 出库
-		// 陀螺仪初始化
-		motor_flag = 1;
-		// outward_basin = 0; // 初始化出库
-		trace_flag = 1;
-		Element_flag = 0; // 无元素
-		// OUTP_flag = 1;		// 启用出库
-		TOF_object = 0;						 // 避障个数
-		avoid_move = 0;						 // 避障过程标志位
-		Target_speed = base_speed; // 速度控制
-		//////////////////////
-		start_flag = 0; // 清除标志位
-										/////////////////////
+		default:
+			break;
+		}
 	}
-	// {										// 初始化发车//无刷启动
-	// 	Target_speed = 0; // 速度控制
-	// 	motor_flag = 0;
-	// 	trace_flag = 1;
-	// 	// 陀螺仪初始化
-	// 	gyro_flag = 0;
-	// 	yaw_output = 0; // 初始化
-	// 	pitch_result = 0.0f;
-	// 	gyro_flag = 1;
-	// 	// PID结构体清零
-	// 	initall_PID();
-	// 	// 初始化读取积分零漂
-	// 	// OUTP_flag=0;//出库设置
-	// 	Target_speed = 50; // 速度控制
-	// 	motor_flag = 1;
-	// 	start_flag = 0;
-	// 	running_mode = 8;
-	// }
+}
+
+void stop_dection() // 停车检测
+{
+	if (jiangxing_No_1.stop_flag == 1) // 停车标志位为1
+	{
+		jiangxing_No_1.start_flag = 0; // 发车置零
+		motor_flag = 0;
+		jiangxing_No_1.stop_flag = 0;
+	}
 }
 
 void arangement_init() // 初始化设定
@@ -192,8 +160,6 @@ void arangement_init() // 初始化设定
 	gpio_mode(P6_0, GPO_PP);									// P60引脚设置为推挽输出
 	pwm_init(PWM_1, 17000, 0);								// 初始化PWM1  使用P60引脚  初始化频率为17Khz
 	pwm_init(PWM_2, 17000, 0);								// 初始化PWM2  使用P62引脚  初始化频率为17Khz
-	pwm_init(PWMB_CH4_P77, 50, 0);						// 初始化无刷电机为 50hz
-	pwm_init(PWMB_CH3_P33, 50, 0);						// (1-2ms/20ms * 10000)（10000是PWM的满占空比时候的值） 10000为PWM最大值
 	adc_init(ADC_P00, 0);											// P00引脚		具体通道与引脚对应关系可以查看zf_adc.h文件	  adc[7].data_0 = adc_mean_filter(ADC_P00,8);		//采集并处理ADC_P16电压，精度12位R1—————(L1)
 	adc_init(ADC_P01, 0);											// P01引脚		具体通道与引脚对应关系可以查看zf_adc.h文件	  adc[6].data_0 = adc_mean_filter(ADC_P01,8);		//采集并处理ADC_P14电压，精度12位R2—————(L2)
 	adc_init(ADC_P05, 0);											// P05引脚		具体通道与引脚对应关系可以查看zf_adc.h文件	  adc[5].data_0 = adc_mean_filter(ADC_P06,8);		//采集并处理ADC_P06电压，精度12位R3—————(L3)
@@ -208,12 +174,12 @@ void arangement_init() // 初始化设定
 	exit_init(INT2_P36, FALLING_EDGE);
 	exit_init(INT3_P37, FALLING_EDGE);
 	// EX2=1;
-//tof initial
-//	while (dl1a_init())
-//	{
-//		delay_ms(500);
-//		printf("VL53L0X init try again.\r\n");
-//	}
+	// tof initial
+	//	while (dl1a_init())
+	//	{
+	//		delay_ms(500);
+	//		printf("VL53L0X init try again.\r\n");
+	//	}
 
 	while (MPU_Init())
 	{
@@ -221,14 +187,14 @@ void arangement_init() // 初始化设定
 	}
 	MPU6050_DMP_Init();
 	printf("STC32 MPU6050 DMP test!  \r\n");
-	
-	read_all_par();		 // 读取eeprom数值
-	// Zero_Offset_set(); // mpu6050 DMP上电矫正时间
+
+	read_all_par(); // 读取eeprom数值
+									// Zero_Offset_set(); // mpu6050 DMP上电矫正时间
 }
 
-void parameter_init()//参数初始化
+void parameter_init() // 参数初始化
 {
-// 后排电感最大值
+	// 后排电感最大值
 	adc[1].data_max = 2359;
 	adc[2].data_max = 2424;
 	adc[3].data_max = 3121;
@@ -252,142 +218,29 @@ void parameter_init()//参数初始化
 	adc[8].data_min = 0;
 	adc[9].data_min = 0;
 	adc[10].data_min = 0;
-		// ZeroOffset_init(); //yaw数值零飘
-	//显示屏页面设置
+	// ZeroOffset_init(); //yaw数值零飘
+	// 显示屏页面设置
 	sys_display[1] = 1;
 	sys_display[2] = 0;
 	sys_display[3] = 0;
-	button_switch = 1;//按钮开启
-	display_switch = 1;
-	// brusheless_duty = 0;无刷风扇设置
-	// brusheless_flag = 1;无刷风扇开启标志位
-	gyro_flag = 1;//开启陀螺仪
+	button_switch = 1;	// 按钮开启
+	display_switch = 1; // 显示开启
+	gyro_flag = 1;			// 开启陀螺仪
 	yaw_output = 0.0f;
 	// PID结构体清零
 	initall_PID();
 	// 初始化读取积分零漂
-	Element_flag = 0; // 无元素
-	motor_flag = 0;
-	roundcount = 0;
-	leftRound = 0;
-	rightRound = 0;
-	UpSlope = 0;
+	motor_flag = 0;// 电机软开关关闭
 
-	distance_L = 0;//左轮里程
-	distance_R = 0;//右轮里程
+	distance_L = 0; // 左轮里程清0
+	distance_R = 0;			// 右轮里程清0
 
-	block_count = 0;			 // 计数清零
-	stop_flag = 0;				 // 停车归零
-	isr_counter_start = 0; // 霍尔防误判
-	block_timer_count = 0; // 霍尔计数归零
-	blockcount_flag = 0;	 // 霍尔标志位
-	// outward_basin = 1;		 // 出库
-	// OUTP_flag = 0;				 // 出库设置
-	HRTRIG_flag = 1; // 停车
 	//////////////////////
-	outward_basin = 0; // 初始化出库
-	OUTP_flag = 1;		 // 启用出库
-
-	start_flag = 0;		 // 清除标志位
-	base_speed = 220;	 // 速度控制
+	jiangxing_No_1.start_flag = 0; // 清除标志位
+	jiangxing_No_1.stop_flag = 1;	 // 清除标志位
+	jiangxing_No_1.start_mode = 0; // 发车模式
+	base_speed = 120;							 // 速度控制
 }
-
-//-------------------------------------------------------------------------------------------------------------------
-// @brief		霍尔检测
-//  @param
-//  @param
-//  @return  将修改trace_flag寻迹开关
-//-------------------------------------------------------------------------------------------------------------------
-// void Hall_detection() // 左后
-// {
-// 	// int32 hall_counter=0;
-// 	if (HRTRIG == 0 && isr_count_flag > 400)
-// 	{
-// 		if (outward_basin == 1)
-// 		{
-// 			yaw = 0;
-// 			outward_basin = 2; // 结束
-// 		}
-// 		trace_flag = 0;
-// 		running_mode = 0; // 待机
-// 		motor_flag = 0;
-// 		pid_init(&Speed_PID_L);
-// 		pid_init(&Speed_PID_R);
-// 		// PID_all_set();
-// 		motor_flag = 1; // 电机输出
-// 		distance_L = 0;
-// 		distance_R = 0; // 出库
-// 		gyro_flag = 0;
-// 		yaw = 0.0f;
-// 		Dir_car = 0;
-// 		Target_speed = 50;
-// 		while ((distance_L < 17000) && (distance_R < 18000))
-// 		{
-// 			gyro_flag = 1;
-// 			OUTP_flag = 7; // 左后
-// 			motor_flag = 1;
-// 			imu660ra_get_gyro(); // 获取陀螺仪数据
-// 			wireless_send(1, 5);
-// 			ips114_showstr(15, 2, "distance_L");
-// 			ips114_showfloat(8 * 16, 2, distance_L, 5, 2);
-// 			ips114_showstr(15, 3, "distance_R");
-// 			ips114_showfloat(8 * 16, 3, distance_R, 5, 2);
-// 			ips114_showstr(15, 4, "Tgt_Spd_L=");
-// 			ips114_showfloat(8 * 16, 4, Target_Speed_L, 3, 3);
-// 			ips114_showstr(15, 5, "Tgt_Spd_R=");
-// 			ips114_showfloat(8 * 16, 5, Target_Speed_R, 3, 3);
-// 			ips114_showstr(15, 6, "yaw");
-// 			ips114_showfloat(8 * 16, 6, yaw, 4, 2);
-// 		}
-// 		motor_flag = 0;
-// 		brusheless_flag = 0;
-// 	}
-// }
-// void Hall_detection() // 右后
-// {
-// 	int32 hall_counter = 0;
-// 	if (HRTRIG == 0 && count_flag > 400)
-// 	{
-// 		if (outward_basin == 1)
-// 		{
-// 			yaw = 0;
-// 			outward_basin = 2; // 结束
-// 		}
-// 		trace_flag = 0;
-// 		running_mode = 0; // 待机
-// 		motor_flag = 0;
-// 		pid_init(&Speed_PID_L);
-// 		pid_init(&Speed_PID_R);
-// 		// PID_all_set();
-// 		motor_flag = 1; // 电机输出
-// 		distance_L = 0;
-// 		distance_R = 0; // 出库
-// 		gyro_flag = 0;
-// 		yaw = 0.0f;
-// 		Dir_car = 0;
-// 		Target_speed = 50;
-// 		while ((distance_L < 21000) && (distance_R < 20000))
-// 		{
-// 			gyro_flag = 1;
-// 			OUTP_flag = 8; // 右后
-// 			motor_flag = 1;
-// 			imu660ra_get_gyro(); // 获取陀螺仪数据
-// 			wireless_send(1, 5);
-// 			ips114_showstr(15, 2, "distance_L");
-// 			ips114_showfloat(8 * 16, 2, distance_L, 5, 2);
-// 			ips114_showstr(15, 3, "distance_R");
-// 			ips114_showfloat(8 * 16, 3, distance_R, 5, 2);
-// 			ips114_showstr(15, 4, "Tgt_Spd_L=");
-// 			ips114_showfloat(8 * 16, 4, Target_Speed_L, 3, 3);
-// 			ips114_showstr(15, 5, "Tgt_Spd_R=");
-// 			ips114_showfloat(8 * 16, 5, Target_Speed_R, 3, 3);
-// 			ips114_showstr(15, 6, "yaw");
-// 			ips114_showfloat(8 * 16, 6, yaw, 4, 2);
-// 		}
-// 		motor_flag = 0;
-// 		brusheless_flag = 0;
-// 	}
-// }
 
 //-------------------------------------------------------------------------------------------------------------------
 // @brief		PID结构体内容清理
@@ -544,10 +397,9 @@ void Button_Scan()
 				{
 					pack_mode = pack_mode + 1;
 					if (pack_mode > 10)
-						pack_mode = 10;
+						;
 					else if (pack_mode < 0)
 						pack_mode = 0;
-					pack_choose(pack_mode);
 				}
 				break;
 				default:
@@ -725,7 +577,7 @@ void Button_Scan()
 					printf("error\n");
 				}
 			}
-			else if (sw1_status ==  1 && sw2_status == 0 && sys_display[1] == 3 && sys_display[2] == 4) // PID2直道和弯道界面1和2 拨杆为没动 调整multiple_time*10
+			else if (sw1_status == 1 && sw2_status == 0 && sys_display[1] == 3 && sys_display[2] == 4) // PID2直道和弯道界面1和2 拨杆为没动 调整multiple_time*10
 			{
 				switch (cursor)
 				{
@@ -1186,7 +1038,6 @@ void Button_Scan()
 						pack_mode = 10;
 					else if (pack_mode < 0)
 						pack_mode = 0;
-					pack_choose(pack_mode);
 				}
 				break;
 				default:
@@ -1770,8 +1621,6 @@ void Button_Scan()
 			key4_flag = 0; // 使用按键之后，应该清除标志位
 		}
 	}
-
-
 }
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -1789,17 +1638,17 @@ void system_display() // 显示界面系统的显示控制
 		{
 		case 1: // 主菜单显示
 		{
-			ips114_showstr(15, 0, (uint8 *)"mode-choose");								// PID参数设置
-			ips114_showstr(15, 1, (uint8 *)"arguments-pid");							// PID参数设置
-			ips114_showstr(15, 2, (uint8 *)"round");											// 环岛模块参数进入
-			ips114_showstr(15, 3, (uint8 *)"pack");												// 左右轮速度环调参选择模块进入
-			ips114_showstr(15, 4, (uint8 *)"imu_display");       					// 姿态传感器显示载入
-			ips114_showstr(15, 5, (uint8 *)"electric ADC ");							// 显示ADC电磁界面
-			ips114_showstr(15, 6, (uint8 *)"obstacle_avoidance");					// 避障参数
-			ips114_showstr(15, 7, (uint8 *)"dill");												// 显示ADC电磁界面
-			ips114_showstr(0, cursor, (uint8 *)"->");											// 光标位置
-			ips114_showuint16(8 * 20, 7, battery_voltage);								// 1是打开 0是关闭
-			ips114_showfloat(20 * 8, 1, dl1a_distance_mm, 5, 1);					// P参数显示
+			ips114_showstr(15, 0, (uint8 *)"mode-choose");				// PID参数设置
+			ips114_showstr(15, 1, (uint8 *)"arguments-pid");			// PID参数设置
+			ips114_showstr(15, 2, (uint8 *)"round");							// 环岛模块参数进入
+			ips114_showstr(15, 3, (uint8 *)"pack");								// 左右轮速度环调参选择模块进入
+			ips114_showstr(15, 4, (uint8 *)"imu_display");				// 姿态传感器显示载入
+			ips114_showstr(15, 5, (uint8 *)"electric ADC ");			// 显示ADC电磁界面
+			ips114_showstr(15, 6, (uint8 *)"obstacle_avoidance"); // 避障参数
+			ips114_showstr(15, 7, (uint8 *)"dill");								// 显示ADC电磁界面
+			ips114_showstr(0, cursor, (uint8 *)"->");							// 光标位置
+			ips114_showuint16(8 * 20, 7, battery_voltage);				// 1是打开 0是关闭
+			ips114_showfloat(20 * 8, 1, dl1a_distance_mm, 5, 1);	// P参数显示
 		}
 		break;
 		case 2: // 模式界面
@@ -1968,7 +1817,7 @@ void system_display() // 显示界面系统的显示控制
 				ips114_showstr(15, 4, "lrd_mid_del =");
 				ips114_showfloat(9 * 12, 4, lmid_del, 4, 3);
 				ips114_showstr(15, 5, "r2 =");
-				ips114_showfloat(9 * 12, 5, r2, 4, 3);				
+				ips114_showfloat(9 * 12, 5, r2, 4, 3);
 			}
 			break;
 			case 2: // 右环岛
@@ -1984,7 +1833,7 @@ void system_display() // 显示界面系统的显示控制
 				ips114_showstr(15, 4, "rrd_mid_del =");
 				ips114_showfloat(9 * 12, 4, rmid_del, 4, 3);
 				ips114_showstr(15, 5, "l2 =");
-				ips114_showfloat(9 * 12, 5, l2, 4, 3);		
+				ips114_showfloat(9 * 12, 5, l2, 4, 3);
 
 				ips114_showstr(8 * 4, 7, (uint8 *)"multiple_time"); // 调整位数
 				ips114_showfloat(20 * 8, 7, multiple_time, 4, 5);		// 调整位数显示
@@ -2020,12 +1869,12 @@ void system_display() // 显示界面系统的显示控制
 		break;
 		case 5: // 入库参数界面
 		{
-			ips114_showstr(15, 0, (uint8 *)"Current_Speed_L");		// PID参数设置
-			ips114_showstr(15, 1, (uint8 *)"Current_Speed_R");				// P
+			ips114_showstr(15, 0, (uint8 *)"Current_Speed_L");	// PID参数设置
+			ips114_showstr(15, 1, (uint8 *)"Current_Speed_R");	// P
 			ips114_showstr(15, 2, (uint8 *)"intop_dis");				// I
 			ips114_showstr(15, 3, (uint8 *)"intop_rad");				// D
-			ips114_showfloat(18 * 8, 0, Current_Speed_L, 4, 5);	// P参数显示
-			ips114_showfloat(18 * 8, 1, Current_Speed_R, 4, 5);			// P参数显示
+			ips114_showfloat(18 * 8, 0, Current_Speed_L, 4, 5); // P参数显示
+			ips114_showfloat(18 * 8, 1, Current_Speed_R, 4, 5); // P参数显示
 			ips114_showfloat(15 * 8, 2, intop_distance, 4, 5);	// P参数显示
 			ips114_showfloat(15 * 8, 3, intop_radiu, 4, 5);			// P参数显示
 			ips114_showstr(15, 4, (uint8 *)"outp_ang");					// P
@@ -2045,14 +1894,11 @@ void system_display() // 显示界面系统的显示控制
 			ips114_showstr(15, 3, (uint8 *)"brusheless_flag");
 			ips114_showint16(8 * 18, 3, brusheless_flag);
 
-
 			// ips114_showstr(15, 1, (uint8 *)"Roundabout-mode"); // 环岛模式
 			// ips114_showuint16(15, 2, Round_mode);							 // 1是打开 0是关闭
 			// ips114_showstr(15, 5, (uint8 *)"base_speed");			 // 环岛模式
 			// ips114_showuint16(15 * 8, 5, base_speed);					 // 1是打开 0是关闭
 			// 																									 /* 1 小小 2 小中 3 小大 4 中小 5 中中 6 中大 7 大小 8 大中 9 大大 */
-
-
 		}
 		break;
 		case 7: // 电磁显示界面
@@ -2089,31 +1935,31 @@ void system_display() // 显示界面系统的显示控制
 				ips114_showstr(13 * 8, 5, "data10:");
 				ips114_showint16(21 * 8, 5, adc[10].data_0);
 				break;
-				case 2:
+			case 2:
 				ips114_showfloat(0, 0, Err_Hori, 3, 3);
 				ips114_showfloat(10 * 8, 0, Err_Vert, 3, 3);
 				ips114_showfloat(21 * 8, 0, Err_2_Hori, 3, 3);
 				ips114_showstr(0, 1, "adc_L1");
-				ips114_showfloat(6 * 8, 1, adc_L1,3,2);
+				ips114_showfloat(6 * 8, 1, adc_L1, 3, 2);
 				ips114_showstr(0, 2, "adc_L2:");
-				ips114_showfloat(6 * 8, 2, adc_L2,3,2);
+				ips114_showfloat(6 * 8, 2, adc_L2, 3, 2);
 				ips114_showstr(0, 3, "adc_M:");
-				ips114_showfloat(6 * 8, 3, adc_M,3,2);
+				ips114_showfloat(6 * 8, 3, adc_M, 3, 2);
 				ips114_showstr(0, 4, "adc_R2");
-				ips114_showfloat(6 * 8, 4, adc_R2,3,2);
+				ips114_showfloat(6 * 8, 4, adc_R2, 3, 2);
 				ips114_showstr(0, 5, "adc_R1:");
-				ips114_showfloat(6 * 8, 5, adc_R1,3,2);
+				ips114_showfloat(6 * 8, 5, adc_R1, 3, 2);
 
 				ips114_showstr(13 * 8, 1, "adc2_L1");
-				ips114_showfloat(21 * 8, 1, adc_2_L1,3,2);
+				ips114_showfloat(21 * 8, 1, adc_2_L1, 3, 2);
 				ips114_showstr(13 * 8, 2, "adc2_L2");
-				ips114_showfloat(21 * 8, 2, adc_2_L2,3,2);
+				ips114_showfloat(21 * 8, 2, adc_2_L2, 3, 2);
 				ips114_showstr(13 * 8, 3, "adc2_M");
-				ips114_showfloat(21 * 8, 3, adc_2_M,3,2);
+				ips114_showfloat(21 * 8, 3, adc_2_M, 3, 2);
 				ips114_showstr(13 * 8, 4, "adc2_R2");
-				ips114_showfloat(21 * 8, 4,	adc_2_R2,3,2);
+				ips114_showfloat(21 * 8, 4, adc_2_R2, 3, 2);
 				ips114_showstr(13 * 8, 5, "adc2_R1");
-				ips114_showfloat(21 * 8, 5, adc_2_R1,3,2);
+				ips114_showfloat(21 * 8, 5, adc_2_R1, 3, 2);
 				break;
 			default:
 				break;

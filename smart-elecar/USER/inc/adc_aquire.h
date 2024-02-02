@@ -5,6 +5,7 @@
 #include "headfile.h"
 #include "uart_send.h"
 #include "motor.h"
+#include "car_state.h"
 struct ADC
 {
 	int16 data_0;	// 电感数值
