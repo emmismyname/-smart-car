@@ -74,16 +74,17 @@ void wireless_send(int mode, int delayTime) // 无线串口发送函数
         dat[7] = adc_2_M;
         dat[8] = adc_2_R2;
         dat[9] = adc_2_R1;
+
         dat[10] = Target_speed;
         dat[11] = Target_Speed_L;
         dat[12] = Target_Speed_R;
         dat[13] = Current_Speed_L;
         dat[14] = Current_Speed_R;
-        dat[15] = err;
-        dat[16] = Err_Inclined_left;
-        dat[17] = Err_Inclined_right;
-        dat[18] = Err_2_Hori;
-        dat[19] = Err_2_Vert;
+        dat[15] = gyro_flag;
+        dat[16] = yaw;
+        dat[17] = pitch;
+        dat[18] = roll;
+        dat[19] = yaw_output;
         dat[20] = Err_Hori;
         dat[21] = Err_Vert;
 
@@ -227,10 +228,10 @@ void wireless_send(int mode, int delayTime) // 无线串口发送函数
     break;
     case 5:
     {
-        dat[0] = adc_L1;
-        dat[1] = adc_L2;
-        dat[2] = adc_M;
-        dat[3] = adc_R2;
+        dat[0] = yaw;
+        dat[1] = roll;
+        dat[2] = pitch;
+        dat[3] = yaw_output;
         dat[4] = adc_R1;
 
         dat[5] = adc_2_L1;
