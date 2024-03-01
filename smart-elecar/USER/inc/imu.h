@@ -11,11 +11,11 @@ void MPU_Acquire();
 void MPU_Process();
 void Zero_Offset_set(); // 初始化纠正陀螺仪
 float gyro_aquire(float org_gyro);
-void ZeroOffset_init();
+void ZeroOffset_init();//零飘处理函数
 extern float pitch, roll, yaw;
 extern float pitch_result, roll_result, yaw_result; // 计算结果
 extern int16 gyro_flag; // 0为零漂状态，1为正在计算标志，2为置0标志
-extern uint8 mpugyro_flag;
+// extern uint8 mpugyro_flag;
 
 extern int Zero_Offset_Count;                             // 初始化累加值
 extern float y_gyro, z_gyro, x_gyro;                      // 初始化陀螺仪数值

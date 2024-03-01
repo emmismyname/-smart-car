@@ -38,7 +38,7 @@ void read_all_par() // 开机读取数据
 
 	iap_read_bytes(0x300, read_pid4_strline, 256);
 	printf("[read4%s])", read_pid4_strline); // 上位机串口检查写入内容
-	sscanf(read_pid4_strline,"%f,%f,%f,%f,%f,%f,%d",&roundaboutL_PID.KI,&roundaboutL_PID.KI,&roundaboutL_PID.KD,&roundaboutR_PID.KP,&roundaboutR_PID.KI,&roundaboutR_PID.KD,&pack_mode);
+	sscanf(read_pid4_strline,"%f,%f,%f,%f,%f,%f",&roundaboutL_PID.KI,&roundaboutL_PID.KI,&roundaboutL_PID.KD,&roundaboutR_PID.KP,&roundaboutR_PID.KI,&roundaboutR_PID.KD);
 }
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -69,7 +69,7 @@ void write_all_par() // 利用eeporm写入数据
 	printf("(write3%s)", eeprom_pid3_strline); // 上位机串口检查写入内容
 	extern_iap_write_bytes(0x200, eeprom_pid3_strline, 256);
 
-	sprintf(eeprom_pid4_strline, "%f,%f,%f,%f,%f,%f,%d",roundaboutL_PID.KI,roundaboutL_PID.KI,roundaboutL_PID.KD,roundaboutR_PID.KP,roundaboutR_PID.KI,roundaboutR_PID.KD,pack_mode);
+	sprintf(eeprom_pid4_strline, "%f,%f,%f,%f,%f,%f,",roundaboutL_PID.KI,roundaboutL_PID.KI,roundaboutL_PID.KD,roundaboutR_PID.KP,roundaboutR_PID.KI,roundaboutR_PID.KD);
 	printf("(write4%s)", eeprom_pid4_strline); // 上位机串口检查写入内容
 	extern_iap_write_bytes(0x300, eeprom_pid4_strline, 256);
 }

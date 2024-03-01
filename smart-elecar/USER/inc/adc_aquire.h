@@ -5,6 +5,7 @@
 #include "headfile.h"
 #include "uart_send.h"
 #include "motor.h"
+
 struct ADC
 {
 	int16 data_0;	// 电感数值
@@ -15,7 +16,7 @@ struct ADC
 extern struct ADC adc[11];
 extern float adc_L1, adc_L2, adc_M, adc_R2, adc_R1;
 extern float adc_2_L1, adc_2_L2, adc_2_M, adc_2_R1, adc_2_R2; // 电感数值 : 左外 左竖 左内 中间 右内 右竖 右外
-extern float Err_Hori, Err_Vert, Err_2_Hori, Err_2_Vert, Err_1, Err_2,Err_Inclined_left,Err_Inclined_right,compensation_left,compensation_right;
+extern float Err_Hori, Err_Vert, Err_2_Hori, Err_2_Vert, Err_1, Err_2,forward_err,turn_err;
 extern float err;	   // 寻迹误差
 extern float err_last; // 上一次的寻迹误查
 extern uint8 resetelec_flag;

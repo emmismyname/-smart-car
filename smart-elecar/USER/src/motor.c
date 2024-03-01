@@ -291,33 +291,6 @@ void counte_quire() // 获得编码器脉冲个数
 	distance_R += Current_Speed_R;
 }
 
-//-------------------------------------------------------------------------------------------------------------------
-//  @brief      电调控制是看高电平时间，范围： 1ms-2ms
-//  @param      计算无刷电调转速   （1ms - 2ms）/20ms * 10000（10000是PWM的满占空比时候的值）	1ms 为 0%			 2ms 为 100%
-//  @param      brushless_duty无刷电调转速 100% 为 1000  无刷电调转速 0%   为 500
-//  @return     修改brushless_duty(全局变量，不内置函数)的值，可以修改无刷电调转速
-//-------------------------------------------------------------------------------------------------------------------
-void brushes_out()
-{
-	if (brusheless_flag == 1)
-	{
-		if (brusheless_duty < 500)
-			brusheless_duty = 500;
-		else if (brusheless_duty > 1000)
-			brusheless_duty = 1000;
-		// 限制幅度
-
-		// 控制无刷电调转速
-		pwm_duty(PWMB_CH4_P77, brusheless_duty);
-		pwm_duty(PWMB_CH3_P33, brusheless_duty + 10); // 左右电机有一定不同
-	}
-	else if (brusheless_flag == 0)
-	{
-		brusheless_duty = 500;
-		pwm_duty(PWMB_CH4_P77, 0);
-		pwm_duty(PWMB_CH3_P33, 0); // 左右电机有一定不同
-	}
-}
 
 
 void motor_output() // 电机PWM输出
@@ -352,9 +325,13 @@ void motor_output() // 电机PWM输出
 			Speed_PID_R.i_out = -3000;
 		}
 
+
+		// duty_L=Target_Speed_L;调试方向
+		// duty_R=Target_Speed_R;调试方向
+
 		if (duty_L >= 0)
 		{
-			Dir_L = 1;
+			Dir_L = 0;
 			set_duty_L = duty_L;
 			if (set_duty_L >= 6500)
 				set_duty_L = 6500;
@@ -363,13 +340,14 @@ void motor_output() // 电机PWM输出
 		}
 		else if (duty_L < 0)
 		{
-			Dir_L = 0;
+			Dir_L = 1;
 			set_duty_L = -duty_L;
 			if (set_duty_L >= 6500)
 				set_duty_L = 6500;
 			else if (set_duty_L <= 0)
 				set_duty_L = 0;
 		}
+		
 		if (duty_R >= 0)
 		{
 			set_duty_R = duty_R;
@@ -388,6 +366,7 @@ void motor_output() // 电机PWM输出
 			else if (set_duty_R <= 0)
 				set_duty_R = 0;
 		}
+    
 
 		// if(Dir_car==1)
 		// {

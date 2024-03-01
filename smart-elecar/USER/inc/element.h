@@ -6,7 +6,8 @@
 #define BEEP P67
 // 停车触发
 #define HRTRIG P26
-
+#define Forward_carmode 3
+#define Swerve_carmode 4
 void TOF_detection(); // TOF检测
 void Element_Idef();  // 元素识别
 void Hall_detection(); //霍尔检测

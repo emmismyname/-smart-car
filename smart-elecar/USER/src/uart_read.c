@@ -36,15 +36,15 @@ void wireless_read(uint8 flag)
                 {
                 case 'g': // 发车标志
                 {
-                    start_flag = 1;
+                    jiangxing_No_1.start_flag = 1;
                 }
                 break;
                 case 's': // 停车标志
                 {
-                    stop_flag = 1;
+                    jiangxing_No_1.stop_flag = 1;
                 }
                 break;
-                case 'd': // 基础停车标志
+                case 'd': // 基础速度标志
                 {
                     base_speed = read_dat_float;
                 }
@@ -176,56 +176,6 @@ void wireless_read(uint8 flag)
                     }
                 }
                 break;
-                case 'o': // 出库
-                {
-                    mode3 = read_dat_string[4]; // 模式位3
-                    switch (mode3)
-                    {
-                    case 'a':
-                    {
-                        outp_angle = read_dat_float;
-                    }
-                    break;
-                    case 'd':
-                    {
-                        outp_distance = read_dat_float;
-                    }
-                    break;
-                    case 'r':
-                    {
-                        outp_radiu = read_dat_float;
-                    }
-                    break;
-                    }
-                }
-                break;
-                case 'i': // 入库
-                {
-                    mode3 = read_dat_string[4]; // 模式位3
-                    switch (mode3)
-                    {
-                    case 'a':
-                    {
-                        intop_angle = read_dat_float;
-                    }
-                    break;
-                    case 'd':
-                    {
-                        intop_distance = read_dat_float;
-                    }
-                    break;
-                    case 'r':
-                    {
-                        intop_radiu = read_dat_float;
-                    }
-                    break;
-                    case 'b':
-                    {
-                        distance_break = read_dat_float;
-                    }
-                    }
-                }
-                break;
                 case 't': // 角度环
                 {
                     mode3 = read_dat_string[4]; // 模式位3
@@ -249,6 +199,34 @@ void wireless_read(uint8 flag)
                     }
                 }
                 break;
+                case 'y'://调节左右轮
+                {
+                    mode3 = read_dat_string[4]; // 模式位3
+                    switch (mode3)
+                    {
+                    case 'L'://右轮设定速度
+                    {
+                        Target_Speed_L = read_dat_float;
+                    }
+                    break;
+                    case 'R':
+                    {
+                        Target_Speed_R = read_dat_float;
+                    }
+                    break;
+                    case 'd'://左轮移动距离
+                    {
+                        // Pout_rate_PID.KD = read_dat_float;
+                    }
+                    break;
+                     case 'b'://右轮移动距离
+                    {
+                        // Pout_rate_PID.KD = read_dat_float;
+                    }
+                    break;
+                    }
+                }
+                break;
                 }
                 // 发送回上位机检验
                 sprintf(send_dat, "%c_%c_%c=%f\n", mode1, mode2, mode3, read_dat_float);
@@ -263,48 +241,48 @@ void wireless_read(uint8 flag)
                 {
                 case 'l': // 左小环岛环参
                 {
-                    mode3 = read_dat_string[4]; // 模式位3
-                    switch (mode3)
-                    {
-                    case 'p':
-                    {
-                        roundaboutL_PID.KP = read_dat_float;
-                    }
-                    break;
-                    case 'i':
-                    {
-                        roundaboutL_PID.KI = read_dat_float;
-                    }
-                    break;
-                    case 'd':
-                    {
-                        roundaboutL_PID.KD = read_dat_float;
-                    }
-                    break;
-                    }
+                    // mode3 = read_dat_string[4]; // 模式位3
+                    // switch (mode3)
+                    // {
+                    // case 'p':
+                    // {
+                    //     roundaboutL_PID.KP = read_dat_float;
+                    // }
+                    // break;
+                    // case 'i':
+                    // {
+                    //     roundaboutL_PID.KI = read_dat_float;
+                    // }
+                    // break;
+                    // case 'd':
+                    // {
+                    //     roundaboutL_PID.KD = read_dat_float;
+                    // }
+                    // break;
+                    // }
                 }
                 break;
                 case 'r': // 右小环岛环参
                 {
-                    mode3 = read_dat_string[4]; // 模式位3
-                    switch (mode3)
-                    {
-                    case 'p':
-                    {
-                        roundaboutR_PID.KP = read_dat_float;
-                    }
-                    break;
-                    case 'i':
-                    {
-                        roundaboutR_PID.KI = read_dat_float;
-                    }
-                    break;
-                    case 'd':
-                    {
-                        roundaboutR_PID.KD = read_dat_float;
-                    }
-                    break;
-                    }
+                    // mode3 = read_dat_string[4]; // 模式位3
+                    // switch (mode3)
+                    // {
+                    // case 'p':
+                    // {
+                    //     roundaboutR_PID.KP = read_dat_float;
+                    // }
+                    // break;
+                    // case 'i':
+                    // {
+                    //     roundaboutR_PID.KI = read_dat_float;
+                    // }
+                    // break;
+                    // case 'd':
+                    // {
+                    //     roundaboutR_PID.KD = read_dat_float;
+                    // }
+                    // break;
+                    // }
                 }
                 break;
                 case 'c':

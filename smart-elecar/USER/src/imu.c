@@ -7,7 +7,7 @@ float pitch_last = 0.0f, roll_last = 0.0f, yaw_last = 0.0f;
 float pitch_err = 0.0f, roll_err = 0.0f, yaw_err = 0.0f;
 float pitch_circle = 0.0f, roll_circle = 0.0f, yaw_circle = 0.0f;
 float pitch_result = 0.0f, roll_result = 0.0f, yaw_result = 0.0f;
-static int first_flag = 0;
+static int first_flag = 0;//第一次计算给初值
 
 int Zero_Offset_Count = 0; // 初始化累加值
 float move_z_gyro;
@@ -17,9 +17,9 @@ float y_acc, z_acc, x_acc;							  // 初始化加速度计数值
 float y_acc_offset, z_acc_offset, x_acc_offset;		  // 初始化陀螺仪零漂数值
 float dt = 0.01f;									  // 0.01系数
 int Zero_Offset_End;								  // 100次
-float det_yaw = 0;									  // yaw的变化数值
-float yaw_output = 0;								  // 输出值的上一状态数值
 float yaw_result_last = 0, org_yaw = 0, gyro_yaw = 0; // 输出值的上一状态数值
+float det_yaw = 0;									  // yaw的微分量
+float yaw_output = 0;								  // yaw的记录输出值
 float gyro[11] = {0}, gyro_sum;
 //-------------------------------------------------------------------------------------------------------------------
 // @brief		陀螺仪均值滤波
@@ -69,12 +69,11 @@ void MPU_Process()
 	q1 = Q[1] / q30;
 	q2 = Q[2] / q30;
 	q3 = Q[3] / q30;																	// 四元数
-	// roll = asin(-2 * q1 * q3 + 2 * q0 * q2) * 57.3;										// 计算出横滚角
-	// pitch = atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2 * q2 + 1) * 57.3;	// 计算出俯仰角
-	// yaw = atan2(2 * (q1 * q2 + q0 * q3), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * 57.3; // 计算出偏航角
-	pitch = asin(-2 * Q[1] * Q[3] + 2 * Q[0] * Q[2]) * 57.3;													// pitch
-	roll = atan2(2 * Q[2] * Q[3] + 2 * Q[0] * Q[1], -2 * Q[1] * Q[1] - 2 * Q[2] * Q[2] + 1) * 57.3;				// roll
-	yaw = atan2(2 * (Q[1] * Q[2] + Q[0] * Q[3]), Q[0] * Q[0] + Q[1] * Q[1] - Q[2] * Q[2] - Q[3] * Q[3]) * 57.3; // yaw
+	pitch = asin(-2 * Q[1] * Q[3] + 2 * Q[0] * Q[2]) * 57.3;													// pitch计算出横滚角
+	roll = atan2(2 * Q[2] * Q[3] + 2 * Q[0] * Q[1], -2 * Q[1] * Q[1] - 2 * Q[2] * Q[2] + 1) * 57.3;				// roll计算出俯仰角
+	yaw = atan2(2 * (Q[1] * Q[2] + Q[0] * Q[3]), Q[0] * Q[0] + Q[1] * Q[1] - Q[2] * Q[2] - Q[3] * Q[3]) * 57.3; // yaw 计算出偏航角
+
+
 	// if (pitch < 0)
 	// 	pitch += 360;
 	// if (roll < 0)
@@ -95,7 +94,7 @@ void MPU_Process()
 	// if (pitch_err < -180)
 	// 	pitch_circle++;
 	// else if (pitch_err > 180)
-	// 	pitch_circle--;
+	// 	pitch_circle--;	
 	// if (roll_err < -180)
 	// 	roll_circle++;
 	// else if (roll_err > 180)
@@ -112,6 +111,7 @@ void MPU_Process()
 	det_yaw = yaw_result - yaw_result_last;
 	if (myabs(det_yaw) < 100)
 		yaw_output += det_yaw;
+
 }
 
 //-------------------------------------------------------------------------------------------------------------------

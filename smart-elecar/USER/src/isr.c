@@ -168,11 +168,9 @@ void TM4_Isr() interrupt 20//20ms
     if (isr_count_flag % 2 == 1)//10ms
     {
         MPU_Process();
-        ADC_channel_quire(); // 获得电感值
-
-        
-        // Element_Idef();      // 模式控制
-        // if (count_flag % 600 == 1)
+        ADC_channel_quire(); // 获得电感值  
+        Element_Idef();      // 模式控制
+        // if (count_flag % 600 == 1)//调试陀螺仪
         // {
         //     distance_L = 0;
         //     distance_R = 0;
@@ -180,10 +178,10 @@ void TM4_Isr() interrupt 20//20ms
         // }
         // mode_choose(running_mode);
     }
-    if(running_mode==8||running_mode==15||running_mode==16)
-    {
-        err_angle_rate=PID_Loc_angle_Control(&Pout_PID, yaw_target - yaw_output)-(z_gyro-5);
-    }
+    // if(running_mode==8||running_mode==15||running_mode==16)
+    // {
+    //     err_angle_rate=PID_Loc_angle_Control(&Pout_PID, yaw_target - yaw_output)-(z_gyro-5);
+    // }
     // if (isr_count_flag % 2 == 1)//10ms
     // {
     //     TOF_detection();//红外测距
@@ -191,7 +189,6 @@ void TM4_Isr() interrupt 20//20ms
     if (isr_count_flag % 100 == 1)//100ms
     {
         ADC_battery_quire(); // 获得电池电压
-        // brushes_out(); // 无刷电机控制
     }
 
     // if (OUTP_flag != 0)//启动的时候发车程序

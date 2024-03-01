@@ -74,52 +74,24 @@ void wireless_send(int mode, int delayTime) // 无线串口发送函数
         dat[7] = adc_2_M;
         dat[8] = adc_2_R2;
         dat[9] = adc_2_R1;
+
         dat[10] = Target_speed;
         dat[11] = Target_Speed_L;
         dat[12] = Target_Speed_R;
         dat[13] = Current_Speed_L;
         dat[14] = Current_Speed_R;
-        dat[15] = err;
-        dat[16] = Err_Inclined_left;
-        dat[17] = Err_Inclined_right;
-        dat[18] = Err_2_Hori;
-        dat[19] = Err_2_Vert;
-        dat[20] = Err_Hori;
-        dat[21] = Err_Vert;
+        dat[15] = gyro_flag;
+        dat[16] = yaw;
+        dat[17] = pitch;
+        dat[18] = roll;
+        dat[19] = yaw_output;
+        dat[20] = forward_err;
+        dat[21] = turn_err;
 
-        dat[22] = yaw_output;
-        dat[23] = yaw;
+        dat[22] = running_mode;
+        dat[23] = trace_flag;
         dat[24] = Element_flag;
         dat[25] = z_gyro;
-
-        // dat[12] = Err_1;
-        // dat[13] = Err_2;
-
-        // dat[14] = Element_flag;
-
-        // dat[15] = RoundAbout_small_left;
-        // dat[16] = RoundAbout_small_right;
-        // dat[17] = RoundAbout_big_left;
-        // dat[18] = RoundAbout_big_right;
-        // dat[19] = UpSlope;
-
-        // dat[10] = Target_speed;
-        // dat[11] = Target_Speed_L;
-        // dat[12] = Target_Speed_R;
-        // dat[13] = Current_Speed_L;
-        // dat[14] = Current_Speed_R;
-
-        // dat[15] = org_yaw;
-        // dat[16] = filte_yaw;
-        // dat[17] = yaw_err;
-        // dat[18] = yaw_result;
-        // dat[19] = yaw_result_last;
-        // dat[20] = det_yaw;
-
-        // dat[21] = yaw_output;
-        // dat[22] = yaw_circle;
-        // dat[23] = yaw ;
-        // dat[24] = yaw_last;
         // 发送数据
         wireless_uart_send(dat, 26);
         delay_ms(delayTime);
@@ -227,10 +199,10 @@ void wireless_send(int mode, int delayTime) // 无线串口发送函数
     break;
     case 5:
     {
-        dat[0] = adc_L1;
-        dat[1] = adc_L2;
-        dat[2] = adc_M;
-        dat[3] = adc_R2;
+        dat[0] = yaw;
+        dat[1] = roll;
+        dat[2] = pitch;
+        dat[3] = yaw_output;
         dat[4] = adc_R1;
 
         dat[5] = adc_2_L1;

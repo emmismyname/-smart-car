@@ -12,13 +12,12 @@
 #define SPEEDR_DIR P35
 #define SPEEDL_DIR P53
 // 设置电机
-#define DIR_2 P64
-#define DIR_1 P60
-#define PWM_2 PWMA_CH4P_P66
-#define PWM_1 PWMA_CH2P_P62
+#define DIR_1 P64
+#define DIR_2 P60
+#define PWM_1 PWMA_CH4P_P66
+#define PWM_2 PWMA_CH2P_P62
 
 void counte_quire(); // 获得编码器脉冲个数
-void brushes_out();	 // 无刷控制输出
 void motor_output(); // 电机输出
 
 typedef struct // 定义pid常量参数及输出变量

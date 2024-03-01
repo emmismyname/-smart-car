@@ -2,9 +2,11 @@
 
 struct ADC adc[11];
 int32 sum[11];
-float adc_L1, adc_L2, adc_M, adc_R2, adc_R1;
+float adc_L1, adc_L2, adc_M, adc_R2, adc_R1;// 电感数值 : 左外 左竖 左内 中间 右内 右竖 右外
 float adc_2_L1, adc_2_L2, adc_2_M, adc_2_R1, adc_2_R2; // 电感数值 : 左外 左竖 左内 中间 右内 右竖 右外
-float Err_Hori, Err_Vert, Err_2_Hori, Err_2_Vert, Err_1, Err_2,Err_Inclined_left=0,Err_Inclined_right=0,
+float forsight_Left=0,forsight_Right=0;
+float turn_Left=0,turn_Right=0;//转弯变量
+float Err_Hori, Err_Vert, Err_2_Hori, Err_2_Vert, Err_1, Err_2,forward_err=0,turn_err=0,
 compensation_left=40,compensation_right=40;
 int resetelec_count = 0;
 uint8 resetelec_flag = 0;
@@ -27,6 +29,14 @@ float myfabs(float number) // 浮点数取绝对值
 		return -1.0 * number;
 	else
 		return number;
+}
+float squre_sum(float number1,float number2) // 浮点数取绝对值
+{
+	float result;
+  result=number1*number1+number2*number2;
+  result=sqrt(result);
+  return result;
+
 }
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -55,18 +65,29 @@ void adc_aquire(int count)
 
 	for (i = 0; i < count; i++)
 	{
-		adc[1].data_0 = adc_once(ADC_P16, ADC_12BIT);
+		adc[1].data_0 = adc_once(ADC_P01, ADC_12BIT);
 		adc[2].data_0 = adc_once(ADC_P14, ADC_12BIT);
-		adc[3].data_0 = adc_once(ADC_P13, ADC_12BIT);
-		adc[4].data_0 = adc_once(ADC_P10, ADC_12BIT);
-		adc[5].data_0 = adc_once(ADC_P11, ADC_12BIT);
+		adc[3].data_0 = adc_once(ADC_P06, ADC_12BIT);
+		adc[4].data_0 = adc_once(ADC_P13, ADC_12BIT);
+		adc[5].data_0 = adc_once(ADC_P16, ADC_12BIT);
 
-		adc[6].data_0 = adc_once(ADC_P17, ADC_12BIT);
-		adc[7].data_0 = adc_once(ADC_P06, ADC_12BIT);
-		adc[8].data_0 = adc_once(ADC_P05, ADC_12BIT);
-		adc[9].data_0 = adc_once(ADC_P01, ADC_12BIT);
-		adc[10].data_0 = adc_once(ADC_P00, ADC_12BIT);
+		adc[6].data_0 = adc_once(ADC_P10, ADC_12BIT);
+		adc[7].data_0 = adc_once(ADC_P11, ADC_12BIT);
+		adc[8].data_0 = adc_once(ADC_P00, ADC_12BIT);
+		adc[9].data_0 = adc_once(ADC_P05, ADC_12BIT);
+		adc[10].data_0 = adc_once(ADC_P17, ADC_12BIT);
 
+		// adc[1].data_0 = adc_once(ADC_P01, ADC_12BIT);
+		// adc[2].data_0 = adc_once(ADC_P14, ADC_12BIT);
+		// adc[3].data_0 = adc_once(ADC_P06, ADC_12BIT);
+		// adc[4].data_0 = adc_once(ADC_P13, ADC_12BIT);
+		// adc[5].data_0 = adc_once(ADC_P16, ADC_12BIT);
+
+		// adc[6].data_0 = adc_once(ADC_P10, ADC_12BIT);
+		// adc[7].data_0 = adc_once(ADC_P11, ADC_12BIT);
+		// adc[8].data_0 = adc_once(ADC_P00, ADC_12BIT);
+		// adc[9].data_0 = adc_once(ADC_P05, ADC_12BIT);
+		// adc[10].data_0 = adc_once(ADC_P17, ADC_12BIT);
 		sum[1] += adc[1].data_0;
 		sum[2] += adc[2].data_0;
 		sum[3] += adc[3].data_0;
@@ -137,17 +158,17 @@ void ADC_channel_quire() // 获得处理后电感值归一化处理和 获得差比和
 	//  adc_2_R2 = 	adc[9].data_0;
 	//  adc_2_R1 =	adc[10].data_0;
 
-	adc_L1 = (adc[1].data_result - adc[1].data_min) * 100.0 / (adc[1].data_max - adc[1].data_min);
-	adc_L2 = (adc[2].data_result - adc[2].data_min) * 100.0 / (adc[2].data_max - adc[2].data_min);
+	adc_R1 = (adc[1].data_result - adc[1].data_min) * 100.0 / (adc[1].data_max - adc[1].data_min);
+	adc_R2 = (adc[2].data_result - adc[2].data_min) * 100.0 / (adc[2].data_max - adc[2].data_min);
 	adc_M = (adc[3].data_result - adc[3].data_min) * 100.0 / (adc[3].data_max - adc[3].data_min);
-	adc_R2 = (adc[4].data_result - adc[4].data_min) * 100.0 / (adc[4].data_max - adc[4].data_min);
-	adc_R1 = (adc[5].data_result - adc[5].data_min) * 100.0 / (adc[5].data_max - adc[5].data_min);
+	adc_L2 = (adc[4].data_result - adc[4].data_min) * 100.0 / (adc[4].data_max - adc[4].data_min);
+	adc_L1 = (adc[5].data_result - adc[5].data_min) * 100.0 / (adc[5].data_max - adc[5].data_min);
 
-	adc_2_L1 = (adc[6].data_result - adc[6].data_min) * 100.0 / (adc[6].data_max - adc[6].data_min);
-	adc_2_L2 = (adc[7].data_result - adc[7].data_min) * 100.0 / (adc[7].data_max - adc[7].data_min);
+	adc_2_R1 = (adc[6].data_result - adc[6].data_min) * 100.0 / (adc[6].data_max - adc[6].data_min);
+	adc_2_R2 = (adc[7].data_result - adc[7].data_min) * 100.0 / (adc[7].data_max - adc[7].data_min);
 	adc_2_M = (adc[8].data_result - adc[8].data_min) * 100.0 / (adc[8].data_max - adc[8].data_min);
-	adc_2_R2 = (adc[9].data_result - adc[9].data_min) * 100.0 / (adc[9].data_max - adc[9].data_min);
-	adc_2_R1 = (adc[10].data_result - adc[10].data_min) * 100.0 / (adc[10].data_max - adc[10].data_min);
+	adc_2_L2 = (adc[9].data_result - adc[9].data_min) * 100.0 / (adc[9].data_max - adc[9].data_min);
+	adc_2_L1 = (adc[10].data_result - adc[10].data_min) * 100.0 / (adc[10].data_max - adc[10].data_min);
 
 	if (adc_L1 < 0)
 		adc_L1 = 0;
@@ -237,7 +258,7 @@ float Diff_Hori_Sum_Diff(float adc1, float adc2, float a, int Limit)
 //  @param
 //  @return
 //-------------------------------------------------------------------------------------------------------------------
-float Diff_Vert_Sum_Diff(float adc1, float adc2, float a, int Limit)
+float Diff_turn_Sum_Diff(float adc1, float adc2, float a, int Limit)
 {
 
 	float ans, fz, fm;
@@ -246,7 +267,7 @@ float Diff_Vert_Sum_Diff(float adc1, float adc2, float a, int Limit)
 	if (adc1 > 1 || adc2 > 1)
 	{
 		Diff_Mid = adc1 - adc2;
-		Sum_Mid = adc1 + adc2;
+		Sum_Mid = adc1 + adc2+0.001;
 		fz = a * Diff_Mid;
 		fm = a * Sum_Mid;
 		ans = (float)(Limit * (fz * 1.0 / fm)); // 差比和差
@@ -327,83 +348,33 @@ void resetelec_Init() // 重新学习赋值电感的最大最小值
 //-------------------------------------------------------------------------------------------------------------------
 void ERR_process() // 误查处理
 {
-	Err_Hori = Diff_Hori_Sum_Diff(adc_L1, adc_R1, 1, 20);
-	Err_2_Hori = Diff_Hori_Sum_Diff(adc_2_L1, adc_2_R1, 1, 20);
-	Err_Vert = Diff_Vert_Sum_Diff(adc_L2, adc_R2, 1, 20);
-	Err_2_Vert = Diff_Vert_Sum_Diff(adc_2_L2, adc_2_R2, 1, 20);
-	Err_Inclined_left=Diff_Vert_Sum_Diff(adc_L2+compensation_left,adc_M, 1, 20)*4;
-	Err_Inclined_right=Diff_Vert_Sum_Diff(adc_M, adc_R2+compensation_right, 1, 20)*4;
-	// Err_Inclined_left=(Diff_Vert_Sum_Diff(adc_L2, adc_R2, 1, 20)+Diff_Vert_Sum_Diff(adc_2_L2, adc_2_R2, 1, 20));
-	// Err_Inclined_right=(Diff_Vert_Sum_Diff(adc_L2, adc_R2, 1, 20)+Diff_Vert_Sum_Diff(adc_2_L2, adc_2_R2, 1, 20));
-	//  Err_Hori=Diff_Ratio_Sum_Diff(adc_L1,0,0,0,0,adc_R1,0,0,1,20);
-	//  Err_2_Hori=Diff_Ratio_Sum_Diff(adc_2_L1,0,0,0,0,adc_2_R1,0,0,1,20);
-	//  Err_Vert=Diff_Ratio_Sum_Diff(0,adc_L2,0,0,adc_R2,0,0,1,0,20);
-	//  Err_2_Vert=Diff_Ratio_Sum_Diff(0,adc_2_L2,0,0,adc_2_R2,0,0,1,0,20);
-	err_last = err;
-	if (Swerve_flag == 0 && ((adc_L2 > 80 || adc_R2 > 80) && adc_M > 60&&adc_2_M<120)) // 当数值电感到达一定数值的时候直道转换的时候
-	{
-		Swerve_flag = 1;
-		err = 1.1 * Err_Hori + 0.5 * Err_Vert + 0.8 * Err_2_Hori + 0.5 * Err_2_Vert;
-	}
-	else if (Swerve_flag == 1)
-	{
-		err = 1.1 * Err_Hori + 0.5 * Err_Vert + 0.8 * Err_2_Hori + 0.5 * Err_2_Vert;
-	}
-	if (Swerve_flag == 1 && (adc_2_R2 < 15 && adc_2_L2 < 15 && adc_2_M > 30 && adc_M > 30)) // 直道的误差数值
-	{
-		Swerve_flag = 0;
-		err = 0.6 * Err_Hori + 0.6 * Err_Vert + 0.8 * Err_2_Hori;
-	}
-	if (Swerve_flag == 0)
-	{
-		err = 0.6 * Err_Hori + 0.6 * Err_Vert + 0.8 * Err_2_Hori;
-	}
-	// if (Swerve_flag == 0 && ((adc_L2 > 80 || adc_R2 > 80)&&adc_2_M<120)) // 当数值电感到达一定数值的时候直道转换的时候
+	turn_Left=squre_sum(adc_2_L1,adc_2_L2);
+	turn_Right=squre_sum(adc_2_R1,adc_2_R2);
+	forsight_Left=adc_L1+adc_L2;
+	forsight_Right=adc_R1+adc_R2;
+  
+	forward_err=Diff_turn_Sum_Diff(forsight_Left-forsight_Right,1,30);
+	turn_err=Diff_turn_Sum_Diff(turn_Left,turn_Right,1,30);
+  Forward_PID.err=forward_err;
+	Swerve_PID.err=turn_err;
+
+	// if (Swerve_flag == 0 && ((adc_L2 > 80 || adc_R2 > 80) && adc_M > 60&&adc_2_M<120)) // 当数值电感到达一定数值的时候直道转换的时候
 	// {
 	// 	Swerve_flag = 1;
-	// 	BEEP=1;
 	// 	err = 1.1 * Err_Hori + 0.5 * Err_Vert + 0.8 * Err_2_Hori + 0.5 * Err_2_Vert;
 	// }
 	// else if (Swerve_flag == 1)
 	// {
-	// 	BEEP=1;
 	// 	err = 1.1 * Err_Hori + 0.5 * Err_Vert + 0.8 * Err_2_Hori + 0.5 * Err_2_Vert;
 	// }
-	// if (Swerve_flag == 1 && (adc_2_R2 < 15 && adc_2_L2 < 15 && adc_2_M > 30)) // 直道的误差数值
+	// if (Swerve_flag == 1 && (adc_2_R2 < 15 && adc_2_L2 < 15 && adc_2_M > 30 && adc_M > 30)) // 直道的误差数值
 	// {
-	// 	BEEP=0;
 	// 	Swerve_flag = 0;
 	// 	err = 0.6 * Err_Hori + 0.6 * Err_Vert + 0.8 * Err_2_Hori;
 	// }
 	// if (Swerve_flag == 0)
 	// {
-	// 	BEEP=0;
 	// 	err = 0.6 * Err_Hori + 0.6 * Err_Vert + 0.8 * Err_2_Hori;
 	// }
-	
-	
-	//	if(RoundAbout==3)
-	//		{
-	//       if(err>6)
-	//			{err=6;}
-	//			else if(err<-6)
-	//			{err=-6;}
-	//	}
-	// else if(Swerve_flag==1)
-	//	err=0.6*Err_Hori+0.6*Err_Vert;
-	// else if(adc_R2>40||adc_L2>40)//直道的误差数值
-	// err=0.6*Err_Hori+0.5*Err_Vert;
-	// err = Err_1 + Err_2;
-	// 	 if(Err_2_Hori>6&&Err_Hori>8)
-	//  {
-	//  		err=1.1*Err_Hori+0.5*Err_Vert+0.8*Err_2_Hori+0.5*Err_2_Vert;
-	//  }
-	//  else if(Err_2_Hori<-4&&Err_Hori<-6)
-	//  {
-	//  		err=1.1*Err_Hori+0.5*Err_Vert+0.8*Err_2_Hori+0.5*Err_2_Vert;
-	//  }
-	//  	else
-	//  {
 
-	//  }
 }

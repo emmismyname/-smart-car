@@ -6,11 +6,13 @@
 #include "adc_aquire.h"
 #include "imu.h"
 #include "eeprom.h"
+#include "element.h"
+
+
+
 
 extern int display_switch; // 显示屏的开关状态 1开 0关
 extern int button_switch;  // 显示屏的开关状态 1开 0关
-extern uint8 start_flag;   // 发车标志位
-extern uint8 stop_flag;    // 停车标志位
 /****************************运动状态检测********************************/
 extern int running_mode;   // 1是待机 2是发车 3普通寻迹（计时器）
 extern uint8 trace_flag;   // 寻迹开关
@@ -36,7 +38,6 @@ extern float in_angle;//回正目标角度
 
 
 //库状态
-extern int pack_mode;
 extern int strategy_mode; 
 //入库
 extern float intop_angle;//入库目标角度
@@ -52,12 +53,9 @@ extern float outp_radiu;//入库圆环
 extern float move_z_gyro;
 
 
-// extern void outP_moving();              // 运动代码
+extern int16 route_distance;
 
-// extern void left_outP();                // 向右出库控制代码
-// extern void right_outP();               // 向右出库控制代码
 extern void strategy_choose(int mode);
-extern void pack_choose(int mode);
 extern void mode_choose(int move_mode); // 运动模式切换
 extern int obstacle_avoidance(float out_angle1, float in_angle1,float target_out_distance1,float target_in_distance1); //避障处理
 extern void outp(float target_angle,float target_distance,float target_radiu);
