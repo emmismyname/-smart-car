@@ -1,0 +1,100 @@
+C251 COMPILER V5.60.0,  delay                                                              25/04/24  13:33:28  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE delay
+OBJECT MODULE PLACED IN .\Out_flie\delay.obj
+COMPILER INVOKED BY: D:\Keil_80251\C251\BIN\C251.EXE ..\LIB\libraries\delay.c XSMALL INTR2 BROWSE INCDIR(..\LIB\startup;
+                    -..\LIB\libraries;..\LIB\peripheral;..\USER\inc) DEBUG PRINT(.\Listings\delay.lst) TABS(2) OBJECT(.\Out_flie\delay.obj) 
+
+stmt  level    source
+
+    1          
+    2          /********************************************************************************************************
+             -*************
+    3           * @file          delay
+    4           * @date          2024-03-06
+    5           * @note    
+    6           ********************************************************************************************************
+             -************/
+    7          
+    8          
+    9          #include "delay.h"
+   10          #include "board.h"
+   11          #include "intrins.h"
+   12          
+   13          vuint16 the_delay_ms = 0;
+   14          vuint16 the_delay_us = 0;
+   15          
+   16          //-------------------------------------------------------------------------------------------------------
+             -------------
+   17          //  @brief      软件延时函数初始化
+   18          //  @param      void         
+   19          //  @return     void
+   20          //  Sample usage:               无需用户调用，用户请使用h文件中的宏定义
+   21          //-------------------------------------------------------------------------------------------------------
+             -------------
+   22          void delay_init(void)
+   23          {
+   24   1        the_delay_ms = sys_clk / 15000;
+   25   1        the_delay_us = sys_clk / 17500000;
+   26   1      }
+   27          
+   28          //-------------------------------------------------------------------------------------------------------
+             -------------
+   29          //  @brief      软件延时函数(这是一个不准确的延时)
+   30          //  @param      x             需要延时的时间（ms）
+   31          //  @return     void
+   32          //  Sample usage:               无需用户调用，用户请使用h文件中的宏定义
+   33          //-------------------------------------------------------------------------------------------------------
+             -------------
+   34          void delay_ms(uint16 ms)
+   35          {
+   36   1        vuint16 i;
+   37   1        do {
+   38   2            i = the_delay_ms;
+   39   2            while(--i);
+   40   2           }while(--ms);
+   41   1      }
+   42          
+   43          //-------------------------------------------------------------------------------------------------------
+             -------------
+   44          //  @brief      软件延时函数(这是一个不准确的延时)
+   45          //  @param      x             需要延时的时间（us）
+   46          //  @return     void
+   47          //  Sample usage:               无需用户调用，用户请使用h文件中的宏定义
+   48          //-------------------------------------------------------------------------------------------------------
+             -------------
+   49          void delay_us(uint32 us)
+   50          {
+C251 COMPILER V5.60.0,  delay                                                              25/04/24  13:33:28  PAGE 2   
+
+   51   1        uint16 i;
+   52   1        do {
+   53   2            i = the_delay_us;
+   54   2            while(--i);
+   55   2           }while(--us);
+   56   1      }
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =        91     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =         4          2
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =        12     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

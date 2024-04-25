@@ -1,0 +1,302 @@
+C251 COMPILER V5.60.0,  spi                                                                25/04/24  13:33:28  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE spi
+OBJECT MODULE PLACED IN .\Out_flie\spi.obj
+COMPILER INVOKED BY: D:\Keil_80251\C251\BIN\C251.EXE ..\LIB\libraries\spi.c XSMALL INTR2 BROWSE INCDIR(..\LIB\startup;..
+                    -\LIB\libraries;..\LIB\peripheral;..\USER\inc) DEBUG PRINT(.\Listings\spi.lst) TABS(2) OBJECT(.\Out_flie\spi.obj) 
+
+stmt  level    source
+
+    1          
+    2          /********************************************************************************************************
+             -*************
+    3           * @file          spi
+    4           * @date          2024-03-06
+    5           * @note          
+    6           ********************************************************************************************************
+             -************/
+    7          
+    8          
+    9          #pragma warning disable = 47
+   10          
+   11          #include "gpio.h"
+   12          #include "spi.h"
+   13          
+   14          
+   15          //-------------------------------------------------------------------------------------------------------
+             -------------
+   16          //  @brief      spi初始化函数(ss引脚由软件控制)
+   17          //  @param      spi_n     选择SPI模块(SPI_1-SPI_4)
+   18          //  @param      sck_pin     选择SCK引脚
+   19          //  @param      mosi_pin    选择MOSI引脚
+   20          //  @param      miso_pin    选择MISO引脚
+   21          //  @param      mstr      主从选择
+   22          //  @param      mode            SPI模式 0：CPOL=0 CPHA=0    1：CPOL=0 CPHA=1   2：CPOL=1 CPHA=0   3：CPOL
+             -=1 CPHA=1 //具体细节可自行百度
+   23          //  @param      baud      速率选择
+   24          
+   25          //  Sample usage:       spi_init(SPI_1, SPI1_SCLK_P15, SPI1_MOSI_P13, SPI1_MISO_P14, 0, MASTER, SYSclk_DIV_4
+             -);  
+   26          //                //初始化SPI1,主机模式,速率为系统频率/4，SCLK引脚P1.5 MOSI引脚P1.3 MISO引脚P1.4,SPI模式0
+   27          //-------------------------------------------------------------------------------------------------------
+             -------------
+   28          void spi_init(SPIN_enum spi_n,
+   29                  SPI_PIN_enum sck_pin, 
+   30                  SPI_PIN_enum mosi_pin, 
+   31                  SPI_PIN_enum miso_pin, 
+   32                  uint8 mode,
+   33                  SPI_MSTR_enum mstr,
+   34                  SPI_BAUD_enum baud)
+   35          {
+   36   1      
+   37   1        //IO口需要配置为：准双向口（传统8051端口模式，弱上拉）
+   38   1        if(sck_pin != SPI_NULL_PIN)
+   39   1        {
+   40   2          gpio_mode(sck_pin & 0xFF,GPIO);
+   41   2        }
+   42   1        
+   43   1        if(mosi_pin != SPI_NULL_PIN)
+   44   1        {
+   45   2          gpio_mode(mosi_pin & 0xFF,GPIO);
+   46   2        }
+   47   1        
+   48   1        if(miso_pin != SPI_NULL_PIN)
+   49   1        {
+   50   2          gpio_mode(miso_pin & 0xFF,GPIO);
+   51   2        }
+   52   1        
+C251 COMPILER V5.60.0,  spi                                                                25/04/24  13:33:28  PAGE 2   
+
+   53   1        P_SW1 &= ~(0x03<<2);  //清除SPI功能脚选择位
+   54   1          switch(spi_n)
+   55   1          {
+   56   2          case SPI_CH1:
+   57   2              P_SW1 |= (0x00<<2);
+   58   2              break;
+   59   2          case SPI_CH2:
+   60   2              P_SW1 |= (0x01<<2);
+   61   2              break;
+   62   2          case SPI_CH3:
+   63   2              P_SW1 |= (0x02<<2);
+   64   2              break;
+   65   2          case SPI_CH4:
+   66   2              P_SW1 |= (0x03<<2);
+   67   2              break;
+   68   2          }
+   69   1        
+   70   1        SPCTL &= 0xF3;    //清除SPI极性和相位
+   71   1        switch(mode)
+   72   1        {
+   73   2        case 0:
+   74   2          
+   75   2          break;
+   76   2        case 1:
+   77   2          SPCTL |= 0x01<<2;
+   78   2          break;
+   79   2        case 2:
+   80   2          SPCTL |= 0x02<<2;
+   81   2          break;
+   82   2        case 3:
+   83   2          SPCTL |= 0x03<<2;
+   84   2          break;
+   85   2        }
+   86   1          
+   87   1        
+   88   1        SPCTL |= baud;    //速率设定
+   89   1      
+   90   1          if(mstr == MASTER)
+   91   1          {
+   92   2              SPCTL |= 1<<7;  //忽略SS引脚功能，使用MSTR确定器件是主机还是从机
+   93   2              SPCTL |= 1<<4;  //主机模式
+   94   2          }
+   95   1          else
+   96   1          {
+   97   2              //不做操作
+   98   2          }
+   99   1          SPCTL |= 1<<6;    //使能SPI功能
+  100   1      }
+  101          
+  102          
+  103          
+  104          //-------------------------------------------------------------------------------------------------------
+             -------------
+  105          //  @brief      SPI发送接收函数
+  106          //  @param      dat           发送的数据
+  107          
+  108          //  Sample usage:       buf_1 = spi_mosi(buf);    //发送buf的内容，并接收到buf_1里，长度为1字节
+  109          //-------------------------------------------------------------------------------------------------------
+             -------------
+  110          uint8 spi_mosi(uint8 dat)
+  111          {
+  112   1          SPDAT = dat;          //DATA寄存器赋值
+  113   1          while (!(SPSTAT & 0x80));     //查询完成标志
+  114   1          SPSTAT = 0xc0;                  //清中断标志
+  115   1        return SPDAT;
+  116   1      }
+C251 COMPILER V5.60.0,  spi                                                                25/04/24  13:33:28  PAGE 3   
+
+  117          
+  118          //-------------------------------------------------------------------------------------------------------
+             -------------
+  119          //  @brief      SPI发送字节
+  120          //  @param      dat           发送的数据
+  121          //  Sample usage:       spi_sendchar(buf);    //发送buf的内容,长度为1字节
+  122          //-------------------------------------------------------------------------------------------------------
+             -------------
+  123          
+  124          void spi_sendchar(uint8 dat)
+  125          {
+  126   1          SPDAT = dat;          //DATA寄存器赋值
+  127   1          while (!SPIF);      //查询完成标志
+  128   1          SPIF = 1;
+  129   1          WCOL = 1;
+  130   1      }
+  131          
+  132          //-------------------------------------------------------------------------------------------------------
+             -------------
+  133          //  @brief      SPI接收函数
+  134          //  @param      void
+  135          
+  136          //  Sample usage:       buf_1 = spi_read();   //接收buf的内容,长度为1字节
+  137          //-------------------------------------------------------------------------------------------------------
+             -------------
+  138          
+  139          uint8 spi_read(void)
+  140          {
+  141   1          while(!SPIF);
+  142   1          SPIF = 1;
+  143   1          WCOL = 1;
+  144   1          return SPDAT;
+  145   1      }
+  146          
+  147          //-------------------------------------------------------------------------------------------------------
+             -------------
+  148          //  @brief      SPI发送字符串
+  149          //  @param      void
+  150          //  Sample usage:       spi_sendstr("Hello");  //接收buf的内容,长度为1字节
+  151          //-------------------------------------------------------------------------------------------------------
+             -------------
+  152          
+  153          void spi_sendstr(uint8 *str)
+  154          {
+  155   1          while(*str)
+  156   1          {
+  157   2              spi_sendchar(*str++);
+  158   2          }
+  159   1      }
+  160          
+  161          //-------------------------------------------------------------------------------------------------------
+             -------------
+  162          //  @brief      spi引脚切换函数(ss引脚由软件控制)
+  163          //  @param      spi_n     选择SPI模块(SPI_1-SPI_4)
+  164          //  @param      sck_pin     选择SCK引脚
+  165          //  @param      mosi_pin    选择MOSI引脚
+  166          //  @param      miso_pin    选择MISO引脚
+  167          //  Sample usage:       spi_change_pin(SPI_1,SPI1_SCLK_P15, SPI1_MOSI_P13,SPI1_MISO_P14); 
+  168          //                //切换SPI引脚
+  169          //-------------------------------------------------------------------------------------------------------
+             -------------
+  170          void spi_change_pin(SPIN_enum spi_n, SPI_PIN_enum sck_pin, SPI_PIN_enum mosi_pin, SPI_PIN_enum miso_pin)
+  171          {
+  172   1          P_SW1 &= ~(0x03<<2);  //清除SPI功能脚选择位
+  173   1        switch(spi_n)
+  174   1          {
+C251 COMPILER V5.60.0,  spi                                                                25/04/24  13:33:28  PAGE 4   
+
+  175   2        //IO口需要配置为：准双向口（传统8051端口模式，弱上拉）
+  176   2          case SPI_CH1:
+  177   2          gpio_mode(P1_3,GPO_PP);
+  178   2          gpio_mode(P1_4,GPIO);
+  179   2          gpio_mode(P1_5,GPO_PP);
+  180   2              break;
+  181   2          case SPI_CH2:
+  182   2          gpio_mode(P2_3,GPO_PP);
+  183   2          gpio_mode(P2_4,GPIO);
+  184   2          gpio_mode(P2_5,GPO_PP);
+  185   2              break;
+  186   2          case SPI_CH3:
+  187   2          gpio_mode(P4_0,GPO_PP);
+  188   2          gpio_mode(P4_1,GPIO);
+  189   2          gpio_mode(P4_3,GPO_PP);
+  190   2              break;
+  191   2          case SPI_CH4:
+  192   2          gpio_mode(P3_4,GPO_PP);
+  193   2          gpio_mode(P3_3,GPIO);
+  194   2          gpio_mode(P3_2,GPO_PP);
+  195   2              break;
+  196   2          }
+  197   1        
+  198   1      
+  199   1          switch(spi_n)
+  200   1          {
+  201   2          case SPI_CH1:
+  202   2              P_SW1 |= (0x00<<2);
+  203   2              break;
+  204   2          case SPI_CH2:
+  205   2              P_SW1 |= (0x01<<2);
+  206   2              break;
+  207   2          case SPI_CH3:
+  208   2              P_SW1 |= (0x02<<2);
+  209   2              break;
+  210   2          case SPI_CH4:
+  211   2              P_SW1 |= (0x03<<2);
+  212   2              break;
+  213   2          }
+  214   1      }
+  215          
+  216          
+  217          
+  218          //-------------------------------------------------------------------------------------------------------
+             -------------
+  219          //  @brief      spi模式切换函数
+  220          //  @param      mode            SPI模式 0：CPOL=0 CPHA=0    1：CPOL=0 CPHA=1   2：CPOL=1 CPHA=0   3：CPOL
+             -=1 CPHA=1 //具体细节可自行百度
+  221          //  Sample usage:       
+  222          //-------------------------------------------------------------------------------------------------------
+             -------------
+  223          void spi_change_mode(uint8 mode)
+  224          {
+  225   1        SPCTL &= 0xF7;    //清除SPI极性和相位
+  226   1        switch(mode)
+  227   1        {
+  228   2        case 0:
+  229   2          
+  230   2          break;
+  231   2        case 1:
+  232   2          SPCTL |= 0x01<<2;
+  233   2          break;
+  234   2        case 2:
+  235   2          SPCTL |= 0x02<<2;
+  236   2          break;
+  237   2        case 3:
+C251 COMPILER V5.60.0,  spi                                                                25/04/24  13:33:28  PAGE 5   
+
+  238   2          SPCTL |= 0x03<<2;
+  239   2          break;
+  240   2        }
+  241   1      }
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       428     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------          7
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

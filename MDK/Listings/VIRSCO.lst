@@ -1,0 +1,118 @@
+C251 COMPILER V5.60.0,  VIRSCO                                                             08/03/24  19:26:54  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE VIRSCO
+OBJECT MODULE PLACED IN .\Out_flie\VIRSCO.obj
+COMPILER INVOKED BY: D:\Keil_80251\C251\BIN\C251.EXE ..\LIB\peripheral\VIRSCO.c XSMALL INTR2 BROWSE INCDIR(..\LIB\startu
+                    -p;..\LIB\libraries;..\LIB\peripheral;..\USER\inc) DEBUG PRINT(.\Listings\VIRSCO.lst) TABS(2) OBJECT(.\Out_flie\VIRSCO.ob
+                    -j) 
+
+stmt  level    source
+
+    1          
+    2          /********************************************************************************************************
+             -*************
+    3           * @file          虚拟示波器协议
+    4           * @date          2024-03-06
+    5           * @note          示波器下载地址：https://pan.baidu.com/s/198CMXTZsbI3HAEqNXDngBw（包含清华直立方案资料）
+    6           ********************************************************************************************************
+             -************/
+    7          
+    8          
+    9          #include "uart.h"
+   10          #include "WIRELESS.h"
+   11          #include "VIRSCO.h"
+   12          
+   13          
+   14          uint8 virtual_scope_data[10];
+   15          
+   16          //-------------------------------------------------------------------------------------------------------
+             -------------
+   17          //  @brief      CRC校验（内部使用，用户无需关心）
+   18          //  @param      Buf             需要进行CRC计算的数据地址
+   19          //  @param      CRC_CNT         需要进行CRC计算的数据个数
+   20          //  @return     void    
+   21              
+   22          //  Sample usage:     
+   23          //-------------------------------------------------------------------------------------------------------
+             -------------
+   24          uint16 CRC_CHECK(uint8 *Buf, uint8 CRC_CNT)
+   25          {
+   26   1          uint16 CRC_Temp;
+   27   1          uint8 i,j;
+   28   1          CRC_Temp = 0xffff;
+   29   1      
+   30   1          for (i=0;i<CRC_CNT; i++){      
+   31   2              CRC_Temp ^= Buf[i];
+   32   2              for (j=0;j<8;j++) {
+   33   3                  if (CRC_Temp & 0x01)
+   34   3                      CRC_Temp = (CRC_Temp >>1 ) ^ 0xa001;
+   35   3                  else
+   36   3                      CRC_Temp = CRC_Temp >> 1;
+   37   3              }
+   38   2          }
+   39   1          return(CRC_Temp);
+   40   1      }
+   41          
+   42          //-------------------------------------------------------------------------------------------------------
+             -------------
+   43          //  @brief      虚拟示波器数据转换函数
+   44          //  @param      data1       要发送的第一个数据
+   45          //  @param      data2       要发送的第二个数据
+   46          //  @param      data3       要发送的第三个数据
+   47          //  @param      data4       要发送的第四个数据
+   48          //  @param      *dat        转换之后存放数据的地址
+   49          //  @return     void    
+   50              
+   51          //  Sample usage:     
+   52          //-------------------------------------------------------------------------------------------------------
+C251 COMPILER V5.60.0,  VIRSCO                                                             08/03/24  19:26:54  PAGE 2   
+
+             -------------
+   53          void data_conversion(int16 data1, int16 data2, int16 data3, int16 data4, uint8 *dat)
+   54          {
+   55   1          uint16 CRC16;
+   56   1          
+   57   1          dat[0] = (uint8)((uint16)data1&0xff);
+   58   1          dat[1] = (uint8)((uint16)data1>>8);
+   59   1          
+   60   1          dat[2] = (uint8)((uint16)data2&0xff);
+   61   1          dat[3] = (uint8)((uint16)data2>>8);
+   62   1          
+   63   1          dat[4] = (uint8)((uint16)data3&0xff);
+   64   1          dat[5] = (uint8)((uint16)data3>>8);
+   65   1          
+   66   1          dat[6] = (uint8)((uint16)data4&0xff);
+   67   1          dat[7] = (uint8)((uint16)data4>>8);
+   68   1      
+   69   1          CRC16  = CRC_CHECK(dat,8);
+   70   1          dat[8] = (uint8)(CRC16&0xff);
+   71   1          dat[9] = (uint8)(CRC16>>8);
+   72   1          
+   73   1          //uart_putbuff(USART_0,dat,10);  //数据转换完成后，使用串口发送将数组的内容发送出去
+   74   1      }
+   75          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       163     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =        10          4
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

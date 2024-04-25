@@ -1,0 +1,232 @@
+C251 COMPILER V5.60.0,  element                                                            25/04/24  13:33:29  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE element
+OBJECT MODULE PLACED IN .\Out_flie\element.obj
+COMPILER INVOKED BY: D:\Keil_80251\C251\BIN\C251.EXE ..\USER\src\element.c XSMALL INTR2 BROWSE INCDIR(..\LIB\startup;..\
+                    -LIB\libraries;..\LIB\peripheral;..\USER\inc) DEBUG PRINT(.\Listings\element.lst) TABS(2) OBJECT(.\Out_flie\element.obj) 
+
+stmt  level    source
+
+    1          #include "element.h"
+    2          
+    3          /********************************‘™Àÿ ∂±±‰¡ø******/
+    4          int8 Element_flag = 0; // 0 «Œﬁ‘™Àÿ 1 «”–‘™Àÿ
+    5          int8 Swerve_flag = 0;  // 0 «÷±µ¿ 1 «Õ‰µ¿
+    6          int16 UpSlope = 0;
+    7          int16 DownSlope_begin = 0;
+    8          int16 TurnLeft = 0, TurnRight = 0;
+    9          int16 Cross = 0;
+   10          /***************************************************************************************/
+   11          
+   12          // /*******************ª∑µ∫±‰¡ø*******************/
+   13          int32 judge_delay_flag = 0;
+   14          int16 RoundAbout_small_left = 0;
+   15          int16 RoundAbout_small_right = 0;
+   16          int16 RoundAbout_big_left = 0;
+   17          int16 RoundAbout_big_right = 0;
+   18          // int16 Roundflag = 0;
+   19          // int16 roundcount = 0;
+   20          // /**********************************************/
+   21          /*******************ª∑µ∫±‰¡ø*******************/
+   22          float pretoreadyL_round_distance = 11;
+   23          float pretoreadyR_round_distance = 20;
+   24          float leftround_diff = 15;
+   25          float rigtround_diff = 20;
+   26          float leftround_ready = 130;
+   27          float rigtround_ready = 140;
+   28          float leftround_yawtarget = 65;
+   29          float rigtround_yawtarget = -65;
+   30          float lmid_del = -20;
+   31          float rmid_del = -15;
+   32          float r2 = 130;
+   33          float l2 = 120;
+   34          int16 Round_mode = 3;
+   35          int16 Roundflag = 0;
+   36          int16 roundcount = 0;
+   37          int16 rightRound = 0;
+   38          int16 leftRound = 0;
+   39          int16 Round_mode;
+   40          /**********************************************/
+   41          
+   42          // /********************************‘™Àÿ ∂±±‰¡ø******/
+   43          int HRTRIG_flag = 1;
+   44          float distance_break = 3;    // …≤≥µæ‡¿Î
+   45          int8 block_flag = 0;         // ’œ∞≠±Í÷æ
+   46          int8 block_count = 0;        // ≈–∂¡¥Œ ˝
+   47          int16 blockcount_flag = 0;   // ≈–∂¡±Í÷æŒª
+   48          int32 block_timer_end = 100; // ±‹’œº∆ ±∆˜
+   49          int8 blockcount_target = 0;  // ƒø±Í≈–∂¡¥Œ ˝
+   50          int32 block_timer_count = 0; // º∆ ±∆˜º∆ ˝
+   51          // /***************************************************************************************/
+   52          float pre_distance = 1000;
+   53          float ready_distance = 750;
+   54          
+   55          
+   56          
+   57          // //----------------------------------------------------------------------------------------------------
+             ----------------
+C251 COMPILER V5.60.0,  element                                                            25/04/24  13:33:29  PAGE 2   
+
+   58          // // @brief    ∫ÏÕ‚≤‚æ‡
+   59          // //  @param  ∑µªÿ“‘∫¡√◊Œ™µ•Œªµƒ∑∂Œß∂¡ ˝
+   60          // //  @param
+   61          // //  @return  dl1a_get_distance
+   62          // //----------------------------------------------------------------------------------------------------
+             ----------------
+   63          void TOF_detection()
+   64          {
+   65   1          dl1a_get_distance();
+   66   1          if (Element_flag == 0 && UpSlope == 0 && Swerve_flag == 0 && outward_basin == 1)
+   67   1          {
+   68   2              //  int32 hadercounter=0;
+   69   2              // ∑÷±Ê
+   70   2              if (dl1a_distance_mm > 1600 && avoid_move == 0 && TOF_object != 2) // µ± ˝÷µ Ù”⁄8190 ±∫Ú Ù”⁄√ª”–º
+             -Ï≤‚µΩŒÔÃÂ
+   71   2              {
+   72   3                  TOF_object = 0; // Œ¥ºÏ≤‚µΩŒÔÃÂ
+   73   3              }
+   74   2              if (pre_distance < dl1a_distance_mm && dl1a_distance_mm < pre_distance + 200 && avoid_move == 0 &
+             -& TOF_object == 0 && avoid_move == 0) // 1200-1000÷Æº‰‘§ºÏ≤‚
+   75   2              {
+   76   3                  TOF_object = 1; // ‘§ºÏ≤‚ºÏ≤‚µΩ
+   77   3      //            Target_speed = 120;
+   78   3              }
+   79   2              else if (TOF_object == 1 && dl1a_distance_mm > 1600) // Œ¥ºÏ≤‚µΩ’œ∞≠
+   80   2              {
+   81   3                  TOF_object = 0; // Œ¥ºÏ≤‚µΩŒÔÃÂ
+   82   3                  avoid_move = 0;
+   83   3              }
+   84   2              // else if (600 > dl1a_distance_mm && TOF_object == 1 && block_count == blockcount_target) // 600
+             - ±∫Úø™ º±‹’œ
+   85   2              else if (ready_distance > dl1a_distance_mm && TOF_object == 1) // 700 ±∫Úø™ º±‹’œ
+   86   2              {
+   87   3                  err_angle_rate = 0;
+   88   3      //            pid_init(&Pout_rate_PID); // ≥ı ºªØΩ«∂»ª∑ƒ⁄∑¿÷π¿€º∆
+   89   3      //            pid_init(&Pout_PID);      // ≥ı ºªØΩ«∂»ª∑ƒ⁄∑¿÷π¿€º∆
+   90   3      //            Pout_rate_PID.pid_out = Forward_PID.pid_out;
+   91   3                  avoid_move = 1; // ±‹’œø™∆Ù
+   92   3                  TOF_object = 2; // ø™ º±‹’œ∑¿÷πŒÛ≈–
+   93   3      //            distance_L = 0;
+   94   3      //            distance_R = 0;
+   95   3      //            yaw_output = 0;   // ≥ı ºªØΩ«∂»
+   96   3                  outtoin_flag = 0; // ≥ı ºªØ
+   97   3              }
+   98   2              // º∆ ˝≤ﬂ¬‘
+   99   2              if (800 > dl1a_distance_mm && blockcount_flag == 0)
+  100   2              {
+  101   3                  blockcount_flag = 1;
+  102   3                  block_timer_count = 0;
+  103   3              }
+  104   2              if (blockcount_flag == 1 && block_timer_count < block_timer_end)
+  105   2              {
+  106   3                  block_timer_count++; // 20ms+1
+  107   3              }
+  108   2              else if (blockcount_flag == 1 && block_timer_count >= block_timer_end)
+  109   2              {
+  110   3                  block_count = block_count + 1;
+  111   3                  blockcount_flag = 0;
+  112   3                  block_timer_count = 0;
+  113   3              } // º∆ ˝+1≤¢«“«Â≥˝∑¿ŒÛ≈–±Í÷æŒª
+  114   2          }
+  115   1      //    if (avoid_move == 1)
+  116   1      //    {
+  117   1      //        avoid_move = obstacle_avoidance(out_angle, in_angle, out_distance, in_distance);
+  118   1      //    }
+  119   1      }
+C251 COMPILER V5.60.0,  element                                                            25/04/24  13:33:29  PAGE 3   
+
+  120          
+  121          ////-----------------------------------------------------------------------------------------------------
+             ---------------
+  122          //// @brief   ªÙ∂˚ºÏ≤‚
+  123          ////  @param
+  124          ////  @param
+  125          ////  @return  Ω´–ﬁ∏ƒtrace_flag—∞º£ø™πÿ
+  126          ////-----------------------------------------------------------------------------------------------------
+             ---------------
+  127          //void Hall_detection() // ªÙ∂˚ºÏ≤‚
+  128          //{
+  129          //    if (HRTRIG_flag == 0 && isr_count_flag > isr_counter_start + 800)
+  130          //    {
+  131          //        if (outward_basin == 1)
+  132          //        {
+  133          //            yaw = 0;
+  134          //            outward_basin = 2; // Ω· ¯
+  135          //            distance_L = 0;
+  136          //            distance_R = 0;
+  137          //        }
+  138          //    }
+  139          //    if (outward_basin == 2 && Current_Speed_L > 10 && Current_Speed_R > 10)
+  140          //    {
+  141          //        running_mode = 2;
+  142          //        mode_choose(running_mode);
+  143          //    }
+  144          //    else if (outward_basin == 2 && Current_Speed_L < 10 && Current_Speed_R < 10)
+  145          //    {
+  146          //        running_mode = 2;
+  147          //        mode_choose(running_mode);
+  148          //        pid_init(&Pout_rate_PID);
+  149          //        pid_init(&Pout_PID);
+  150          //        err_angle_rate = 0;
+  151          //        yaw_output = 0.0f;
+  152          //        distance_L = 0;
+  153          //        distance_R = 0;
+  154          //        outward_basin = 3;
+  155          //    }
+  156          
+  157          //    if (Current_Speed_L<10 && Current_Speed_R < 10 && outward_basin == 3 && distance_L < -distance_brea
+             -k * 2000 && distance_L < -distance_break * 2000)
+  158          //    {
+  159          //        running_mode = 2;
+  160          //        mode_choose(running_mode);
+  161          //        outward_basin =4;
+  162          //    }
+  163          //    else if (outward_basin == 3 && distance_L > -distance_break * 2000 && distance_L > -distance_break 
+             -* 2000)
+  164          //    {
+  165          //        Target_speed = -50;
+  166          //        yaw_target = 0;
+  167          //        running_mode = 8;
+  168          //        mode_choose(running_mode);
+  169          //    }
+  170          //    else if (Current_Speed_L <= 10 && Current_Speed_R <= 10 && outward_basin == 4)
+  171          //    {
+  172          //        outward_basin = 5;
+  173          //        pid_init(&Pout_rate_PID);
+  174          //        pid_init(&Pout_PID);
+  175          //        err_angle_rate = 0;
+  176          //        yaw_output = 0;
+  177          //    } // ø™ ºµπ≥µ
+  178          //    else if (outward_basin == 5)
+  179          //    {
+  180          //        running_mode = 0;
+  181          //        outward_basin = intop(intop_angle, intop_distance, intop_radiu);
+C251 COMPILER V5.60.0,  element                                                            25/04/24  13:33:29  PAGE 4   
+
+  182          //    }
+  183          //}
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       315     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =       109     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =       265     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,205 @@
+C251 COMPILER V5.60.0,  assistant                                                          08/03/24  19:26:54  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE assistant
+OBJECT MODULE PLACED IN .\Out_flie\assistant.obj
+COMPILER INVOKED BY: D:\Keil_80251\C251\BIN\C251.EXE ..\LIB\peripheral\assistant.c XSMALL INTR2 BROWSE INCDIR(..\LIB\sta
+                    -rtup;..\LIB\libraries;..\LIB\peripheral;..\USER\inc) DEBUG PRINT(.\Listings\assistant.lst) TABS(2) OBJECT(.\Out_flie\ass
+                    -istant.obj) 
+
+stmt  level    source
+
+    1          
+    2          /********************************************************************************************************
+             -*************
+    3           * @file          assistant
+    4           * @date          2024-03-06
+    5           * @note   
+    6           ********************************************************************************************************
+             -************/
+    7           
+    8          
+    9          #include "assistant.h"
+   10          
+   11          assistant_oscilloscope_struct          assistant_oscilloscope_data;                         // 虚拟示波器
+             -数据
+   12          
+   13          
+   14          static fifo_struct      assistant_fifo;
+   15          static uint8            assistant_buffer[ASSISTANT_BUFFER_SIZE];              // 数据存放数组
+   16          float                   assistant_parameter[ASSISTANT_SET_PARAMETR_COUNT];    // 保存接收到的参数
+   17          
+   18          //-------------------------------------------------------------------------------------------------------
+             -------------
+   19          // 函数简介     逐飞助手求和函数
+   20          // 参数说明     *buffer         需要校验的数据地址
+   21          // 参数说明     length          校验长度
+   22          // 返回参数     uint8           和值
+   23          // 使用示例
+   24          //-------------------------------------------------------------------------------------------------------
+             -------------
+   25          static uint8 assistant_sum (uint8 *buffer, uint32 length)
+   26          {
+   27   1          uint8 temp_sum = 0;
+   28   1      
+   29   1          while(length--)
+   30   1          {
+   31   2              temp_sum += *buffer++;
+   32   2          }
+   33   1      
+   34   1          return temp_sum;
+   35   1      }
+   36          
+   37          
+   38          //-------------------------------------------------------------------------------------------------------
+             -------------
+   39          // 函数简介     逐飞助手 虚拟示波器发送函数
+   40          // 参数说明     *assistant_oscilloscope  示波器数据结构体
+   41          // 返回参数     void
+   42          // 使用示例     assistant_oscilloscope_send(&assistant_oscilloscope_data);
+   43          //-------------------------------------------------------------------------------------------------------
+             -------------
+   44          void assistant_oscilloscope_send (assistant_oscilloscope_struct *assistant_oscilloscope)
+   45          {
+   46   1          uint8 packet_size;
+   47   1        uint8 i = 0;
+   48   1        assistant_oscilloscope_struct temp_oscilloscope;
+   49   1        
+   50   1        temp_oscilloscope.channel_num = assistant_oscilloscope->channel_num & 0x0f;
+C251 COMPILER V5.60.0,  assistant                                                          08/03/24  19:26:54  PAGE 2   
+
+   51   1        
+   52   1        // 由于大小端不匹配，所以需要交换。
+   53   1        for(i = 0; i < temp_oscilloscope.channel_num; i++)
+   54   1        {
+   55   2          ((uint8 *)&temp_oscilloscope.dat[i])[0] = ((uint8 *)&assistant_oscilloscope->dat[i])[3];
+   56   2          ((uint8 *)&temp_oscilloscope.dat[i])[1] = ((uint8 *)&assistant_oscilloscope->dat[i])[2];
+   57   2          ((uint8 *)&temp_oscilloscope.dat[i])[2] = ((uint8 *)&assistant_oscilloscope->dat[i])[1];
+   58   2          ((uint8 *)&temp_oscilloscope.dat[i])[3] = ((uint8 *)&assistant_oscilloscope->dat[i])[0];
+   59   2        }
+   60   1      
+   61   1          // 帧头
+   62   1          temp_oscilloscope.head         = ASSISTANT_SEND_HEAD;
+   63   1      
+   64   1          // 写入包长度信息
+   65   1          packet_size                     = sizeof(temp_oscilloscope) - (ASSISTANT_SET_OSCILLOSCOPE_COUNT - tem
+             -p_oscilloscope.channel_num) * 4;
+   66   1          temp_oscilloscope.length       = packet_size;
+   67   1      
+   68   1          // 写入功能字与通道数量
+   69   1          temp_oscilloscope.channel_num |= ASSISTANT_CAMERA_OSCILLOSCOPE;
+   70   1      
+   71   1          // 和校验计算
+   72   1          temp_oscilloscope.check_sum    = 0;
+   73   1          temp_oscilloscope.check_sum    = assistant_sum((uint8 *)&temp_oscilloscope, packet_size);
+   74   1      
+   75   1          // 数据在调用本函数之前，由用户将需要发送的数据写入temp_oscilloscope.data[]
+   76   1      
+   77   1          assistant_transfer((const uint8 *)&temp_oscilloscope, packet_size);
+   78   1      }
+   79          
+   80          
+   81          //-------------------------------------------------------------------------------------------------------
+             -------------
+   82          // 函数简介     逐飞助手解析接收到的数据
+   83          // 参数说明     void
+   84          // 返回参数     void
+   85          // 使用示例     函数只需要放到周期运行的PIT中断或者主循环即可
+   86          //-------------------------------------------------------------------------------------------------------
+             -------------
+   87          void assistant_data_analysis (void)
+   88          {
+   89   1          uint8  temp_sum;
+   90   1          uint32 read_length;
+   91   1          assistant_parameter_struct *receive_packet;
+   92   1      
+   93   1          // 这里使用uint32进行定义，目的是为了保证数组四字节对齐
+   94   1          uint32  temp_buffer[ASSISTANT_BUFFER_SIZE / 4];
+   95   1      
+   96   1        uint32 i = 0;
+   97   1          // 尝试读取数据, 如果不是自定义的传输方式则从接收回调中读取数据
+   98   1          read_length = assistant_receive((uint8 *)temp_buffer, ASSISTANT_BUFFER_SIZE);
+   99   1          if(read_length)
+  100   1          {
+  101   2              // 将读取到的数据写入FIFO
+  102   2              fifo_write_buffer(&assistant_fifo, (uint8 *)temp_buffer, read_length);
+  103   2          }
+  104   1      
+  105   1          while(sizeof(assistant_parameter_struct) <= fifo_used(&assistant_fifo))
+  106   1          {
+  107   2              read_length = sizeof(assistant_parameter_struct);
+  108   2              fifo_read_buffer(&assistant_fifo, (uint8 *)temp_buffer, &read_length, FIFO_READ_ONLY);
+  109   2              if(ASSISTANT_RECEIVE_HEAD != ((uint8 *)temp_buffer)[0])
+  110   2              {
+  111   3                  // 没有帧头则从FIFO中去掉第一个数据
+  112   3                  read_length = 1;
+  113   3              }
+C251 COMPILER V5.60.0,  assistant                                                          08/03/24  19:26:54  PAGE 3   
+
+  114   2              else
+  115   2              {
+  116   3                  // 找到帧头
+  117   3                  receive_packet = (assistant_parameter_struct *)temp_buffer;
+  118   3                  temp_sum = receive_packet->check_sum;
+  119   3                  receive_packet->check_sum = 0;
+  120   3      
+  121   3                  if(temp_sum == assistant_sum((uint8 *)temp_buffer, sizeof(assistant_parameter_struct)))
+  122   3                  {
+  123   4                      // 和校验成功保存数据
+  124   4            
+  125   4              // 由于大小端不匹配，所以需要交换。
+  126   4              ((uint8 *)&assistant_parameter[receive_packet->channel - 1])[3] = ((uint8 *)&receive_packet->dat)[0];
+  127   4              ((uint8 *)&assistant_parameter[receive_packet->channel - 1])[2] = ((uint8 *)&receive_packet->dat)[1];
+  128   4              ((uint8 *)&assistant_parameter[receive_packet->channel - 1])[1] = ((uint8 *)&receive_packet->dat)[2];
+  129   4              ((uint8 *)&assistant_parameter[receive_packet->channel - 1])[0] = ((uint8 *)&receive_packet->dat)[3];
+  130   4      
+  131   4                  }
+  132   3                  else
+  133   3                  {
+  134   4                      read_length = 1;
+  135   4                  }
+  136   3              }
+  137   2      
+  138   2              // 丢弃无需使用的数据
+  139   2              fifo_read_buffer(&assistant_fifo, (uint8 *)temp_buffer, &read_length, FIFO_READ_AND_CLEAN);
+  140   2          }
+  141   1      }
+  142          
+  143          //-------------------------------------------------------------------------------------------------------
+             -------------
+  144          // 函数简介     逐飞助手 初始化
+  145          // 参数说明
+  146          // 返回参数     void
+  147          // 使用示例
+  148          //-------------------------------------------------------------------------------------------------------
+             -------------
+  149          void assistant_init ()
+  150          {
+  151   1          fifo_init(&assistant_fifo,  assistant_buffer, ASSISTANT_BUFFER_SIZE);
+  152   1      }
+  153          
+  154          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       458     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =       216        169
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

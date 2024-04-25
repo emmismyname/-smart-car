@@ -1,0 +1,47 @@
+C251 COMPILER V5.60.0,  mdu16                                                              25/04/24  13:33:28  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE mdu16
+OBJECT MODULE PLACED IN .\Out_flie\mdu16.obj
+COMPILER INVOKED BY: D:\Keil_80251\C251\BIN\C251.EXE ..\LIB\libraries\mdu16.c XSMALL INTR2 BROWSE INCDIR(..\LIB\startup;
+                    -..\LIB\libraries;..\LIB\peripheral;..\USER\inc) DEBUG PRINT(.\Listings\mdu16.lst) TABS(2) OBJECT(.\Out_flie\mdu16.obj) 
+
+stmt  level    source
+
+    1          
+    2          /********************************************************************************************************
+             -*************
+    3           * @file          mdu16(16Î»Ó²¼þ³Ë³ý·¨)
+    4           * @date          2024-03-06
+    5           * @note    
+    6           ********************************************************************************************************
+             -************/
+    7           
+    8           
+    9          #include "mdu16.h"
+   10          
+   11          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =    ------     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

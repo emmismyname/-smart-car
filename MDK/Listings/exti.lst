@@ -1,0 +1,87 @@
+C251 COMPILER V5.60.0,  exti                                                               25/04/24  13:33:28  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE exti
+OBJECT MODULE PLACED IN .\Out_flie\exti.obj
+COMPILER INVOKED BY: D:\Keil_80251\C251\BIN\C251.EXE ..\LIB\libraries\exti.c XSMALL INTR2 BROWSE INCDIR(..\LIB\startup;.
+                    -.\LIB\libraries;..\LIB\peripheral;..\USER\inc) DEBUG PRINT(.\Listings\exti.lst) TABS(2) OBJECT(.\Out_flie\exti.obj) 
+
+stmt  level    source
+
+    1          
+    2          /********************************************************************************************************
+             -*************
+    3           * @file          exti
+    4           * @date          2024-03-06
+    5           * @note    
+    6           ********************************************************************************************************
+             -************/
+    7          
+    8          
+    9          #include "exti.h"
+   10          
+   11          
+   12          //-------------------------------------------------------------------------------------------------------
+             -------------
+   13          //  @brief      外部中断初始化
+   14          //  @param      NULL              
+   15          //  @return     void
+   16          //  Sample usage:               exit_init(INT0_P32,BOTH) //初始化P32 作为外部中断引脚，双边沿触发。
+   17          //-------------------------------------------------------------------------------------------------------
+             -------------
+   18          void exit_init(INTN_enum int_n,INT_MODE_enum mode)
+   19          {
+   20   1        if(INT0_P32 == int_n)
+   21   1        {
+   22   2          IT0 = mode;
+   23   2          EX0 = 1;    //使能INT0中断
+   24   2        }
+   25   1      
+   26   1        if(INT1_P33 == int_n)
+   27   1        {
+   28   2          IT1 = mode;
+   29   2          EX1 = 1;    //使能INT1中断
+   30   2        }
+   31   1        
+   32   1        if(INT2_P36 == int_n)
+   33   1        {
+   34   2          INTCLKO |= 1<<4;  //使能INT2中断
+   35   2        }
+   36   1        
+   37   1        if(INT3_P37 == int_n)
+   38   1        {
+   39   2          INTCLKO |= 1<<5;  //使能INT3中断
+   40   2        }
+   41   1        
+   42   1        if(INT4_P30 == int_n)
+   43   1        {
+   44   2          INTCLKO |= 1<<6;  //使能INT4中断
+   45   2        }
+   46   1      
+   47   1      }
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =        62     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+C251 COMPILER V5.60.0,  exti                                                               25/04/24  13:33:28  PAGE 2   
+
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
