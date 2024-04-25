@@ -1,0 +1,96 @@
+C251 COMPILER V5.60.0,  vofa                                                               23/03/24  21:40:19  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE vofa
+OBJECT MODULE PLACED IN .\Out_flie\vofa.obj
+COMPILER INVOKED BY: D:\Keil_80251\C251\BIN\C251.EXE ..\USER\src\vofa.c XSMALL INTR2 BROWSE INCDIR(..\LIB\startup;..\LIB
+                    -\libraries;..\LIB\peripheral;..\USER\inc) DEBUG PRINT(.\Listings\vofa.lst) TABS(2) OBJECT(.\Out_flie\vofa.obj) 
+
+stmt  level    source
+
+    1          
+    2          #include "vofa.h"
+    3          
+    4          typedef union // 定义float，longint共用体
+    5          {
+    6              float fdata;
+    7              unsigned long int ldata;
+    8          } FloatLongType;
+    9          float dat[64];                               // 定义数据体
+   10          char datetail[4] = {0x00, 0x00, 0x80, 0x7f}; // 定义帧尾
+   11          
+   12          int uart_mode = 0; // 设置串口传输模式
+   13          
+   14          //-------------------------------------------------------------------------------------------------------
+             -------------
+   15          //  @brief      浮点数转二进制数
+   16          //  @param      fnum      输入的浮点数
+   17          //  @param      byte[]      转换成的二进制数组
+   18          //  @return
+   19          //-------------------------------------------------------------------------------------------------------
+             -------------
+   20          void floatToByte(float fnum, unsigned char byte[]) // 浮点数转二进制数
+   21          {
+   22   1          FloatLongType fl;
+   23   1          fl.fdata = fnum;
+   24   1          byte[0] = (unsigned char)(fl.ldata);
+   25   1          byte[1] = (unsigned char)(fl.ldata >> 8);
+   26   1          byte[2] = (unsigned char)(fl.ldata >> 16);
+   27   1          byte[3] = (unsigned char)(fl.ldata >> 24);
+   28   1      }
+   29          
+   30          //-------------------------------------------------------------------------------------------------------
+             -------------
+   31          //  @brief      浮点数组转化为二进制数组并发送
+   32          //  @param      num[]     输入数组
+   33          //  @param      len             数组长度
+   34          //  @return
+   35          //-------------------------------------------------------------------------------------------------------
+             -------------
+   36          void wireless_uart_send(float num[], uint8 len) // 串口发送函数
+   37          {
+   38   1          int i, j;
+   39   1          char hexdats[256];
+   40   1          // 浮点数组转化为二进制数组
+   41   1          for (i = 0; i < len; i++)
+   42   1          {
+   43   2              uint8 bytedat[4] = {0};
+   44   2              floatToByte(num[i], bytedat);
+   45   2              for (j = i * 4; j <= i * 4 + 3; j++)
+   46   2                  hexdats[j] = bytedat[j % 4];
+   47   2          }
+   48   1          // 发送数据体
+   49   1          wireless_uart_send_buff(hexdats, sizeof(float) * len);
+*** WARNING C140 IN LINE 49 OF ..\USER\src\vofa.c: 'wireless_uart_send_buff' undefined; assuming 'extern int wireless_ua
+             -rt_send_buff()'
+*** WARNING C95 IN LINE 49 OF ..\USER\src\vofa.c: 'wireless_uart_send_buff': too many actual parameters
+   50   1          // 发送帧尾
+   51   1          wireless_uart_send_buff(datetail, 4);
+C251 COMPILER V5.60.0,  vofa                                                               23/03/24  21:40:19  PAGE 2   
+
+*** WARNING C95 IN LINE 51 OF ..\USER\src\vofa.c: 'wireless_uart_send_buff': too many actual parameters
+   52   1      }
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       198     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =       262        269
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =        18     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  3 WARNING(S),  0 ERROR(S)

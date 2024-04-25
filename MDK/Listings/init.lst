@@ -1,0 +1,131 @@
+C251 COMPILER V5.60.0,  init                                                               25/04/24  13:33:29  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE init
+OBJECT MODULE PLACED IN .\Out_flie\init.obj
+COMPILER INVOKED BY: D:\Keil_80251\C251\BIN\C251.EXE ..\USER\src\init.c XSMALL INTR2 BROWSE INCDIR(..\LIB\startup;..\LIB
+                    -\libraries;..\LIB\peripheral;..\USER\inc) DEBUG PRINT(.\Listings\init.lst) TABS(2) OBJECT(.\Out_flie\init.obj) 
+
+stmt  level    source
+
+    1          
+    2          /********************************************************************************************************
+             -*************
+    3           * @file          init
+    4           * @date          2024-03-06
+    5           * @note    
+    6           ********************************************************************************************************
+             -************/
+    7          
+    8          #include "init.h"
+    9          
+   10          //-------------------------------------------------------------------------------------------------------
+             -------------
+   11          //  @brief      ADC口初始化
+   12          //  @param      void
+   13          //  Sample usage:       
+   14          //-------------------------------------------------------------------------------------------------------
+             -------------
+   15          void allADC_init(void)
+   16          {
+   17   1        adc_init(ADC_P00,ADC_SYSclk_DIV_2);
+   18   1        adc_init(ADC_P01,ADC_SYSclk_DIV_2);
+   19   1        adc_init(ADC_P02,ADC_SYSclk_DIV_2);
+   20   1        adc_init(ADC_P03,ADC_SYSclk_DIV_2);
+   21   1        adc_init(ADC_P04,ADC_SYSclk_DIV_2);
+   22   1        adc_init(ADC_P05,ADC_SYSclk_DIV_2);
+   23   1        adc_init(ADC_P06,ADC_SYSclk_DIV_2);
+   24   1        adc_init(ADC_P13,ADC_SYSclk_DIV_2);
+   25   1        adc_init(ADC_P14,ADC_SYSclk_DIV_2);
+   26   1        adc_init(ADC_P15,ADC_SYSclk_DIV_2);
+   27   1        adc_init(ADC_P16,ADC_SYSclk_DIV_2);
+   28   1        adc_init(ADC_P17,ADC_SYSclk_DIV_2);
+   29   1      }
+   30          
+   31          
+   32          void allPins_init(void)
+   33          {
+   34   1        gpio_mode(P5_0,GPO_PP);         // 将P5.0设置为推挽输出
+   35   1        
+   36   1      }
+   37          
+   38          void nvic_init(void)
+   39          {
+   40   1        NVIC_SetPriority(SPI_IRQn,3);
+   41   1      //  NVIC_SetPriority(SPI_IRQn,3);
+   42   1      }
+   43          
+   44          
+   45          //-------------------------------------------------------------------------------------------------------
+             -------------
+   46          //  @brief      spi初始化
+   47          //  @param      无        
+   48          //  @param      
+   49          //  @return     无
+   50          //-------------------------------------------------------------------------------------------------------
+             -------------
+   51          void spi_master_init()
+   52          {
+C251 COMPILER V5.60.0,  init                                                               25/04/24  13:33:29  PAGE 2   
+
+   53   1          PSPIH = 1;PSPI = 1;         //SPI中断设置为最高优先级
+   54   1          spi_init(SPI_CH2, SPI_CH2_SCLK_P25 , SPI_CH2_MOSI_P23, SPI_CH2_MISO_P24, 0, MASTER, SPI_SYSclk_DIV_16);
+             -  
+   55   1          SS_2=1;
+   56   1          spi_busy=0;
+   57   1          SPSTAT = 0xC0;
+   58   1      }
+   59          
+   60          //-------------------------------------------------------------------------------------------------------
+             -------------
+   61          //  @brief      spi接收初始化
+   62          //  @param      无        
+   63          //  @param      
+   64          //  @return     无
+   65          //-------------------------------------------------------------------------------------------------------
+             -------------
+   66          void spi_slave_init()
+   67          {
+   68   1      //    PSPIH = 1;PSPI = 1;         //SPI中断设置为最高优先级
+   69   1          spi_init(SPI_CH2, SPI_CH2_SCLK_P25 , SPI_CH2_MOSI_P23, SPI_CH2_MISO_P24, 0, SLAVE, SPI_SYSclk_DIV_16);  
+   70   1          SPSTAT = 0xC0;
+   71   1      }
+   72          
+   73          
+   74          //-------------------------------------------------------------------------------------------------------
+             -------------
+   75          //  @brief      使能SPI中断
+   76          //  @param      无        
+   77          //  @param      
+   78          //  @return     无
+   79          //-------------------------------------------------------------------------------------------------------
+             -------------
+   80          void EnableSPIIRQ(void)
+   81          { 
+   82   1        SS_2 = 0;
+   83   1        ESPI = 1;
+   84   1      }
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       218     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

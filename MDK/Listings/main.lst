@@ -1,0 +1,88 @@
+C251 COMPILER V5.60.0,  main                                                               25/04/24  13:33:29  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE main
+OBJECT MODULE PLACED IN .\Out_flie\main.obj
+COMPILER INVOKED BY: D:\Keil_80251\C251\BIN\C251.EXE ..\USER\src\main.c XSMALL INTR2 BROWSE INCDIR(..\LIB\startup;..\LIB
+                    -\libraries;..\LIB\peripheral;..\USER\inc) DEBUG PRINT(.\Listings\main.lst) TABS(2) OBJECT(.\Out_flie\main.obj) 
+
+stmt  level    source
+
+    1          
+    2          /********************************************************************************************************
+             -*************
+    3           * @file          main (Signal_Board)
+    4           * @version       查看doc内version文件 版本说明
+    5           * @Software    MDK FOR C251 V5.60
+    6           * @Target core   STC32F12K
+    7           * @date          2024-03-04  Ver0.0.0
+    8                            2024-03-08  Ver0.1.1
+    9                            2024-03-XX  Ver0.1.2
+   10          
+   11           ********************************************************************************************************
+             -************/
+   12          #include "headfile.h"
+   13          
+   14          /*
+   15           *关于内核频率的设定，可以查看board.h文件
+   16           *在board_init中,已经将P54引脚设置为复位
+   17           *如果需要使用P54引脚,可以在board.c文件中的board_init()函数中删除SET_P54_RESRT即可
+   18           */
+   19           
+   20            
+   21          void main()
+   22          {
+   23   1        clock_init(SYSTEM_CLOCK_52M);   // 初始化系统频率
+   24   1        board_init();                   // 初始化寄存器
+   25   1        
+   26   1        allPins_init();                 // 初始化引脚
+   27   1        allADC_init();                  // 初始化ADC
+   28   1        pit_timer_ms(TIM_3,5);          // 初始化定时器
+   29   1        pit_timer_ms(TIM_0,5);          // 初始化定时器
+   30   1        wireless_uart_init();           // 初始化无线串口
+   31   1      //  dl1a_init();                    // 初始化TOF
+   32   1        spi_master_init();              // 初始化SPI(作为主机)
+   33   1        
+   34   1        EnableSPIIRQ();                 // 使能SPI中断
+   35   1        EnableGlobalIRQ();              // 打开总中断
+   36   1              
+   37   1        resetelec_flag = 1;             // 上电扫电感
+   38   1        resetelec_Init();
+   39   1      
+   40   1        while(1)
+   41   1         {
+   42   2            resetelec_Init();
+   43   2           wireless_send_SBtoPC();      // 无线串口发送数据至上位机
+   44   2           wireless_read(1);            // 读取指令
+   45   2           spi_send_float(err);         // SPI发送err至主板
+   46   2      //     delay_ms(10);
+   47   2      //     printf("%f",err);
+   48   2         }
+   49   1      }
+   50          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =        81     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+C251 COMPILER V5.60.0,  main                                                               25/04/24  13:33:29  PAGE 2   
+
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

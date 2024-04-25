@@ -1,0 +1,165 @@
+C251 COMPILER V5.60.0,  WIRELESS_CH573                                                     08/03/24  19:26:54  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE WIRELESS_CH573
+OBJECT MODULE PLACED IN .\Out_flie\WIRELESS_CH573.obj
+COMPILER INVOKED BY: D:\Keil_80251\C251\BIN\C251.EXE ..\LIB\peripheral\WIRELESS_CH573.c XSMALL INTR2 BROWSE INCDIR(..\LI
+                    -B\startup;..\LIB\libraries;..\LIB\peripheral;..\USER\inc) DEBUG PRINT(.\Listings\WIRELESS_CH573.lst) TABS(2) OBJECT(.\Ou
+                    -t_flie\WIRELESS_CH573.obj) 
+
+stmt  level    source
+
+    1          
+    2          /********************************************************************************************************
+             -*************
+    3           * @file          无线CH573
+    4           * @date          2024-03-06
+    5           * @note    
+    6                    接线定义：
+    7                    ------------------------------------ 
+    8                    无线转串口      单片机                        
+    9                    RX              查看WIRELESS_CH573.h文件中的WIRELESS_CH573_UART_TX_PIN宏定义
+   10                    TX              查看WIRELESS_CH573.h文件中的WIRELESS_CH573_UART_RX_PIN宏定义
+   11                    RTS             查看WIRELESS_CH573.h文件中的WIRELESS_CH573_RTS_PIN宏定义
+   12                    ------------------------------------ 
+   13          *********************************************************************************************************
+             -***********/
+   14          
+   15          #include "WIRELESS_CH573.h"
+   16          #include "uart.h"
+   17          #include "fifo.h"
+   18          
+   19          
+   20          static  fifo_struct     wireless_ch573_fifo;
+   21          static  uint8           wireless_ch573_buffer[WIRELESS_CH573_BUFFER_SIZE];  // 数据存放数组
+   22          
+   23          static          uint8   wireless_ch573_data;
+   24          
+   25          
+   26          //-------------------------------------------------------------------------------------------------------
+             -------------
+   27          //  @brief      573转串口模块回调函数
+   28          //  @param      NULL
+   29          //  @return     void          
+   30          
+   31          //  Sample usage: 
+   32          //  @note       
+   33          //-------------------------------------------------------------------------------------------------------
+             -------------
+   34          void wireless_ch573_callback(void)
+   35          {
+   36   1          //接到一个字节后单片机将会进入串口中断，通过在此处读取wireless_ch573_data可以取走数据
+   37   1          wireless_ch573_data = WIRELESS_CH573_DATA_BUF;
+   38   1          fifo_write_buffer(&wireless_ch573_fifo, &wireless_ch573_data, 1);       // 存入 FIFO
+   39   1      }
+   40          
+   41          
+   42          
+   43          
+   44          //-------------------------------------------------------------------------------------------------------
+             -------------
+   45          //  @brief      573转串口模块 发送函数
+   46          //  @param      buff        需要发送的数据地址
+   47          //  @param      len         发送长度
+   48          //  @return     uint32      剩余未发送的字节数   
+   49          
+   50          //  Sample usage: 
+   51          //  @note       
+   52          //-------------------------------------------------------------------------------------------------------
+C251 COMPILER V5.60.0,  WIRELESS_CH573                                                     08/03/24  19:26:54  PAGE 2   
+
+             -------------
+   53          uint32 wireless_ch573_send_buff(uint8 *buff, uint16 len)
+   54          {
+   55   1          while(len>30)
+   56   1          {
+   57   2              if(WIRELESS_CH573_RTS_PIN == 1)  
+   58   2              {
+   59   3                  return len;//模块忙,如果允许当前程序使用while等待 则可以使用后面注释的while等待语句替换本if语
+             -句
+   60   3              }
+   61   2              //while(RTS_PIN);  //如果RTS为低电平，则继续发送数据
+   62   2              uart_putbuff(WIRELESS_CH573_UART,buff,30);
+   63   2      
+   64   2              buff += 30; //地址偏移
+   65   2              len -= 30;//数量
+   66   2          }
+   67   1          
+   68   1          if(WIRELESS_CH573_RTS_PIN == 1)  
+   69   1          {
+   70   2              return len;//模块忙,如果允许当前程序使用while等待 则可以使用后面注释的while等待语句替换本if语句
+   71   2          }
+   72   1          //while(WIRELESS_CH573_RTS_PIN);  //如果RTS为低电平，则继续发送数据
+   73   1          uart_putbuff(WIRELESS_CH573_UART,buff,len);//发送最后的数据
+   74   1          
+   75   1          return 0;
+   76   1      }
+   77          
+   78          
+   79          //-------------------------------------------------------------------------------------------------------
+             -------------
+   80          //  @brief      无线转串口模块 读取函数
+   81          //  @param      buff            存储的数据地址
+   82          //  @param      len             长度
+   83          //  @return     uint32          实际读取字节数
+   84          //  Sample usage:
+   85          //-------------------------------------------------------------------------------------------------------
+             -------------
+   86          uint32 wireless_ch573_read_buff (uint8 *buff, uint32 len)
+   87          {
+   88   1          uint32 data_len = len;
+   89   1          fifo_read_buffer(&wireless_ch573_fifo, buff, &data_len, FIFO_READ_AND_CLEAN);
+   90   1          return data_len;
+   91   1      }
+   92          
+   93          
+   94          
+   95          
+   96          
+   97          //-------------------------------------------------------------------------------------------------------
+             -------------
+   98          //  @brief      573转串口模块初始化
+   99          //  @param      NULL
+  100          //  @return     void          
+  101          
+  102          //  Sample usage: 
+  103          //  @note       
+  104          //-------------------------------------------------------------------------------------------------------
+             -------------
+  105          void wireless_ch573_init(void)
+  106          {
+  107   1          WIRELESS_CH573_RTS_PIN = 0;
+  108   1          wireless_type = WIRELESS_CH573;
+  109   1          //本函数使用的波特率为115200，为573转串口模块的默认波特率，如需其他波特率请自行配置模块并修改串口的波
+             -特率
+  110   1          fifo_init(&wireless_ch573_fifo, wireless_ch573_buffer, WIRELESS_CH573_BUFFER_SIZE);
+  111   1          uart_init(WIRELESS_CH573_UART, WIRELESS_CH573_UART_RX_PIN, WIRELESS_CH573_UART_TX_PIN, WIRELESS_CH573
+C251 COMPILER V5.60.0,  WIRELESS_CH573                                                     08/03/24  19:26:54  PAGE 3   
+
+             -_UART_BAUD, WIRELESS_CH573_TIMER_N); //初始化串口    
+  112   1          
+  113   1      }
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       222     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =        85          6
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

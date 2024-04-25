@@ -1,0 +1,515 @@
+C251 COMPILER V5.60.0,  pwm                                                                25/04/24  13:33:28  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE pwm
+OBJECT MODULE PLACED IN .\Out_flie\pwm.obj
+COMPILER INVOKED BY: D:\Keil_80251\C251\BIN\C251.EXE ..\LIB\libraries\pwm.c XSMALL INTR2 BROWSE INCDIR(..\LIB\startup;..
+                    -\LIB\libraries;..\LIB\peripheral;..\USER\inc) DEBUG PRINT(.\Listings\pwm.lst) TABS(2) OBJECT(.\Out_flie\pwm.obj) 
+
+stmt  level    source
+
+    1          
+    2          /********************************************************************************************************
+             -*************
+    3           * @file          pwm
+    4           * @date          2024-03-06
+    5           * @note    
+    6           ********************************************************************************************************
+             -************/
+    7          
+    8          
+    9          #include "pwm.h"
+   10          #include "board.h"
+   11          #include "gpio.h"
+   12          #include "uart.h"
+   13          #include "stdio.h"
+   14          
+   15          
+   16          //#pragma warning disable = 208
+   17          
+   18          //²¶»ñ±È½ÏÄ£Ê½¼Ä´æÆ÷
+   19          const uint32 PWM_CCMR_ADDR[] = {0x7efec8, 0x7efec9, 0x7efeca ,0x7efecb, 
+   20                          0x7efee8, 0x7efee9, 0x7efeea, 0x7efeeb};
+   21          //²¶»ñ±È½ÏÊ¹ÄÜ¼Ä´æÆ÷
+   22          const uint32 PWM_CCER_ADDR[] = {0x7efecc, 0x7efecd, 
+   23                          0x7efeec ,0x7efeed};
+   24          //¿ØÖÆ¼Ä´æÆ÷,¸ß8Î»µØÖ·  µÍ8Î»µØÖ· + 1¼´¿É
+   25          const uint32 PWM_CCR_ADDR[] = {0x7efed5, 0x7efed7, 0x7efed9, 0x7efedb,
+   26                           0x7efef5, 0x7efef7, 0x7efef9, 0x7efefb};
+   27            
+   28                           //¿ØÖÆ¼Ä´æÆ÷,¸ß8Î»µØÖ·  µÍ8Î»µØÖ· + 1¼´¿É
+   29          const uint32 PWM_ARR_ADDR[] = {0x7efed2,0x7efef2};
+   30          
+   31          //-------------------------------------------------------------------------------------------------------
+             -------------
+   32          //  @brief      PWM_gpio³õÊ¼»¯£¨ÄÚ²¿Ê¹ÓÃÓÃ»§ÎÞÐè¹ØÐÄ£©
+   33          //  @param      pwmch       PWMÍ¨µÀºÅ¼°Òý½Å
+   34          //  @return     void
+   35          //  Sample usage:           
+   36          //-------------------------------------------------------------------------------------------------------
+             -------------
+   37          void pwm_set_gpio(PWMCH_enum pwmch)
+   38          {
+   39   1        switch(pwmch)
+   40   1        {
+   41   2          case PWMA_CH1P_P10:
+   42   2          {
+   43   3            gpio_mode(P1_0,GPO_PP);
+   44   3            break;
+   45   3          }
+   46   2          case PWMA_CH1N_P11:
+   47   2          {
+   48   3            gpio_mode(P1_1,GPO_PP);
+   49   3            break;
+   50   3          }
+   51   2          case PWMA_CH1P_P20:
+   52   2          {
+   53   3            gpio_mode(P2_0,GPO_PP);
+   54   3            break;
+C251 COMPILER V5.60.0,  pwm                                                                25/04/24  13:33:28  PAGE 2   
+
+   55   3          }
+   56   2          case PWMA_CH1N_P21:
+   57   2          {
+   58   3            gpio_mode(P2_1,GPO_PP);
+   59   3            break;
+   60   3          }
+   61   2      //    case PWMA_CH1P_P60:
+   62   2      //    {
+   63   2      //      gpio_mode(P6_0,GPO_PP);
+   64   2      //      break;
+   65   2      //    }
+   66   2      //    case PWMA_CH1N_P61:
+   67   2      //    {
+   68   2      //      gpio_mode(P6_1,GPO_PP);
+   69   2      //      break;
+   70   2      //    }
+   71   2          
+   72   2          case PWMA_CH2P_P12:
+   73   2          {
+   74   3            gpio_mode(P1_2,GPO_PP);
+   75   3            break;
+   76   3          }
+   77   2          case PWMA_CH2N_P13:
+   78   2          {
+   79   3            gpio_mode(P1_3,GPO_PP);
+   80   3            break;
+   81   3          }
+   82   2          case PWMA_CH2P_P22:
+   83   2          {
+   84   3            gpio_mode(P2_2,GPO_PP);
+   85   3            break;
+   86   3          }
+   87   2          case PWMA_CH2N_P23:
+   88   2          {
+   89   3            gpio_mode(P2_3,GPO_PP);
+   90   3            break;
+   91   3          }
+   92   2      //    case PWMA_CH2P_P62:
+   93   2      //    {
+   94   2      //      gpio_mode(P6_2,GPO_PP);
+   95   2      //      break;
+   96   2      //    }
+   97   2      //    case PWMA_CH2N_P63:
+   98   2      //    {
+   99   2      //      gpio_mode(P6_3,GPO_PP);
+  100   2      //      break;
+  101   2      //    }
+  102   2          
+  103   2          case PWMA_CH3P_P14:
+  104   2          {
+  105   3            gpio_mode(P1_4,GPO_PP);
+  106   3            break;
+  107   3          }
+  108   2          case PWMA_CH3N_P15:
+  109   2          {
+  110   3            gpio_mode(P1_5,GPO_PP);
+  111   3            break;
+  112   3          }
+  113   2          case PWMA_CH3P_P24:
+  114   2          {
+  115   3            gpio_mode(P2_4,GPO_PP);
+  116   3            break;
+  117   3          }
+  118   2          case PWMA_CH3N_P25:
+  119   2          {
+  120   3            gpio_mode(P2_5,GPO_PP);
+C251 COMPILER V5.60.0,  pwm                                                                25/04/24  13:33:28  PAGE 3   
+
+  121   3            break;
+  122   3          }
+  123   2      //    case PWMA_CH3P_P64:
+  124   2      //    {
+  125   2      //      gpio_mode(P6_4,GPO_PP);
+  126   2      //      break;
+  127   2      //    }
+  128   2      //    case PWMA_CH3N_P65:
+  129   2      //    {
+  130   2      //      gpio_mode(P6_5,GPO_PP);
+  131   2      //      break;
+  132   2      //    }
+  133   2          
+  134   2          
+  135   2          case PWMA_CH4P_P16:
+  136   2          {
+  137   3            gpio_mode(P1_6,GPO_PP);
+  138   3            break;
+  139   3          }
+  140   2          case PWMA_CH4N_P17:
+  141   2          {
+  142   3            gpio_mode(P1_7,GPO_PP);
+  143   3            break;
+  144   3          }
+  145   2          case PWMA_CH4P_P26:
+  146   2          {
+  147   3            gpio_mode(P2_6,GPO_PP);
+  148   3            break;
+  149   3          }
+  150   2          case PWMA_CH4N_P27:
+  151   2          {
+  152   3            gpio_mode(P2_7,GPO_PP);
+  153   3            break;
+  154   3          }
+  155   2      //    case PWMA_CH4P_P66:
+  156   2      //    {
+  157   2      //      gpio_mode(P6_6,GPO_PP);
+  158   2      //      break;
+  159   2      //    }
+  160   2      //    case PWMA_CH4N_P67:
+  161   2      //    {
+  162   2      //      gpio_mode(P6_7,GPO_PP);
+  163   2      //      break;
+  164   2      //    }
+  165   2          case PWMA_CH4P_P34:
+  166   2          {
+  167   3            gpio_mode(P3_4,GPO_PP);
+  168   3            break;
+  169   3          }
+  170   2          case PWMA_CH4N_P33:
+  171   2          {
+  172   3            gpio_mode(P3_3,GPO_PP);
+  173   3            break;
+  174   3          }
+  175   2          
+  176   2          
+  177   2          case PWMB_CH1_P20:
+  178   2          {
+  179   3            gpio_mode(P2_0,GPO_PP);
+  180   3            break;
+  181   3          }
+  182   2          case PWMB_CH1_P17:
+  183   2          {
+  184   3            gpio_mode(P1_7,GPO_PP);
+  185   3            break;
+  186   3          }
+C251 COMPILER V5.60.0,  pwm                                                                25/04/24  13:33:28  PAGE 4   
+
+  187   2          case PWMB_CH1_P00:
+  188   2          {
+  189   3            gpio_mode(P0_0,GPO_PP);
+  190   3            break;
+  191   3          }
+  192   2      //    case PWMB_CH1_P74:
+  193   2      //    {
+  194   2      //      gpio_mode(P7_4,GPO_PP);
+  195   2      //      break;
+  196   2      //    }
+  197   2          
+  198   2          case PWMB_CH2_P21:
+  199   2          {
+  200   3            gpio_mode(P2_1,GPO_PP);
+  201   3            break;
+  202   3          }
+  203   2          case PWMB_CH2_P54:
+  204   2          {
+  205   3            gpio_mode(P5_4,GPO_PP);
+  206   3            break;
+  207   3          }
+  208   2          case PWMB_CH2_P01:
+  209   2          {
+  210   3            gpio_mode(P0_1,GPO_PP);
+  211   3            break;
+  212   3          }
+  213   2      //    case PWMB_CH2_P75:
+  214   2      //    {
+  215   2      //      gpio_mode(P7_5,GPO_PP);
+  216   2      //      break;
+  217   2      //    }
+  218   2      
+  219   2          
+  220   2          case PWMB_CH3_P22:
+  221   2          {
+  222   3            gpio_mode(P2_2,GPO_PP);
+  223   3            break;
+  224   3          }
+  225   2          case PWMB_CH3_P33:
+  226   2          {
+  227   3            gpio_mode(P3_3,GPO_PP);
+  228   3            break;
+  229   3          }
+  230   2          case PWMB_CH3_P02:
+  231   2          {
+  232   3            gpio_mode(P0_2,GPO_PP);
+  233   3            break;
+  234   3          }
+  235   2      //    case PWMB_CH3_P76:
+  236   2      //    {
+  237   2      //      gpio_mode(P7_6,GPO_PP);
+  238   2      //      break;
+  239   2      //    }
+  240   2      
+  241   2          
+  242   2          case PWMB_CH4_P23:
+  243   2          {
+  244   3            gpio_mode(P2_3,GPO_PP);
+  245   3            break;
+  246   3          }
+  247   2          case PWMB_CH4_P34:
+  248   2          {
+  249   3            gpio_mode(P3_4,GPO_PP);
+  250   3            break;
+  251   3          }
+  252   2          case PWMB_CH4_P03:
+C251 COMPILER V5.60.0,  pwm                                                                25/04/24  13:33:28  PAGE 5   
+
+  253   2          {
+  254   3            gpio_mode(P0_3,GPO_PP);
+  255   3            break;
+  256   3          }
+  257   2      //    case PWMB_CH4_P77:
+  258   2      //    {
+  259   2      //      gpio_mode(P7_7,GPO_PP);
+  260   2      //      break;
+  261   2      //    }
+  262   2          
+  263   2        }
+  264   1        
+  265   1      }
+  266            
+  267              
+  268          //-------------------------------------------------------------------------------------------------------
+             -------------
+  269          //  @brief      PWM³õÊ¼»¯
+  270          //  @param      pwmch       PWMÍ¨µÀºÅ¼°Òý½Å
+  271          //  @param      freq        PWMÆµÂÊ(10Hz-3MHz)
+  272          //  @param      duty        PWMÕ¼¿Õ±È
+  273          //  @return     void
+  274          //  Sample usage:           
+  275          //              pwm_init(PWM0_P00, 100, 5000);     //³õÊ¼»¯PWM0  Ê¹ÓÃÒý½ÅP0.0  Êä³öPWMÆµÂÊ100HZ   Õ¼¿Õ±ÈÎª°Ù·ÖÖ®
+             - 5000/PWM_DUTY_MAX*100
+  276          //              PWM_DUTY_MAXÔÚpwm.hÎÄ¼þÖÐ Ä¬ÈÏÎª10000
+  277          //-------------------------------------------------------------------------------------------------------
+             -------------
+  278          void pwm_init(PWMCH_enum pwmch,uint32 freq, uint32 duty)
+  279          {
+  280   1        
+  281   1        uint32 match_temp;
+  282   1        uint32 period_temp; 
+  283   1        uint16 freq_div = 0;
+  284   1        
+  285   1        
+  286   1        P_SW2 |= 0x80;
+  287   1        
+  288   1        //GPIOÐèÒªÉèÖÃÎªÍÆÍìÊä³ö
+  289   1        pwm_set_gpio(pwmch);
+  290   1      
+  291   1      
+  292   1        //·ÖÆµ¼ÆËã£¬ÖÜÆÚ¼ÆËã£¬Õ¼¿Õ±È¼ÆËã
+  293   1        freq_div = (sys_clk / freq) >> 16;              //¶àÉÙ·ÖÆµ
+  294   1        period_temp = sys_clk / freq ;      
+  295   1        period_temp = period_temp / (freq_div + 1) - 1;       //ÖÜÆÚ
+  296   1      
+  297   1        if(duty != PWM_DUTY_MAX)
+  298   1        {
+  299   2          match_temp = period_temp * ((float)duty / PWM_DUTY_MAX);  // Õ¼¿Õ±È     
+  300   2        }
+  301   1        else
+  302   1        {
+  303   2          match_temp = period_temp + 1;               // dutyÎª100%
+  304   2        }
+  305   1      
+  306   1        
+  307   1        if(PWMB_CH1_P20 <= pwmch)       //PWM5-8
+  308   1        {
+  309   2          //Í¨µÀÑ¡Ôñ£¬Òý½ÅÑ¡Ôñ
+  310   2          PWMB_ENO |= (1 << ((2 * ((pwmch >> 4) - 4))));          //Ê¹ÄÜÍ¨µÀ  
+  311   2          PWMB_PS |= ((pwmch & 0x03) << ((2 * ((pwmch >> 4) - 4))));    //Êä³ö½ÅÑ¡Ôñ
+  312   2          
+  313   2          // ÅäÖÃÍ¨µÀÊä³öÊ¹ÄÜºÍ¼«ÐÔ 
+  314   2          (*(unsigned char volatile far *) (PWM_CCER_ADDR[pwmch>>5])) |= (uint8)(1 << (((pwmch >> 4) & 0x01) * 4)
+             -);
+C251 COMPILER V5.60.0,  pwm                                                                25/04/24  13:33:28  PAGE 6   
+
+  315   2          
+  316   2          //ÉèÖÃÔ¤·ÖÆµ
+  317   2          PWMB_PSCRH = (uint8)(freq_div>>8);
+  318   2          PWMB_PSCRL = (uint8)freq_div;
+  319   2          
+  320   2          PWMB_BKR = 0x80;  //Ö÷Êä³öÊ¹ÄÜ Ïàµ±ÓÚ×Ü¿ª¹Ø
+  321   2          PWMB_CR1 = 0x01;  //PWM¿ªÊ¼¼ÆÊý
+  322   2        }
+  323   1        else
+  324   1        {
+  325   2          PWMA_ENO |= (1 << (pwmch & 0x01)) << ((pwmch >> 4) * 2);  //Ê¹ÄÜÍ¨µÀ  
+  326   2          PWMA_PS  |= ((pwmch & 0x07) >> 1) << ((pwmch >> 4) * 2);    //Êä³ö½ÅÑ¡Ôñ
+  327   2          
+  328   2          // ÅäÖÃÍ¨µÀÊä³öÊ¹ÄÜºÍ¼«ÐÔ 
+  329   2          (*(unsigned char volatile far *) (PWM_CCER_ADDR[pwmch>>5])) |= (1 << ((pwmch & 0x01) * 2 + ((pwmch >> 4
+             -) & 0x01) * 0x04));
+  330   2      
+  331   2          
+  332   2          //ÉèÖÃÔ¤·ÖÆµ
+  333   2          PWMA_PSCRH = (uint8)(freq_div>>8);
+  334   2          PWMA_PSCRL = (uint8)freq_div;
+  335   2      
+  336   2          PWMA_BKR = 0x80;  // Ö÷Êä³öÊ¹ÄÜ Ïàµ±ÓÚ×Ü¿ª¹Ø
+  337   2          PWMA_CR1 = 0x01;  //PWM¿ªÊ¼¼ÆÊý
+  338   2        }
+  339   1        
+  340   1        //ÖÜÆÚ
+  341   1        (*(unsigned char volatile far *) (PWM_ARR_ADDR[pwmch>>6])) = (uint8)(period_temp>>8);   //¸ß8Î»
+  342   1        (*(unsigned char volatile far *) (PWM_ARR_ADDR[pwmch>>6] + 1)) = (uint8)period_temp;    //µÍ8Î»
+  343   1      
+  344   1        //ÉèÖÃ²¶»ñÖµ|±È½ÏÖµ
+  345   1        (*(unsigned char volatile far *) (PWM_CCR_ADDR[pwmch>>4]))    = match_temp>>8;      //¸ß8Î»
+  346   1        (*(unsigned char volatile far *) (PWM_CCR_ADDR[pwmch>>4] + 1))  = (uint8)match_temp;    //µÍ8Î»
+  347   1        
+  348   1        //¹¦ÄÜÉèÖÃ
+  349   1        (*(unsigned char volatile far *) (PWM_CCMR_ADDR[pwmch>>4])) |= 0x06<<4;   //ÉèÖÃÎªPWMÄ£Ê½1
+  350   1        (*(unsigned char volatile far *) (PWM_CCMR_ADDR[pwmch>>4])) |= 1<<3;    //¿ªÆôPWM¼Ä´æÆ÷µÄÔ¤×°ÔØ¹¦
+  351   1        
+  352   1      
+  353   1      //  P_SW2 &= 0x7F;
+  354   1      
+  355   1      }
+  356          
+  357          //-------------------------------------------------------------------------------------------------------
+             -------------
+  358          //  @brief      PWMÕ¼¿Õ±ÈÉèÖÃ
+  359          //  @param      pwmch       PWMÍ¨µÀºÅ¼°Òý½Å
+  360          //  @param      duty        PWMÕ¼¿Õ±È
+  361          //  @return     void
+  362          //  Sample usage:           pwm_duty(PWM0_P00, 5000);     //³õÊ¼»¯PWM0  Ê¹ÓÃÒý½ÅP0.0  Êä³öPWMÆµÂÊ50HZ   Õ
+             -¼¿Õ±ÈÎª°Ù·ÖÖ® 5000/PWM_DUTY_MAX*100
+  363          //              PWM_DUTY_MAXÔÚfsl_pwm.hÎÄ¼þÖÐ Ä¬ÈÏÎª10000
+  364          //-------------------------------------------------------------------------------------------------------
+             -------------
+  365          void pwm_duty(PWMCH_enum pwmch, uint32 duty)
+  366          {
+  367   1        uint32 match_temp;
+  368   1        uint32 arr = ((*(unsigned char volatile far *) (PWM_ARR_ADDR[pwmch>>6]))<<8) | (*(unsigned char volatile
+             - far *) (PWM_ARR_ADDR[pwmch>>6] + 1 ));
+  369   1      
+  370   1      //  P_SW2 |= 0x80;
+  371   1      
+  372   1        if(duty != PWM_DUTY_MAX)
+  373   1        {
+  374   2          match_temp = arr * ((float)duty/PWM_DUTY_MAX);        //Õ¼¿Õ±È
+  375   2        }
+C251 COMPILER V5.60.0,  pwm                                                                25/04/24  13:33:28  PAGE 7   
+
+  376   1        else
+  377   1        {
+  378   2          match_temp = arr + 1;
+  379   2        }
+  380   1        
+  381   1                    
+  382   1        
+  383   1        //ÉèÖÃ²¶»ñÖµ|±È½ÏÖµ
+  384   1        (*(unsigned char volatile far *) (PWM_CCR_ADDR[pwmch>>4]))    = match_temp>>8;      //¸ß8Î»
+  385   1        (*(unsigned char volatile far *) (PWM_CCR_ADDR[pwmch>>4] + 1))  = (uint8)match_temp;    //µÍ8Î»
+  386   1      
+  387   1      //  P_SW2 &= ~0x80;
+  388   1        
+  389   1      }
+  390          
+  391          
+  392          //-------------------------------------------------------------------------------------------------------
+             -------------
+  393          //  @brief      PWMÆµÂÊÉèÖÃ
+  394          //  @param      pwmch       PWMÍ¨µÀºÅ¼°Òý½Å
+  395          //  @param      freq        PWMÆµÂÊ(10Hz-3MHz)
+  396          //  @param      duty        PWMÕ¼¿Õ±È
+  397          //  @return     void
+  398          //  Sample usage:           pwm_freq(PWM0_P00, 50, 5000);     //ÐÞ¸Ä»¯PWM0  Ê¹ÓÃÒý½ÅP0.0  Êä³öPWMÆµÂÊ50HZ
+             -   Õ¼¿Õ±ÈÎª°Ù·ÖÖ® 5000/PWM_DUTY_MAX*100
+  399          //-------------------------------------------------------------------------------------------------------
+             -------------
+  400          void pwm_freq(PWMCH_enum pwmch, uint32 freq, uint32 duty)
+  401          {
+  402   1        uint32 match_temp;
+  403   1          uint32 period_temp; 
+  404   1        uint16 freq_div = 0;
+  405   1      
+  406   1        
+  407   1      
+  408   1        //·ÖÆµ¼ÆËã£¬ÖÜÆÚ¼ÆËã£¬Õ¼¿Õ±È¼ÆËã
+  409   1        freq_div = (sys_clk / freq) >> 16;                // ¶àÉÙ·ÖÆµ
+  410   1        period_temp = sys_clk / freq;     
+  411   1        period_temp = period_temp / (freq_div + 1) - 1;         // ÖÜÆÚ
+  412   1        
+  413   1        if(duty != PWM_DUTY_MAX)
+  414   1        {
+  415   2          match_temp = period_temp * ((float)duty / PWM_DUTY_MAX);  // Õ¼¿Õ±È     
+  416   2        }
+  417   1        else
+  418   1        {
+  419   2          match_temp = period_temp + 1;               // dutyÎª100%
+  420   2        }
+  421   1        
+  422   1        
+  423   1        
+  424   1        
+  425   1      //  P_SW2 |= 0x80;
+  426   1        
+  427   1        if(PWMB_CH1_P20 <= pwmch)       //PWM5-8
+  428   1        {
+  429   2          //ÉèÖÃÔ¤·ÖÆµ
+  430   2          PWMB_PSCRH = (uint8)(freq_div>>8);
+  431   2          PWMB_PSCRL = (uint8)freq_div;
+  432   2        }
+  433   1        else
+  434   1        {
+  435   2          //ÉèÖÃÔ¤·ÖÆµ
+  436   2          PWMA_PSCRH = (uint8)(freq_div>>8);
+  437   2          PWMA_PSCRL = (uint8)freq_div;
+  438   2        }
+C251 COMPILER V5.60.0,  pwm                                                                25/04/24  13:33:28  PAGE 8   
+
+  439   1        
+  440   1        //ÖÜÆÚ
+  441   1        (*(unsigned char volatile far *) (PWM_ARR_ADDR[pwmch>>6])) = (uint8)(period_temp>>8);   //¸ß8Î»
+  442   1        (*(unsigned char volatile far *) (PWM_ARR_ADDR[pwmch>>6] + 1)) = (uint8)period_temp;    //µÍ8Î»
+  443   1        
+  444   1          //ÉèÖÃ²¶»ñÖµ|±È½ÏÖµ
+  445   1        (*(unsigned char volatile far *) (PWM_CCR_ADDR[pwmch>>4]))    = match_temp>>8;      //¸ß8Î»
+  446   1        (*(unsigned char volatile far *) (PWM_CCR_ADDR[pwmch>>4] + 1))  = (uint8)match_temp;    //µÍ8Î»
+  447   1        
+  448   1      //  P_SW2 &= ~0x80;
+  449   1      }
+  450          
+  451          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =      1846     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------         16
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =        88     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

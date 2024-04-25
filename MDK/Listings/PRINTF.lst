@@ -1,0 +1,253 @@
+C251 COMPILER V5.60.0,  PRINTF                                                             07/03/24  13:19:59  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE PRINTF
+OBJECT MODULE PLACED IN .\Out_flie\PRINTF.obj
+COMPILER INVOKED BY: D:\Keil_80251\C251\BIN\C251.EXE ..\LIB\peripheral\PRINTF.c XSMALL INTR2 BROWSE INCDIR(..\LIB\startu
+                    -p;..\LIB\libraries;..\LIB\peripheral) DEBUG PRINT(.\Listings\PRINTF.lst) TABS(2) OBJECT(.\Out_flie\PRINTF.obj) 
+
+stmt  level    source
+
+    1          /********************************************************************************************************
+             -*************
+    2           * COPYRIGHT NOTICE
+    3           * Copyright (c) 2018,Öð·É¿Æ¼¼
+    4           * All rights reserved.
+    5           * æŠ€æœ¯è®¨è®ºQQç¾¤ï¼šä¸€ç¾¤ï¼š179029047(å·²æ»¡)  äºŒç¾¤ï¼š244861897 ÒÔÏÂËùÓÐÄÚÈÝ°æÈ¨¾ùÊôÖð·É¿Æ¼¼ËùÓÐ£¬Î
+             -´¾­ÔÊÐí²»µÃÓÃÓÚÉÌÒµÓÃÍ¾£¬
+    6           * »¶Ó­¸÷Î»Ê¹ÓÃ²¢´«²¥±¾³ÌÐò£¬ÐÞ¸ÄÄÚÈÝÊ±±ØÐë±£ÁôÖð·É¿Æ¼¼µÄ°æÈ¨ÉùÃ÷¡£
+    7           *
+    8           * @file          printf
+    9           * @company       ³É¶¼Öð·É¿Æ¼¼ÓÐÏÞ¹«Ë¾
+   10           * @author        Öð·É¿Æ¼¼(QQ3184284598)
+   11           * @version       ²é¿´docÄÚversionÎÄ¼þ °æ±¾ËµÃ÷
+   12           * @Software    MDK FOR C251 V5.60
+   13           * @Target core   STC32F12K
+   14           * @Taobao      https://seekfree.taobao.com/
+   15           * @date          2019-04-30
+   16           ********************************************************************************************************
+             -************/
+   17          
+   18          
+   19          #include <stdarg.h>
+   20          #include <string.h>
+   21          
+   22          #include "FUNCTION.h"
+   23          
+   24          
+   25          //uint8 number_conversion_ascii(uint32 dat, int8 *p, uint8 neg_type, uint8 radix)
+   26          //{
+   27          //    int32   neg_dat;
+   28          //    uint32  pos_dat;
+   29          //    uint8   temp_data = 0;
+   30          //    uint8   valid_num = 0;
+   31          //    
+   32          //    if(neg_type)
+   33          //    {
+   34          //        neg_dat = (int32)dat;
+   35          //        if(neg_dat<0)   neg_dat = -neg_dat;
+   36          //        while(1)
+   37          //        {
+   38          //            *p = neg_dat%radix + '0';
+   39          //            neg_dat = neg_dat/radix;
+   40          //            valid_num++;
+   41          //            
+   42          //            if(!neg_dat) break;
+   43          //            p++;
+   44          //        }
+   45          //    }
+   46          //    else
+   47          //    {
+   48          //        pos_dat = dat;
+   49          //        while(1)
+   50          //        {
+   51          //            temp_data = pos_dat%radix;
+   52          //            if(10 <= temp_data) temp_data += 'A'-10;
+   53          //            else                temp_data += '0';
+   54          //            
+   55          //            *p = temp_data;
+C251 COMPILER V5.60.0,  PRINTF                                                             07/03/24  13:19:59  PAGE 2   
+
+   56          //            
+   57          //            pos_dat = pos_dat/radix;
+   58          //            valid_num++;
+   59          //            
+   60          //            if(!pos_dat) break;
+   61          //            p++;
+   62          //        }
+   63          //    }
+   64          //    return valid_num;
+   65          //}
+   66          
+   67          //void printf_reverse_order(int8 *d_buff, uint32 len)
+   68          //{
+   69          //    uint32 i;
+   70          //    int8  temp_data;
+   71          //    for(i=0;i<len/2;i++)
+   72          //    {
+   73          //        temp_data = d_buff[len-1-i];
+   74          //        d_buff[len-1-i] = d_buff[i];
+   75          //        d_buff[i] = temp_data; 
+   76          //    }
+   77          //}
+   78          
+   79          
+   80          ////void printf(const int8 *format, ...)
+   81          ////{
+   82          ////#if(PRINTF)     //Èç¹ûºê¶¨ÒåPRINTFÎª0 Ôò²»±àÒëprintfº¯ÊýÄÚÈÝ£¬µ÷ÓÃprintfÃ»ÓÐÈÎºÎ²Ù×÷
+   83          ////    va_list arg;
+   84          ////  va_start(arg, format);
+   85          ////    
+   86          ////  while (*format)
+   87          ////  {
+   88          ////    int8 ret = *format;
+   89          ////    if (ret == '%')
+   90          ////    {
+   91          ////      switch (*++format)
+   92          ////      {
+   93          ////                case 'a':// Ê®Áù½øÖÆp¼ÆÊý·¨Êä³ö¸¡µãÊý ÔÝÎ´ÊµÏÖ
+   94          ////                {
+   95          ////                    
+   96          ////                    
+   97          ////                }break;
+   98          ////                
+   99          ////                
+  100          ////                case 'c':// Ò»¸ö×Ö·û
+  101          ////                {
+  102          ////                    int8 ch = (int8)va_arg(arg, uint32);
+  103          ////                    uart_putchar(DEBUG_UART, (int8)ch);
+  104          ////                            
+  105          ////                }break;
+  106          ////                
+  107          ////                
+  108          ////                case 'd':
+  109          ////                case 'i':// ÓÐ·ûºÅÊ®½øÖÆÕûÊý
+  110          ////                {
+  111          ////                    int8 vstr[33];
+  112          ////                    int32 ival = (int32)va_arg(arg, int32);
+  113          ////                    uint8 vlen = number_conversion_ascii((uint32)ival, vstr, 1, 10);
+  114          ////                    if(ival<0)  uart_putchar(DEBUG_UART, '-');
+  115          ////                    printf_reverse_order(vstr,vlen);
+  116          ////                    uart_putbuff(DEBUG_UART, (uint8 *)vstr,vlen);
+  117          ////                }break;
+  118          ////                
+  119          ////                case 'f':// ¸¡µãÊý£¬Êä³öÐ¡ÊýµãºóÁùÎ»  ²»ÄÜÖ¸¶¨Êä³ö¾«¶È
+  120          ////                case 'F':// ¸¡µãÊý£¬Êä³öÐ¡ÊýµãºóÁùÎ»  ²»ÄÜÖ¸¶¨Êä³ö¾«¶È
+  121          ////                {
+C251 COMPILER V5.60.0,  PRINTF                                                             07/03/24  13:19:59  PAGE 3   
+
+  122          ////                    int8 vstr[33];
+  123          ////                    double ival = (double)va_arg(arg, double);
+  124          ////                    uint8 vlen = number_conversion_ascii((uint32)(int32)ival, vstr, 1, 10);
+  125          ////                    if(ival<0)  uart_putchar(DEBUG_UART, '-');
+  126          ////                    printf_reverse_order(vstr,vlen);
+  127          ////                    uart_putbuff(DEBUG_UART, (uint8 *)vstr,vlen);
+  128          ////                    uart_putchar(DEBUG_UART, '.');
+  129          
+  130          ////                    ival = ((double)ival - (int32)ival)*1000000;
+  131          ////                    vlen = number_conversion_ascii((uint32)(int32)ival, vstr, 1, 10);
+  132          ////              while(6>vlen)
+  133          ////                    {
+  134          ////                        vstr[vlen] = '0';
+  135          ////                        vlen++;
+  136          ////                    }
+  137          ////                    printf_reverse_order(vstr,vlen);
+  138          ////                    uart_putbuff(DEBUG_UART, (uint8 *)vstr,vlen);
+  139          ////                    break;
+  140          ////                }
+  141          ////                
+  142          ////                case 'u':// ÎÞ·ûºÅÊ®½øÖÆÕûÊý
+  143          ////                {
+  144          ////                    int8 vstr[33];
+  145          ////                    uint32 ival = (uint32)va_arg(arg, uint32);
+  146          ////                    uint8 vlen = number_conversion_ascii(ival, vstr, 0, 10);
+  147          ////                    printf_reverse_order(vstr,vlen);
+  148          ////                    uart_putbuff(DEBUG_UART, (uint8 *)vstr,vlen);
+  149          ////                }break;
+  150          ////                
+  151          ////                case 'o':// ÎÞ·ûºÅ°Ë½øÖÆÕûÊý 
+  152          ////                {
+  153          ////                    int8 vstr[33];
+  154          ////                    uint32 ival = (uint32)va_arg(arg, uint32);
+  155          ////                    uint8 vlen = number_conversion_ascii(ival, vstr, 0, 8);
+  156          ////                    printf_reverse_order(vstr,vlen);
+  157          ////                    uart_putbuff(DEBUG_UART, (uint8 *)vstr,vlen);
+  158          ////                    
+  159          ////                }break;
+  160          ////                
+  161          ////                case 'x':// ÎÞ·ûºÅÊ®Áù½øÖÆÕûÊý
+  162          ////                case 'X':// ÎÞ·ûºÅÊ®Áù½øÖÆÕûÊý
+  163          ////                {
+  164          ////                    int8 vstr[33];
+  165          ////                    uint32 ival = (uint32)va_arg(arg, uint32);
+  166          ////                    uint8 vlen = number_conversion_ascii(ival, vstr, 0, 16);
+  167          ////                    printf_reverse_order(vstr,vlen);
+  168          ////                    uart_putbuff(DEBUG_UART, (uint8 *)vstr,vlen);
+  169          ////                }break;
+  170          ////                
+  171          ////                
+  172          ////                case 's':// ×Ö·û´®
+  173          ////                {
+  174          ////                    int8 *pc = va_arg(arg, int8 *);
+  175          ////                    while (*pc)
+  176          ////                    {
+  177          ////                        uart_putchar(DEBUG_UART, (int8)(*pc));
+  178          ////                        pc++;
+  179          ////                    }
+  180          ////                }break;
+  181          ////                
+  182          ////                case 'p':// ÒÔ16½øÖÆÐÎÊ½Êä³öÖ¸Õë
+  183          ////                {
+  184          ////                    int8 vstr[33];
+  185          ////                    uint32 ival = (uint32)va_arg(arg, uint32);
+  186          ////                    uint8 vlen = number_conversion_ascii(ival, vstr, 0, 16);
+  187          ////                    printf_reverse_order(vstr,8);
+C251 COMPILER V5.60.0,  PRINTF                                                             07/03/24  13:19:59  PAGE 4   
+
+  188          ////                    uart_putbuff(DEBUG_UART, (uint8 *)vstr,8);
+  189          ////                            
+  190          ////                }break;
+  191          ////                
+  192          ////                
+  193          ////                case '%':// Êä³ö×Ö·û% 
+  194          ////                {
+  195          ////                    uart_putchar(DEBUG_UART, '%');
+  196          ////                }break;
+  197          
+  198          ////                default:break;
+  199          ////      }
+  200          ////    }
+  201          ////    else
+  202          ////    {
+  203          ////      uart_putchar(DEBUG_UART, (int8)(*format));
+  204          ////    }
+  205          ////    format++;
+  206          ////  }
+  207          ////  va_end(arg);
+  208          ////#endif
+  209          ////}
+  210          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =    ------     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

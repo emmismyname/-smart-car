@@ -1,0 +1,516 @@
+C251 COMPILER V5.60.0,  board                                                              25/04/24  13:33:27  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE board
+OBJECT MODULE PLACED IN .\Out_flie\board.obj
+COMPILER INVOKED BY: D:\Keil_80251\C251\BIN\C251.EXE ..\LIB\startup\board.c XSMALL INTR2 BROWSE INCDIR(..\LIB\startup;..
+                    -\LIB\libraries;..\LIB\peripheral;..\USER\inc) DEBUG PRINT(.\Listings\board.lst) TABS(2) OBJECT(.\Out_flie\board.obj) 
+
+stmt  level    source
+
+    1          
+    2          /********************************************************************************************************
+             -*************
+    3           * @file          board
+    4           * @date          2024-03-06
+    5           * @note    
+    6           ********************************************************************************************************
+             -************/
+    7          
+    8          
+    9          #include "board.h"
+   10          #include "uart.h"
+   11          #include "tim.h"
+   12          #include "delay.h"
+   13          
+   14          //内核频率
+   15          int32 sys_clk = 0;
+   16          
+   17          //-------------------------------------------------------------------------------------------------------
+             -------------
+   18          //  @brief      STC32G设置系统频率
+   19          //  @param      NULL            空值
+   20          //  @return     void          系统频率
+   21          //  Sample usage:
+   22          //-------------------------------------------------------------------------------------------------------
+             -------------
+   23          uint32 set_clk(uint32 clock)
+   24          {
+   25   1        uint32 temp_sys_clk = 0;
+   26   1        
+   27   1        
+   28   1          switch(clock)
+   29   1          {
+   30   2          case SYSTEM_CLOCK_500K:
+   31   2              //选择500KHz
+   32   2              CLKDIV = 0x04;
+   33   2              IRTRIM = T24M_ADDR;
+   34   2              VRTRIM = VRT24M_ADDR;
+   35   2              IRCBAND = IRCBAND_24M;
+   36   2              WTST = 0;       //设置程序读取等待控制寄存器
+   37   2          _nop_();
+   38   2              _nop_();
+   39   2              _nop_();
+   40   2              _nop_();
+   41   2              CLKDIV = 48;
+   42   2          temp_sys_clk = clock;
+   43   2              break;
+   44   2      
+   45   2          case SYSTEM_CLOCK_3M:
+   46   2              //选择3MHz
+   47   2              CLKDIV = 0x04;
+   48   2              IRTRIM = T24M_ADDR;
+   49   2              VRTRIM = VRT24M_ADDR;
+   50   2              IRCBAND = IRCBAND_24M;
+   51   2              WTST = 0;       //设置程序读取等待控制寄存器
+   52   2          _nop_();
+   53   2          _nop_();
+   54   2          _nop_();
+C251 COMPILER V5.60.0,  board                                                              25/04/24  13:33:27  PAGE 2   
+
+   55   2          _nop_();
+   56   2              CLKDIV = 8;
+   57   2          temp_sys_clk = clock;
+   58   2              break;
+   59   2      
+   60   2          case SYSTEM_CLOCK_55_296M:
+   61   2              //选择5.5296MHz
+   62   2              CLKDIV = 0x04;
+   63   2              IRTRIM = T22M_ADDR;
+   64   2              VRTRIM = VRT24M_ADDR;
+   65   2              IRCBAND = IRCBAND_24M;
+   66   2              WTST = 0;       //设置程序读取等待控制寄存器
+   67   2          _nop_();
+   68   2          _nop_();
+   69   2          _nop_();
+   70   2          _nop_();
+   71   2              CLKDIV = 4;
+   72   2          temp_sys_clk = clock;
+   73   2              break;
+   74   2      
+   75   2          case SYSTEM_CLOCK_6M:
+   76   2              //选择6MHz
+   77   2              CLKDIV = 0x04;
+   78   2              IRTRIM = T24M_ADDR;
+   79   2              VRTRIM = VRT24M_ADDR;
+   80   2              IRCBAND = IRCBAND_24M;
+   81   2          _nop_();
+   82   2          _nop_();
+   83   2          _nop_();
+   84   2          _nop_();
+   85   2              WTST = 0;       //设置程序读取等待控制寄存器
+   86   2              CLKDIV = 4;
+   87   2          temp_sys_clk = clock;
+   88   2              break;
+   89   2      
+   90   2          case SYSTEM_CLOCK_11_0592M:
+   91   2              //选择11.0592MHz
+   92   2              CLKDIV = 0x04;
+   93   2              IRTRIM = T22M_ADDR;
+   94   2              VRTRIM = VRT24M_ADDR;
+   95   2              IRCBAND = IRCBAND_24M;
+   96   2              WTST = 0;       //设置程序读取等待控制寄存器
+   97   2          _nop_();
+   98   2          _nop_();
+   99   2          _nop_();
+  100   2          _nop_();
+  101   2              CLKDIV = 2;
+  102   2          temp_sys_clk = clock;
+  103   2              break;
+  104   2      
+  105   2          case SYSTEM_CLOCK_12M:
+  106   2              //选择12MHz
+  107   2              CLKDIV = 0x04;
+  108   2              IRTRIM = T24M_ADDR;
+  109   2              VRTRIM = VRT24M_ADDR;
+  110   2              IRCBAND = IRCBAND_24M;
+  111   2              WTST = 0;       //设置程序读取等待控制寄存器
+  112   2          _nop_();
+  113   2          _nop_();
+  114   2          _nop_();
+  115   2          _nop_();
+  116   2              CLKDIV = 2;
+  117   2          temp_sys_clk = clock;
+  118   2              break;
+  119   2      
+  120   2          case SYSTEM_CLOCK_22_1184M:
+C251 COMPILER V5.60.0,  board                                                              25/04/24  13:33:27  PAGE 3   
+
+  121   2              //选择22.1184MHz
+  122   2              CLKDIV = 0x04;
+  123   2              IRTRIM = T22M_ADDR;
+  124   2              VRTRIM = VRT24M_ADDR;
+  125   2              IRCBAND = IRCBAND_24M;
+  126   2              WTST = 0;       //设置程序读取等待控制寄存器
+  127   2          _nop_();
+  128   2          _nop_();
+  129   2          _nop_();
+  130   2          _nop_();
+  131   2              CLKDIV = 1;
+  132   2          temp_sys_clk = clock;
+  133   2              break;
+  134   2      
+  135   2          case SYSTEM_CLOCK_24M:
+  136   2              //选择24MHz
+  137   2              CLKDIV = 0x04;
+  138   2              IRTRIM = T24M_ADDR;
+  139   2              VRTRIM = VRT24M_ADDR;
+  140   2              IRCBAND = IRCBAND_24M;
+  141   2              WTST = 0;       //设置程序读取等待控制寄存器
+  142   2          _nop_();
+  143   2          _nop_();
+  144   2          _nop_();
+  145   2          _nop_();
+  146   2              CLKDIV = 1;
+  147   2          temp_sys_clk = clock;
+  148   2              break;
+  149   2      
+  150   2          case SYSTEM_CLOCK_30M:
+  151   2              //选择30MHz
+  152   2              CLKDIV = 0x04;
+  153   2              IRTRIM = T60M_ADDR;
+  154   2              VRTRIM = VRT44M_ADDR;
+  155   2              IRCBAND = IRCBAND_44M;
+  156   2              WTST = 0;       //设置程序读取等待控制寄存器
+  157   2          _nop_();
+  158   2          _nop_();
+  159   2          _nop_();
+  160   2          _nop_();
+  161   2              CLKDIV = 2;
+  162   2          temp_sys_clk = clock;
+  163   2              break;
+  164   2      
+  165   2          case SYSTEM_CLOCK_32M:
+  166   2              //选择32MHz
+  167   2              CLKDIV = 0x04;
+  168   2              IRTRIM = T64M_ADDR;
+  169   2              VRTRIM = VRT44M_ADDR;
+  170   2              IRCBAND = IRCBAND_44M;
+  171   2              WTST = 0;       //设置程序读取等待控制寄存器
+  172   2          _nop_();
+  173   2          _nop_();
+  174   2          _nop_();
+  175   2          _nop_();
+  176   2              CLKDIV = 2;
+  177   2          temp_sys_clk = clock;
+  178   2              break;
+  179   2      
+  180   2          case SYSTEM_CLOCK_40M:
+  181   2              //选择40MHz
+  182   2              CLKDIV = 0x04;
+  183   2              IRTRIM = T40M_ADDR;
+  184   2              VRTRIM = VRT44M_ADDR;
+  185   2              IRCBAND = IRCBAND_44M;
+  186   2              WTST = 1;       //设置程序读取等待控制寄存器
+C251 COMPILER V5.60.0,  board                                                              25/04/24  13:33:27  PAGE 4   
+
+  187   2          _nop_();
+  188   2          _nop_();
+  189   2          _nop_();
+  190   2          _nop_();
+  191   2              CLKDIV = 1;
+  192   2          temp_sys_clk = clock;
+  193   2              break;
+  194   2      
+  195   2          case SYSTEM_CLOCK_45_1584M:
+  196   2              //选择45.1584MHz
+  197   2              CLKDIV = 0x04;
+  198   2              IRTRIM = T45M_ADDR;
+  199   2              VRTRIM = VRT44M_ADDR;
+  200   2              IRCBAND = IRCBAND_44M;
+  201   2              WTST = 1;       //设置程序读取等待控制寄存器
+  202   2          _nop_();
+  203   2          _nop_();
+  204   2          _nop_();
+  205   2          _nop_();
+  206   2              CLKDIV = 1;
+  207   2          temp_sys_clk = clock;
+  208   2              break;
+  209   2      
+  210   2          case SYSTEM_CLOCK_48M:
+  211   2              //选择48MHz
+  212   2              CLKDIV = 0x04;
+  213   2              IRTRIM = T48M_ADDR;
+  214   2              VRTRIM = VRT44M_ADDR;
+  215   2              IRCBAND = IRCBAND_44M;
+  216   2              WTST = 1;       //设置程序读取等待控制寄存器
+  217   2          _nop_();
+  218   2          _nop_();
+  219   2          _nop_();
+  220   2          _nop_();
+  221   2              CLKDIV = 1;
+  222   2          temp_sys_clk = clock;
+  223   2              break;
+  224   2      
+  225   2          case SYSTEM_CLOCK_50M:
+  226   2              //选择50.8032MHz
+  227   2              CLKDIV = 0x04;
+  228   2              IRTRIM = T50M_ADDR;
+  229   2              VRTRIM = VRT44M_ADDR;
+  230   2              IRCBAND = IRCBAND_44M;
+  231   2              WTST = 1;       //设置程序读取等待控制寄存器
+  232   2          _nop_();
+  233   2          _nop_();
+  234   2          _nop_();
+  235   2          _nop_();
+  236   2              CLKDIV = 1;
+  237   2          temp_sys_clk = clock;
+  238   2              break;
+  239   2      
+  240   2          case SYSTEM_CLOCK_52M:
+  241   2              //选择52MHz
+  242   2              CLKDIV = 0x04;
+  243   2              IRTRIM = T52M_ADDR;
+  244   2              VRTRIM = VRT44M_ADDR;
+  245   2              IRCBAND = IRCBAND_44M;
+  246   2              WTST = 1;       //设置程序读取等待控制寄存器
+  247   2          _nop_();
+  248   2          _nop_();
+  249   2          _nop_();
+  250   2          _nop_();
+  251   2              CLKDIV = 1;
+  252   2          temp_sys_clk = clock;
+C251 COMPILER V5.60.0,  board                                                              25/04/24  13:33:27  PAGE 5   
+
+  253   2              break;
+  254   2      
+  255   2          case SYSTEM_CLOCK_56M:
+  256   2              //选择56MHz
+  257   2              CLKDIV = 0x04;
+  258   2              IRTRIM = T56M_ADDR;
+  259   2              VRTRIM = VRT44M_ADDR;
+  260   2              IRCBAND = IRCBAND_44M;
+  261   2              WTST = 1;       //设置程序读取等待控制寄存器
+  262   2          _nop_();
+  263   2          _nop_();
+  264   2          _nop_();
+  265   2          _nop_();
+  266   2              CLKDIV = 1;
+  267   2          temp_sys_clk = clock;
+  268   2              break;
+  269   2      
+  270   2          case SYSTEM_CLOCK_60M:
+  271   2              //选择60MHz
+  272   2              CLKDIV = 0x04;
+  273   2              IRTRIM = T60M_ADDR;
+  274   2              VRTRIM = VRT44M_ADDR;
+  275   2              IRCBAND = IRCBAND_44M;
+  276   2              WTST = 1;       //设置程序读取等待控制寄存器
+  277   2          _nop_();
+  278   2          _nop_();
+  279   2          _nop_();
+  280   2          _nop_();
+  281   2              CLKDIV = 1;
+  282   2          temp_sys_clk = clock;
+  283   2              break;
+  284   2      
+  285   2      //    case SYSTEM_CLOCK_64M:
+  286   2      //        //选择64MHz
+  287   2      //        CLKDIV = 0x04;
+  288   2      //        IRTRIM = T64M_ADDR;
+  289   2      //        VRTRIM = VRT44M_ADDR;
+  290   2      //        IRCBAND = IRCBAND_44M;
+  291   2      //        WTST = 2;       //设置程序读取等待控制寄存器
+  292   2      //        CLKDIV = 1;
+  293   2      //        break;
+  294   2      
+  295   2          default:
+  296   2              //选择56MHz
+  297   2              CLKDIV = 0x04;
+  298   2              IRTRIM = T56M_ADDR;
+  299   2              VRTRIM = VRT44M_ADDR;
+  300   2              IRCBAND = IRCBAND_44M;
+  301   2              WTST = 1;       //设置程序读取等待控制寄存器
+  302   2          _nop_();
+  303   2          _nop_();
+  304   2          _nop_();
+  305   2          _nop_();
+  306   2              CLKDIV = 1;
+  307   2          temp_sys_clk = SYSTEM_CLOCK_56M;
+  308   2              break;
+  309   2        }
+  310   1        
+  311   1        return temp_sys_clk;
+  312   1      }
+  313          
+  314          
+  315          
+  316          
+  317          
+  318          
+C251 COMPILER V5.60.0,  board                                                              25/04/24  13:33:27  PAGE 6   
+
+  319          #if (1 == PRINTF_ENABLE)      //初始化调试串口
+  320          //重定义printf 数字 只能输出uint16
+  321              char putchar(char c)
+  322              {
+  323   1              uart_putchar(UART_1, c);//把自己实现的串口打印一字节数据的函数替换到这里
+  324   1      
+  325   1              return c;
+  326   1          }
+  327          #endif
+  328          
+  329          void DisableGlobalIRQ(void)
+  330          {
+  331   1        EA = 0;
+  332   1      }
+  333          
+  334          
+  335          void EnableGlobalIRQ(void)
+  336          {
+  337   1        EA = 1;
+  338   1      }
+  339          
+  340          void enalbe_icache(void)
+  341          {
+  342   1        EA = 0;
+  343   1        _nop_();
+  344   1        _nop_();
+  345   1        TA = 0xaa;    //写入触发命令序列1
+  346   1                //此处不能有其他任何指令
+  347   1        TA = 0x55;    //写入触发命令序列2
+  348   1                //此处不能有其他任何指令
+  349   1        ICHECR = 0x01;  //写保护暂时关闭，可以修改ICHECR 中的EN 位
+  350   1                //EN 位再次进入写保护状态
+  351   1        _nop_();
+  352   1        _nop_();
+  353   1        EA = 1;
+  354   1      }
+  355          
+  356          void disalbe_icache(void)
+  357          {
+  358   1        EA = 0;
+  359   1        _nop_();
+  360   1        _nop_();
+  361   1        TA = 0xaa;    //写入触发命令序列1
+  362   1                //此处不能有其他任何指令
+  363   1        TA = 0x55;    //写入触发命令序列2
+  364   1                //此处不能有其他任何指令
+  365   1        ICHECR = 0x00;  //写保护暂时关闭，可以修改ICHECR 中的EN 位
+  366   1                //EN 位再次进入写保护状态
+  367   1        _nop_();
+  368   1        _nop_();
+  369   1        EA = 1;
+  370   1      }
+  371          
+  372          
+  373          void ICacheOn() //打开ICACHE 功能
+  374          {
+  375   1        _nop_();
+  376   1        _nop_();
+  377   1        TA = 0xaa; //写入触发命令序列1
+  378   1        //此处不能有其他任何指令
+  379   1        TA = 0x55; //写入触发命令序列2
+  380   1        //此处不能有其他任何指令
+  381   1        ICHECR = 0x01; //写保护暂时关闭，可以修改ICHECR 中的EN 位
+  382   1        //EN 位再次进入写保护状态
+  383   1        _nop_();
+  384   1        _nop_();
+C251 COMPILER V5.60.0,  board                                                              25/04/24  13:33:27  PAGE 7   
+
+  385   1      }
+  386          
+  387          void clock_init(uint32 clock)
+  388          {
+  389   1        P_SW2 = 0x80; // 开启特殊地址访问
+  390   1        
+  391   1        #if (1 == EXTERNAL_CRYSTA_ENABLE)
+                 {
+                   sys_clk = clock;
+                 }
+                 #else
+  396   1        {
+  397   2          sys_clk = set_clk(clock);
+  398   2        }
+  399   1        #endif
+  400   1      
+  401   1      }
+  402          
+  403          
+  404          void board_init(void)
+  405          {
+  406   1      
+  407   1        SET_P54_RESRT;      // 使P54为复位引脚
+  408   1      
+  409   1        
+  410   1        P0M0 = 0x00;
+  411   1        P0M1 = 0x00;
+  412   1        P1M0 = 0x00;
+  413   1        P1M1 = 0x00;
+  414   1        P2M0 = 0x00;
+  415   1        P2M1 = 0x00;
+  416   1        P3M0 = 0x00;
+  417   1        P3M1 = 0x00;
+  418   1        P4M0 = 0x00;
+  419   1        P4M1 = 0x00;
+  420   1        P5M0 = 0x00;
+  421   1        P5M1 = 0x00;   
+  422   1      //  P6M0 = 0x00;
+  423   1      //  P6M1 = 0x00;
+  424   1      //  P7M0 = 0x00;
+  425   1      //  P7M1 = 0x00;
+  426   1        
+  427   1      
+  428   1      #if (1 == EXTERNAL_CRYSTA_ENABLE)
+               {
+               
+                 XOSCCR = 0xc0;      //启动外部晶振
+                 while(!(XOSCCR & 1));   //等待时钟稳定
+               
+                 CLKDIV = 0x00;      //时钟不分频
+                 CLKSEL = 0x01;      //选择外部晶振
+               }
+               
+               #endif
+  439   1      
+  440   1        delay_init();     //延时函数初始化
+  441   1      
+  442   1        if(sys_clk > SYSTEM_CLOCK_32M)
+  443   1        {
+  444   2          //STC32F 系列单片机内部硬件逻辑及外设可运行在60MHz 的主频下，但内部的程序存储器（ROM）
+  445   2          //相对较慢，时钟只能在33M 左右，为解决这个时钟不一致的问题，STC32F 系列增加了ICACHE 技术，
+  446   2          //即程序存储器高速缓存技术。
+  447   2          ICacheOn();
+  448   2        }
+  449   1        
+  450   1      
+C251 COMPILER V5.60.0,  board                                                              25/04/24  13:33:27  PAGE 8   
+
+  451   1      
+  452   1        ADCCFG = 0;
+  453   1        AUXR = 0;
+  454   1        SCON = 0;
+  455   1        S2CON = 0;
+  456   1        S3CON = 0;
+  457   1        S4CON = 0;
+  458   1        P_SW1 = 0;
+  459   1        IE2 = 0;
+  460   1        TMOD = 0;
+  461   1      //  MCLKOCR =1<<7| 10;
+  462   1        uart_init(DEBUG_UART, DEBUG_UART_RX_PIN, DEBUG_UART_TX_PIN, DEBUG_UART_BAUD, DEBUG_UART_TIM);
+  463   1        EnableGlobalIRQ();
+  464   1      }
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =      1332     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =         4     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =         8     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
