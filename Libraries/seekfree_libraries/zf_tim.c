@@ -12,7 +12,7 @@
  * @author     		逐飞科技(QQ790875685)
  * @version    		查看doc内version文件 版本说明
  * @Software 		MDK FOR C251 V5.60
- * @Target core		STC32G12K128
+ * @Target core		STC32F12K
  * @Taobao   		https://seekfree.taobao.com/
  * @date       		2020-4-14
  ********************************************************************************************************************/
@@ -131,7 +131,6 @@ uint16 ctimer_count_read(CTIMN_enum tim_n)
 		
 	}
 	return dat;
-	
 }
 
 

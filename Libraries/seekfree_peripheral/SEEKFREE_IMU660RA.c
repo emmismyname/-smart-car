@@ -1,57 +1,40 @@
 /*********************************************************************************************************************
-* MM32F327X-G9P Opensourec Library 即（MM32F327X-G9P 开源库）是一个基于官方 SDK 接口的第三方开源库
-* Copyright (c) 2022 SEEKFREE 逐飞科技
-* 
-* 本文件是 MM32F327X-G9P 开源库的一部分
-* 
-* MM32F327X-G9P 开源库 是免费软件
-* 您可以根据自由软件基金会发布的 GPL（GNU General Public License，即 GNU通用公共许可证）的条款
-* 即 GPL 的第3版（即 GPL3.0）或（您选择的）任何后来的版本，重新发布和/或修改它
-* 
-* 本开源库的发布是希望它能发挥作用，但并未对其作任何的保证
-* 甚至没有隐含的适销性或适合特定用途的保证
-* 更多细节请参见 GPL
-* 
-* 您应该在收到本开源库的同时收到一份 GPL 的副本
-* 如果没有，请参阅<https://www.gnu.org/licenses/>
-* 
-* 额外注明：
-* 本开源库使用 GPL3.0 开源许可证协议 以上许可申明为译文版本
-* 许可申明英文版在 libraries/doc 文件夹下的 GPL3_permission_statement.txt 文件中
-* 许可证副本在 libraries 文件夹下 即该文件夹下的 LICENSE 文件
-* 欢迎各位使用并传播本程序 但修改内容时必须保留逐飞科技的版权声明（即本声明）
-* 
-* 文件名称          zf_device_imu660ra
-* 公司名称          成都逐飞科技有限公司
-* 版本信息          查看 libraries/doc 文件夹内 version 文件 版本说明
-* 开发环境          IAR 8.32.4 or MDK 5.37
-* 适用平台          MM32F327X_G9P
-* 店铺链接          https://seekfree.taobao.com/
-* 
-* 修改记录
-* 日期              作者                备注
-* 2022-09-15        pudding             first version
-********************************************************************************************************************/
-/*********************************************************************************************************************
-* 接线定义：
-*                   ------------------------------------
-*                   模块管脚            单片机管脚
-*                   // 硬件 SPI 引脚
-*                   SCL/SPC           查看 zf_device_imu660ra.h 中 IMU660RA_SPC_PIN 宏定义
-*                   SDA/DSI           查看 zf_device_imu660ra.h 中 IMU660RA_SDI_PIN 宏定义
-*                   SA0/SDO           查看 zf_device_imu660ra.h 中 IMU660RA_SDO_PIN 宏定义
-*                   CS                查看 zf_device_imu660ra.h 中 IMU660RA_CS_PIN 宏定义
-*                   VCC               3.3V电源
-*                   GND               电源地
-*                   其余引脚悬空
-*
-*                   // 软件 IIC 引脚
-*                   SCL/SPC           查看 zf_device_imu660ra.h 中 IMU660RA_SCL_PIN 宏定义
-*                   SDA/DSI           查看 zf_device_imu660ra.h 中 IMU660RA_SDA_PIN 宏定义
-*                   VCC               3.3V电源
-*                   GND               电源地
-*                   其余引脚悬空
-*                   ------------------------------------
+ * COPYRIGHT NOTICE
+ * Copyright (c) 2018,逐飞科技
+ * All rights reserved.
+ * 技术讨论QQ群：一群：179029047(已满)  二群：244861897
+ *
+ * 以下所有内容版权均属逐飞科技所有，未经允许不得用于商业用途，
+ * 欢迎各位使用并传播本程序，修改内容时必须保留逐飞科技的版权声明。
+ *
+ * @file       		IMU660RA
+ * @company	   		成都逐飞科技有限公司
+ * @author     		逐飞科技(QQ3184284598)
+ * @version    		查看doc内version文件 版本说明
+ * @Software 		MDK FOR C251 V5.60
+ * @Target core		STC32F12K
+ * @Taobao   		https://seekfree.taobao.com/
+ * @date       		2019-04-30
+ * @note		
+ * 接线定义：
+ *                   ------------------------------------
+ *                   模块管脚            单片机管脚
+ *                   // 硬件 SPI 引脚
+ *                   SCL/SPC           查看 SEEKFREE_IMU660RA.h 中 IMU660RA_SPC_PIN 宏定义
+ *                   SDA/DSI           查看 SEEKFREE_IMU660RA.h 中 IMU660RA_SDI_PIN 宏定义
+ *                   SA0/SDO           查看 SEEKFREE_IMU660RA.h 中 IMU660RA_SDO_PIN 宏定义
+ *                   CS                查看 SEEKFREE_IMU660RA.h 中 IMU660RA_CS_PIN 宏定义
+ *                   VCC               3.3V电源
+ *                   GND               电源地
+ *                   其余引脚悬空
+ *
+ *                   // 软件 IIC 引脚
+ *                   SCL/SPC           查看 SEEKFREE_IMU660RA.h 中 IMU660RA_SCL_PIN 宏定义
+ *                   SDA/DSI           查看 SEEKFREE_IMU660RA.h 中 IMU660RA_SDA_PIN 宏定义
+ *                   VCC               3.3V电源
+ *                   GND               电源地
+ *                   其余引脚悬空
+ *                   ------------------------------------
 ********************************************************************************************************************/
 
 #include "SEEKFREE_IMU660RA.h"
@@ -64,6 +47,7 @@
 
 #pragma warning disable = 177
 #pragma warning disable = 183
+
 
 
 int16 imu660ra_gyro_x = 0, imu660ra_gyro_y = 0, imu660ra_gyro_z = 0;            // 三轴陀螺仪数据   gyro (陀螺仪)
@@ -220,9 +204,9 @@ static uint8 imu660ra_read_ch(uint8 ack_x)
 static void imu660ra_simiic_write_reg(uint8 dev_add, uint8 reg, uint8 dat)
 {
 	imu660ra_simiic_start();
-    send_ch( (dev_add<<1) | 0x00);   //发送器件地址加写位
-	send_ch( reg );   				 //发送从机寄存器地址
-	send_ch( dat );   				 //发送需要写入的数据
+    imu660ra_send_ch( (dev_add<<1) | 0x00);   //发送器件地址加写位
+	imu660ra_send_ch( reg );   				 //发送从机寄存器地址
+	imu660ra_send_ch( dat );   				 //发送需要写入的数据
 	imu660ra_simiic_stop();
 }
 
@@ -239,12 +223,12 @@ static void imu660ra_simiic_write_regs(uint8 dev_add, uint8 reg, uint8 *dat, uin
 {
 	uint16 i = 0;
 	imu660ra_simiic_start();
-    send_ch( (dev_add<<1) | 0x00);   //发送器件地址加写位
-	send_ch( reg );   				 //发送从机寄存器地址
+    imu660ra_send_ch( (dev_add<<1) | 0x00);   //发送器件地址加写位
+	imu660ra_send_ch( reg );   				 //发送从机寄存器地址
 
 	while(len--)
 	{
-		send_ch( *dat++ );   				 //发送需要写入的数据
+		imu660ra_send_ch( *dat++ );   				 //发送需要写入的数据
 	}
 
 	
@@ -600,6 +584,7 @@ float imu660ra_gyro_transition (int16 gyro_value)
 uint8 imu660ra_init (void)
 {
     uint8 return_state = 0;
+	
     delay_ms(20);                                                        		// 等待设备上电成功
 
 //#if IMU660RA_USE_SOFT_IIC 
@@ -632,11 +617,11 @@ uint8 imu660ra_init (void)
         imu660ra_write_registers(IMU660RA_INIT_DATA, imu660ra_config_file, sizeof(imu660ra_config_file));   // 输出配置文件
         imu660ra_write_register(IMU660RA_INIT_CTRL, 0x01);                      // 初始化配置结束
         delay_ms(20);
-        if(imu660ra_read_register(IMU660RA_INT_STA) == 0)                       // 检查是否配置完成
+        if(imu660ra_read_register(IMU660RA_INT_STA) != 1)                       // 检查是否配置完成
         {
             // 如果程序在输出了断言信息 并且提示出错位置在这里
             // 那么就是 IMU660RA 配置初始化文件出错了
-            // 检查一下接线有没有问题 如果没问题可能就是坏了
+            // 检查IMU660RA初始化之前，是否打开了定时器中断，在定时器中断里面采集了660RA的数据
 //			while(1)
 //			{
 				printf("imu660ra init error.\r\n");
@@ -664,8 +649,14 @@ uint8 imu660ra_init (void)
         // 设置为:0x02 加速度计量程为:±8g         获取到的加速度计数据 除以 4096    可以转化为带物理单位的数据 单位：g(m/s^2)
         // 设置为:0x03 加速度计量程为:±16g        获取到的加速度计数据 除以 2048    可以转化为带物理单位的数据 单位：g(m/s^2)
     
+
+	
 	}while(0);
+	
+
+	
     return return_state;
 }
+
 
 

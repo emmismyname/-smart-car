@@ -12,15 +12,15 @@
  * @author     		逐飞科技(QQ3184284598)
  * @version    		查看doc内version文件 版本说明
  * @Software 		MDK FOR C251 V5.60
- * @Target core		STC32G12K128
+ * @Target core		STC32F12K
  * @Taobao   		https://seekfree.taobao.com/
  * @date       		2019-04-30
  * @note		
 					接线定义：
 					------------------------------------ 
-						软件IIC
-                        SCL                 查看SEEKFREE_IIC文件内的SEEKFREE_SCL宏定义
-						SDA                 查看SEEKFREE_IIC文件内的SEEKFREE_SDA宏定义
+					软件IIC
+					SCL                 查看SEEKFREE_MPU6050.H文件内的MPU6050_SCL_PIN宏定义
+					SDA                 查看SEEKFREE_MPU6050.H文件内的MPU6050_SDA_PIN宏定义  
 					------------------------------------ 
  ********************************************************************************************************************/
 
@@ -35,10 +35,10 @@ int16 mpu6050_acc_x,mpu6050_acc_y,mpu6050_acc_z;
 
 
 #define GET_MPU6050_SDA   		 	MPU6050_SDA_PIN
-#define MPU6050_SCL_LOW()          	MPU6050_SDA_PIN = 0		//IO口输出低电平
-#define MPU6050_SDA_HIGH()         	MPU6050_SDA_PIN = 1		//IO口输出高电平  
-#define MPU6050_SDA_LOW()          	MPU6050_SCL_PIN = 0		//IO口输出低电平
-#define MPU6050_SCL_HIGH()         	MPU6050_SCL_PIN = 1		//IO口输出高电平
+#define MPU6050_SCL_LOW()          	MPU6050_SCL_PIN = 0		//IO口输出低电平
+#define MPU6050_SCL_HIGH()         	MPU6050_SCL_PIN = 1		//IO口输出高电平  
+#define MPU6050_SDA_LOW()          	MPU6050_SDA_PIN = 0		//IO口输出低电平
+#define MPU6050_SDA_HIGH()         	MPU6050_SDA_PIN = 1		//IO口输出高电平
 
 #define ack 1      //主应答
 #define no_ack 0   //从应答	

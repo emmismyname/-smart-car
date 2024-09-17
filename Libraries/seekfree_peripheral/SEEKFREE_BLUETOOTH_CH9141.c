@@ -12,18 +12,18 @@
  * @author     		逐飞科技(QQ3184284598)
  * @version    		查看doc内version文件 版本说明
  * @Software 		MDK FOR C251 V5.60
- * @Target core		STC32G12K128
+ * @Target core		STC32F12K
  * @Taobao   		https://seekfree.taobao.com/
  * @date       		2021-08-27
  * @note		
 					接线定义：
 					------------------------------------ 
-					    蓝牙转串口      单片机                        
-    					RX              查看SEEKFREE_BLUETOOTH_CH9141.h文件中的BLUETOOTH_CH9141_UART_TX宏定义
-    					TX              查看SEEKFREE_BLUETOOTH_CH9141.h文件中的BLUETOOTH_CH9141_UART_RX宏定义
-    					RTS             查看SEEKFREE_BLUETOOTH_CH9141.h文件中的BLUETOOTH_CH9141_RTS_PIN宏定义
-                        CTS             悬空
-    					CMD             悬空或者上拉
+					蓝牙转串口      单片机                        
+					RX              查看SEEKFREE_BLUETOOTH_CH9141.h文件中的BLUETOOTH_CH9141_UART_TX宏定义
+					TX              查看SEEKFREE_BLUETOOTH_CH9141.h文件中的BLUETOOTH_CH9141_UART_RX宏定义
+					RTS             查看SEEKFREE_BLUETOOTH_CH9141.h文件中的BLUETOOTH_CH9141_RTS_PIN宏定义
+					CTS             悬空
+					CMD             悬空或者上拉
 					------------------------------------ 
  ********************************************************************************************************************/
 #include "stdio.h"
@@ -79,10 +79,11 @@ void bluetooth_ch9141_uart_callback (void)
 //-------------------------------------------------------------------------------------------------------------------
 uint8 bluetooth_ch9141_init (void)
 {
+	BLUETOOTH_CH9141_RTS_PIN = 0;
     wireless_type = WIRELESS_CH9141;
     // 本函数使用的波特率为115200 为蓝牙转串口模块的默认波特率 如需其他波特率请使用上位机修改模块参数
-    fifo_init(&bluetooth_ch9141_fifo, bluetooth_ch9141_buffer, BLUETOOTH_CH9141_BUFFER_SIZE);
-    uart_init(BLUETOOTH_CH9141_INDEX, BLUETOOTH_CH9141_TX_PIN, BLUETOOTH_CH9141_RX_PIN, BLUETOOTH_CH9141_BUAD_RATE, BLUETOOTH_CH9141_TIMER);
+    fifo_init(&bluetooth_ch9141_fifo, FIFO_DATA_8BIT, bluetooth_ch9141_buffer, BLUETOOTH_CH9141_BUFFER_SIZE);
+    uart_init(BLUETOOTH_CH9141_INDEX, BLUETOOTH_CH9141_RX_PIN, BLUETOOTH_CH9141_TX_PIN, BLUETOOTH_CH9141_BUAD_RATE, BLUETOOTH_CH9141_TIMER);
     return 0;
 }
 

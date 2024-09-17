@@ -12,7 +12,7 @@
  * @author     		逐飞科技(QQ790875685)
  * @version    		查看doc内version文件 版本说明
  * @Software 		MDK FOR C251 V5.60
- * @Target core		STC32G12K128
+ * @Target core		STC32F12K
  * @Taobao   		https://seekfree.taobao.com/
  * @date       		2020-4-14
  ********************************************************************************************************************/
@@ -33,24 +33,21 @@ vuint16 zf_delay_us = 0;
 //-------------------------------------------------------------------------------------------------------------------
 void delay_init(void)
 {
-	zf_delay_ms = sys_clk / 6000;
-	zf_delay_us = sys_clk / 7000000;
-	if(sys_clk <= 12000000) zf_delay_us++;
-
+	zf_delay_ms = sys_clk / 15000;
+	zf_delay_us = sys_clk / 17500000;
 }
 
 //-------------------------------------------------------------------------------------------------------------------
-//  @brief      软件延时函数
+//  @brief      软件延时函数(这是一个不准确的延时)
 //  @param      x            	需要延时的时间（ms）
 //  @return     void
 //  Sample usage:               无需用户调用，用户请使用h文件中的宏定义
 //-------------------------------------------------------------------------------------------------------------------
 void delay_ms(uint16 ms)
 {
-	uint16 i;
+	vuint16 i;
 	do {
 			i = zf_delay_ms;
-			//i = sys_clk/6000;//参数: ms,要延时的ms数, 这里只支持1~255ms. 自动适应主时钟.
 			while(--i);
 	   }while(--ms);
 }
@@ -66,7 +63,6 @@ void delay_us(uint32 us)
 	uint16 i;
 	do {
 			i = zf_delay_us;
-			//i = sys_clk/6000;//参数: ms,要延时的ms数, 这里只支持1~255ms. 自动适应主时钟.
 			while(--i);
 	   }while(--us);
 }

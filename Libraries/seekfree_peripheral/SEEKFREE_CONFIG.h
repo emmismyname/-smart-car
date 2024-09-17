@@ -36,7 +36,9 @@
 #ifndef _zf_device_config_h_
 #define _zf_device_config_h_
 
-extern  const unsigned char code imu660ra_config_file[8192];
+extern const unsigned char code imu660ra_config_file[8192];
+extern const unsigned char code dl1b_default_configuration [135];
+
 
 
 

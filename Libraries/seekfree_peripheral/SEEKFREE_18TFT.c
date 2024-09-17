@@ -12,18 +12,18 @@
  * @author     		逐飞科技(QQ3184284598)
  * @version    		查看doc内version文件 版本说明
  * @Software 		MDK FOR C251 V5.60
- * @Target core		STC32G12K128
+ * @Target core		STC32F12K
  * @Taobao   		https://seekfree.taobao.com/
  * @date       		2018-05-24
  * @note		
 					接线定义：
 					------------------------------------ 
 					模块管脚            单片机管脚
-					SCL                 查看TFT_SCL宏定义的引脚     硬件SPI引脚不可随意切换
-					SDA                 查看TFT_SDA宏定义的引脚     硬件SPI引脚不可随意切换
-					RES                 查看REST_PIN宏定义的引脚    
-					DC                  查看DC_PIN宏定义的引脚  
-					CS                  查看TFT_CS宏定义的引脚      硬件SPI引脚不可随意切换
+					SCL                 查看SEEKFREE_18FTF.h文件中的 TFT_SCL  宏定义的引脚     硬件SPI引脚不可随意切换
+					SDA                 查看SEEKFREE_18FTF.h文件中的 TFT_SDA  宏定义的引脚     硬件SPI引脚不可随意切换
+					RES                 查看SEEKFREE_18FTF.h文件中的 REST_PIN 宏定义的引脚    
+					DC                  查看SEEKFREE_18FTF.h文件中的 DC_PIN   宏定义的引脚  
+					CS                  查看SEEKFREE_18FTF.h文件中的 TFT_CS   宏定义的引脚      硬件SPI引脚不可随意切换
 					
 					电源引脚
 					BL  3.3V电源（背光控制引脚，也可以接PWM来控制亮度）
@@ -40,7 +40,7 @@
 
 #include "SEEKFREE_18TFT.h"
 #include "SEEKFREE_FONT.h"
-#include "SEEKFREE_PRINTF.h"
+#include "SEEKFREE_FUNCTION.h"
 #include "zf_spi.h"
 #include "zf_delay.h"
 

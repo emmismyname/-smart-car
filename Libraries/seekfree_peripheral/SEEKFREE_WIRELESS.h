@@ -12,17 +12,17 @@
  * @author     		逐飞科技(QQ3184284598)
  * @version    		查看doc内version文件 版本说明
  * @Software 		MDK FOR C251 V5.60
- * @Target core		STC32G12K128
+ * @Target core		STC32F12K
  * @Taobao   		https://seekfree.taobao.com/
  * @date       		2019-03-27
  * @note		
 					接线定义：
 					------------------------------------ 
-					    无线转串口       单片机                        
-    					RX              查看SEEKFREE_WIRELESS.h文件中的WIRELESS_UART_TX宏定义
-    					TX              查看SEEKFREE_WIRELESS.h文件中的WIRELESS_UART_RX宏定义
-    					RTS             查看SEEKFREE_WIRELESS.h文件中的RTS_PIN宏定义
-    					CMD             查看SEEKFREE_WIRELESS.h文件中的CMD_PIN宏定义
+					无线转串口      单片机                        
+    				RX              查看SEEKFREE_WIRELESS.h文件中的WIRELESS_UART_TX宏定义
+    				TX              查看SEEKFREE_WIRELESS.h文件中的WIRELESS_UART_RX宏定义
+    				RTS             查看SEEKFREE_WIRELESS.h文件中的RTS_PIN宏定义
+    				CMD             查看SEEKFREE_WIRELESS.h文件中的CMD_PIN宏定义
 					------------------------------------ 
  ********************************************************************************************************************/
 
@@ -51,7 +51,7 @@
 void wireless_uart_init(void);
 void wireless_uart_callback(void);
 
-uint32 wireless_uart_send_buff(uint8 *buff, uint16 len);
+uint32 wireless_uart_send_buff(uint8 *buff, uint32 len);
 uint32 wireless_uart_read_buff(uint8 *buff, uint32 len);
-
+void   wireless_uart_send_byte(uint8 dat);
 #endif 

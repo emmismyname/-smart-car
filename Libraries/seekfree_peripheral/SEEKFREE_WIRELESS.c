@@ -12,17 +12,17 @@
  * @author     		逐飞科技(QQ3184284598)
  * @version    		查看doc内version文件 版本说明
  * @Software 		MDK FOR C251 V5.60
- * @Target core		STC32G12K128
+ * @Target core		STC32F12K
  * @Taobao   		https://seekfree.taobao.com/
  * @date       		2019-03-27
  * @note		
 					接线定义：
 					------------------------------------ 
-					    无线转串口       单片机                        
-    					RX              查看SEEKFREE_WIRELESS.h文件中的WIRELESS_UART_TX宏定义
-    					TX              查看SEEKFREE_WIRELESS.h文件中的WIRELESS_UART_RX宏定义
-    					RTS             查看SEEKFREE_WIRELESS.h文件中的RTS_PIN宏定义
-    					CMD             查看SEEKFREE_WIRELESS.h文件中的CMD_PIN宏定义
+					无线转串口      单片机                        
+    				RX              查看SEEKFREE_WIRELESS.h文件中的WIRELESS_UART_TX宏定义
+    				TX              查看SEEKFREE_WIRELESS.h文件中的WIRELESS_UART_RX宏定义
+    				RTS             查看SEEKFREE_WIRELESS.h文件中的RTS_PIN宏定义
+    				CMD             查看SEEKFREE_WIRELESS.h文件中的CMD_PIN宏定义
 					------------------------------------ 
  ********************************************************************************************************************/
 
@@ -52,7 +52,22 @@ void wireless_uart_callback(void)
     fifo_write_buffer(&wireless_uart_fifo, &wireless_uart_data, 1);       // 存入 FIFO
 }
 
-
+//-------------------------------------------------------------------------------------------------------------------
+//  @brief      无线转串口模块 发送函数
+//  @param      buff        需要发送的数据地址
+//  @param      len         发送长度
+//  @return     uint32      剩余未发送的字节数   
+//  @since      v1.0
+//  Sample usage:	
+//  @note       
+//-------------------------------------------------------------------------------------------------------------------
+void wireless_uart_send_byte(uint8 dat)
+{
+	if(WIRELESS_RTS_PIN == 0)  
+	{
+		uart_putbuff(WIRELESS_UART, &dat, 1);
+	}
+}
 
 //-------------------------------------------------------------------------------------------------------------------
 //  @brief      无线转串口模块 发送函数
@@ -63,26 +78,26 @@ void wireless_uart_callback(void)
 //  Sample usage:	
 //  @note       
 //-------------------------------------------------------------------------------------------------------------------
-uint32 wireless_uart_send_buff(uint8 *buff, uint16 len)
+uint32 wireless_uart_send_buff(uint8 *buff, uint32 len)
 {
     while(len>30)
     {
-         if(WIRELESS_RTS_PIN == 1)  
-         {
-             return len;//模块忙,如果允许当前程序使用while等待 则可以使用后面注释的while等待语句替换本if语句
-         }
-//        while(RTS_PIN);  //如果RTS为低电平，则继续发送数据
+        if(WIRELESS_RTS_PIN == 1)  
+        {
+            return len;//模块忙,如果允许当前程序使用while等待 则可以使用后面注释的while等待语句替换本if语句
+        }
+        //while(RTS_PIN);  //如果RTS为低电平，则继续发送数据
         uart_putbuff(WIRELESS_UART,buff,30);
 
         buff += 30; //地址偏移
         len -= 30;//数量
     }
     
-     if(WIRELESS_RTS_PIN == 1)  
+    if(WIRELESS_RTS_PIN == 1)  
     {
-         return len;//模块忙,如果允许当前程序使用while等待 则可以使用后面注释的while等待语句替换本if语句
-     }
-//    while(WIRELESS_RTS_PIN);  //如果RTS为低电平，则继续发送数据
+        return len;//模块忙,如果允许当前程序使用while等待 则可以使用后面注释的while等待语句替换本if语句
+    }
+    //while(WIRELESS_RTS_PIN);  //如果RTS为低电平，则继续发送数据
     uart_putbuff(WIRELESS_UART,buff,len);//发送最后的数据
     
     return 0;
@@ -120,7 +135,7 @@ void wireless_uart_init(void)
     WIRELESS_RTS_PIN = 0;
     wireless_type = WIRELESS_SI24R1;
     //本函数使用的波特率为115200，为无线转串口模块的默认波特率，如需其他波特率请自行配置模块并修改串口的波特率
-    fifo_init(&wireless_uart_fifo, wireless_uart_buffer, WIRELESS_BUFFER_SIZE);
+    fifo_init(&wireless_uart_fifo, FIFO_DATA_8BIT, wireless_uart_buffer, WIRELESS_BUFFER_SIZE);
 	uart_init(WIRELESS_UART, WIRELESS_UART_RX_PIN, WIRELESS_UART_TX_PIN, WIRELESS_UART_BAUD, WIRELESS_TIMER_N);	//初始化串口    
     
 }

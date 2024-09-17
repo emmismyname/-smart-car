@@ -12,7 +12,7 @@
  * @author     		逐飞科技(QQ790875685)
  * @version    		查看doc内version文件 版本说明
  * @Software 		MDK FOR C251 V5.60
- * @Target core		STC32G12K128
+ * @Target core		STC32F12K
  * @Taobao   		https://seekfree.taobao.com/
  * @date       		2020-4-14
  ********************************************************************************************************************/
@@ -22,10 +22,7 @@
    
 
 
-uint8 busy[5];				 //接收忙标志位
-
-uint8 uart1_tx_buff[UART1_TX_BUFFER_SIZE];	//发送缓冲
-uint8 uart1_rx_buff[UART1_RX_BUFFER_SIZE];	//接收缓冲
+uint8 busy[5] = {0};				 //接收忙标志位
 
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -99,7 +96,7 @@ void uart_init(UARTN_enum uart_n, UARTPIN_enum uart_rx_pin, UARTPIN_enum uart_tx
 		{
 			if(TIM_2 == tim_n)
 			{
-				S2CON |= 0x10;
+				S2CON |= 0x50;
 				T2L = brt;
 				T2H = brt >> 8;
 				AUXR |= 0x14;
@@ -159,7 +156,7 @@ void uart_init(UARTN_enum uart_n, UARTPIN_enum uart_rx_pin, UARTPIN_enum uart_tx
 				S4CON |= 0x10;
 				T2L = brt;
 				T2H = brt >> 8;
-				AUXR |= 0x14;
+				AUXR = 0x15;
 			}
 			else if(TIM_4 == tim_n)
 			{
@@ -232,7 +229,7 @@ void uart_putchar(UARTN_enum uart_n,uint8 dat)
 //  @return     void
 //  Sample usage:               uart_putbuff(UART_1,&a[0],5);
 //-------------------------------------------------------------------------------------------------------------------
-void uart_putbuff(UARTN_enum uart_n,uint8 *p,uint16 len)
+void uart_putbuff(UARTN_enum uart_n,uint8 *p,uint32 len)
 {
     while(len--)
         uart_putchar(uart_n,*p++);

@@ -12,7 +12,7 @@
  * @author     		逐飞科技(QQ790875685)
  * @version    		查看doc内version文件 版本说明
  * @Software 		MDK FOR C251 V5.60
- * @Target core		STC32G12K128
+ * @Target core		STC32F12K
  * @Taobao   		https://seekfree.taobao.com/
  * @date       		2020-4-14
  ********************************************************************************************************************/
@@ -27,7 +27,7 @@ typedef enum
 {
     ADC_P10 = 0     , 
     ADC_P11         , 
-    ADC_P12         ,	//STC16F没有这个引脚，仅做站位使用
+    ADC_P12         ,	//STC32系列和STC16F没有这个引脚，仅做占位使用
 	ADC_P13         , 
     ADC_P14         , 
 	ADC_P15         , 

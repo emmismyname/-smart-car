@@ -12,7 +12,7 @@
  * @author     		逐飞科技(QQ790875685)
  * @version    		查看doc内version文件 版本说明
  * @Software 		MDK FOR C251 V5.60
- * @Target core		STC32G12K128
+ * @Target core		STC32F12K
  * @Taobao   		https://seekfree.taobao.com/
  * @date       		2020-4-14
  ********************************************************************************************************************/
@@ -24,8 +24,7 @@
 #include "common.h"
 #include "zf_tim.h"
 
-#define UART1_RX_BUFFER_SIZE	100
-#define UART1_TX_BUFFER_SIZE	100
+
 
 
 #define	UART1_CLEAR_RX_FLAG (SCON  &= ~0x01)
@@ -83,15 +82,12 @@ typedef enum //枚举串口引脚
 
 
 
-
-extern uint8 uart1_tx_buff[UART1_TX_BUFFER_SIZE];	//发送缓冲
-extern uint8 uart1_rx_buff[UART1_RX_BUFFER_SIZE];	//接收缓冲
 extern uint8 busy[5];
 
 
 void uart_init(UARTN_enum uart_n, UARTPIN_enum uart_rx_pin, UARTPIN_enum uart_tx_pin, uint32 baud,TIMN_enum tim_n);
 void uart_putchar(UARTN_enum uart_n,uint8 dat);
 void uart_putstr(UARTN_enum uart_n,uint8 *str);
-void uart_putbuff(UARTN_enum uart_n,uint8 *p,uint16 len);
+void uart_putbuff(UARTN_enum uart_n,uint8 *p,uint32 len);
 
 #endif

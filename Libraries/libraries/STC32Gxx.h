@@ -1,7 +1,10 @@
-#ifndef     __STC32G_H__
-#define     __STC32G_H__
+#ifndef __STC32G_H_
+#define __STC32G_H_
 
 /////////////////////////////////////////////////
+#include <intrins.h>
+
+//包含本头文件后,不用另外再包含"REG51.H"
 
 sfr         P0          =           0x80;
 sbit        P00         =           P0^0;
@@ -36,6 +39,14 @@ sbit        IT1         =           TCON^2;
 sbit        IE0         =           TCON^1;
 sbit        IT0         =           TCON^0;
 sfr         TMOD        =           0x89;
+sbit        T1_GATE     =           TMOD^7;
+sbit        T1_CT       =           TMOD^6;
+sbit        T1_M1       =           TMOD^5;
+sbit        T1_M0       =           TMOD^4;
+sbit        T0_GATE     =           TMOD^3;
+sbit        T0_CT       =           TMOD^2;
+sbit        T0_M1       =           TMOD^1;
+sbit        T0_M0       =           TMOD^0;
 sfr         TL0         =           0x8a;
 sfr         TL1         =           0x8b;
 sfr         TH0         =           0x8c;
@@ -45,7 +56,7 @@ sbit        T0x12       =           AUXR^7;
 sbit        T1x12       =           AUXR^6;
 sbit        S1M0x6      =           AUXR^5;
 sbit        T2R         =           AUXR^4;
-sbit        T2CT        =           AUXR^3;
+sbit        T2_CT       =           AUXR^3;
 sbit        T2x12       =           AUXR^2;
 sbit        EXTRAM      =           AUXR^1;
 sbit        S1BRT       =           AUXR^0;
@@ -249,6 +260,10 @@ sfr         IAP_ADDRL   =           0xc4;
 sfr         IAP_CMD     =           0xc5;
 sfr         IAP_TRIG    =           0xc6;
 sfr         IAP_CONTR   =           0xc7;
+sbit        IAPEN       =           IAP_CONTR^7;
+sbit        SWBS        =           IAP_CONTR^6;
+sbit        SWRST       =           IAP_CONTR^5;
+sbit        CMD_FAIL    =           IAP_CONTR^4;
 sfr         P5          =           0xc8;
 sbit        P50         =           P5^0;
 sbit        P51         =           P5^1;
@@ -293,14 +308,15 @@ sfr         T2L         =           0xd7;
 sfr         USBCLK      =           0xdc;
 sfr         T4T3M       =           0xdd;
 sbit        T4R         =           T4T3M^7;
-sbit        T4CT        =           T4T3M^6;
+sbit        T4_CT       =           T4T3M^6;
 sbit        T4x12       =           T4T3M^5;
 sbit        T4CLKO      =           T4T3M^4;
 sbit        T3R         =           T4T3M^3;
-sbit        T3CT        =           T4T3M^2;
+sbit        T3_CT       =           T4T3M^2;
 sbit        T3x12       =           T4T3M^1;
 sbit        T3CLKO      =           T4T3M^0;
 sfr         ADCCFG      =           0xde;
+sbit        RESFMT      =           ADCCFG^5;
 sfr         IP3         =           0xdf;
 sbit        PI2S        =           IP3^3;
 sbit        PRTC        =           IP3^2;
@@ -429,6 +445,8 @@ sbit        P54RST      =           RSTCFG^4;
 #define     IRC48ATRIM              (*(unsigned char volatile far *)0x7efe09)
 #define     IRC48BTRIM              (*(unsigned char volatile far *)0x7efe0a)
 #define     HSCLKDIV                (*(unsigned char volatile far *)0x7efe0b)
+#define     HPLLCR                  (*(unsigned char volatile far *)0x7efe0c)
+#define     HPLLPSCR                (*(unsigned char volatile far *)0x7efe0d)
 
 #define     P0PU                    (*(unsigned char volatile far *)0x7efe10)
 #define     P1PU                    (*(unsigned char volatile far *)0x7efe11)
@@ -470,6 +488,14 @@ sbit        P54RST      =           RSTCFG^4;
 #define     P5IE                    (*(unsigned char volatile far *)0x7efe35)
 #define     P6IE                    (*(unsigned char volatile far *)0x7efe36)
 #define     P7IE                    (*(unsigned char volatile far *)0x7efe37)
+#define     P0PD                    (*(unsigned char volatile far *)0x7efe40)
+#define     P1PD                    (*(unsigned char volatile far *)0x7efe41)
+#define     P2PD                    (*(unsigned char volatile far *)0x7efe42)
+#define     P3PD                    (*(unsigned char volatile far *)0x7efe43)
+#define     P4PD                    (*(unsigned char volatile far *)0x7efe44)
+#define     P5PD                    (*(unsigned char volatile far *)0x7efe45)
+#define     P6PD                    (*(unsigned char volatile far *)0x7efe46)
+#define     P7PD                    (*(unsigned char volatile far *)0x7efe47)
 
 #define     LCMIFCFG                (*(unsigned char volatile far *)0x7efe50)
 #define     LCMIFCFG2               (*(unsigned char volatile far *)0x7efe51)
@@ -538,8 +564,10 @@ sbit        P54RST      =           RSTCFG^4;
 #define     PWMB_ENO                (*(unsigned char volatile far *)0x7efeb5)
 #define     PWMB_PS                 (*(unsigned char volatile far *)0x7efeb6)
 #define     PWMB_IOAUX              (*(unsigned char volatile far *)0x7efeb7)
+
 #define     CANAR                   (*(unsigned char volatile far *)0x7efebb)
 #define     CANDR                   (*(unsigned char volatile far *)0x7efebc)
+
 #define     PWMA_CR1                (*(unsigned char volatile far *)0x7efec0)
 #define     PWMA_CR2                (*(unsigned char volatile far *)0x7efec1)
 #define     PWMA_SMCR               (*(unsigned char volatile far *)0x7efec2)
@@ -593,14 +621,14 @@ sbit        P54RST      =           RSTCFG^4;
 #define     PWMB_ARRH               (*(unsigned char volatile far *)0x7efef2)
 #define     PWMB_ARRL               (*(unsigned char volatile far *)0x7efef3)
 #define     PWMB_RCR                (*(unsigned char volatile far *)0x7efef4)
-#define     PWMB_CCR1H              (*(unsigned char volatile far *)0x7efef5)
-#define     PWMB_CCR1L              (*(unsigned char volatile far *)0x7efef6)
-#define     PWMB_CCR2H              (*(unsigned char volatile far *)0x7efef7)
-#define     PWMB_CCR2L              (*(unsigned char volatile far *)0x7efef8)
-#define     PWMB_CCR3H              (*(unsigned char volatile far *)0x7efef9)
-#define     PWMB_CCR3L              (*(unsigned char volatile far *)0x7efefa)
-#define     PWMB_CCR4H              (*(unsigned char volatile far *)0x7efefb)
-#define     PWMB_CCR4L              (*(unsigned char volatile far *)0x7efefc)
+#define     PWMB_CCR5H              (*(unsigned char volatile far *)0x7efef5)
+#define     PWMB_CCR5L              (*(unsigned char volatile far *)0x7efef6)
+#define     PWMB_CCR6H              (*(unsigned char volatile far *)0x7efef7)
+#define     PWMB_CCR6L              (*(unsigned char volatile far *)0x7efef8)
+#define     PWMB_CCR7H              (*(unsigned char volatile far *)0x7efef9)
+#define     PWMB_CCR7L              (*(unsigned char volatile far *)0x7efefa)
+#define     PWMB_CCR8H              (*(unsigned char volatile far *)0x7efefb)
+#define     PWMB_CCR8L              (*(unsigned char volatile far *)0x7efefc)
 #define     PWMB_BKR                (*(unsigned char volatile far *)0x7efefd)
 #define     PWMB_DTR                (*(unsigned char volatile far *)0x7efefe)
 #define     PWMB_OISR               (*(unsigned char volatile far *)0x7efeff)
@@ -641,13 +669,12 @@ typedef struct TAG_PWM_STRUCT
     unsigned char OISR;
 } PWM_STRUCT;
 
-#define     PWMA                    ((PWM_STRUCT volatile far *)0x7efec0)
-#define     PWMB                    ((PWM_STRUCT volatile far *)0x7efee0)
+//#define     PWMA                    ((PWM_STRUCT volatile far *)0x7efec0)
+//#define     PWMB                    ((PWM_STRUCT volatile far *)0x7efee0)
 
 /////////////////////////////////////////////////
 //7E:FD00H-7E:FDFFH
 /////////////////////////////////////////////////
-#define     PWM2_OISR               (*(unsigned char volatile far *)0x7efeff)
 
 #define     P0INTE                  (*(unsigned char volatile far *)0x7efd00)
 #define     P1INTE                  (*(unsigned char volatile far *)0x7efd01)
@@ -690,8 +717,48 @@ typedef struct TAG_PWM_STRUCT
 #define     P6WKUE                  (*(unsigned char volatile far *)0x7efd46)
 #define     P7WKUE                  (*(unsigned char volatile far *)0x7efd47)
 
-#define     PIN_IP                  (*(unsigned char volatile far *)0x7efd60)
-#define     PIN_IPH                 (*(unsigned char volatile far *)0x7efd61)
+#define     PINIPL                  (*(unsigned char volatile far *)0x7efd60)
+#define     PINIPH                  (*(unsigned char volatile far *)0x7efd61)
+
+#define     UR1TOCR                 (*(unsigned char volatile far *)0x7efd70)
+#define     UR1TOSR                 (*(unsigned char volatile far *)0x7efd71)
+#define     UR1TOTH                 (*(unsigned char volatile far *)0x7efd72)
+#define     UR1TOTL                 (*(unsigned char volatile far *)0x7efd73)
+#define     UR2TOCR                 (*(unsigned char volatile far *)0x7efd74)
+#define     UR2TOSR                 (*(unsigned char volatile far *)0x7efd75)
+#define     UR2TOTH                 (*(unsigned char volatile far *)0x7efd76)
+#define     UR2TOTL                 (*(unsigned char volatile far *)0x7efd77)
+#define     UR3TOCR                 (*(unsigned char volatile far *)0x7efd78)
+#define     UR3TOSR                 (*(unsigned char volatile far *)0x7efd79)
+#define     UR3TOTH                 (*(unsigned char volatile far *)0x7efd7a)
+#define     UR3TOTL                 (*(unsigned char volatile far *)0x7efd7b)
+#define     UR4TOCR                 (*(unsigned char volatile far *)0x7efd7c)
+#define     UR4TOSR                 (*(unsigned char volatile far *)0x7efd7d)
+#define     UR4TOTH                 (*(unsigned char volatile far *)0x7efd7e)
+#define     UR4TOTL                 (*(unsigned char volatile far *)0x7efd7f)
+#define     SPITOCR                 (*(unsigned char volatile far *)0x7efd80)
+#define     SPITOSR                 (*(unsigned char volatile far *)0x7efd81)
+#define     SPITOTH                 (*(unsigned char volatile far *)0x7efd82)
+#define     SPITOTL                 (*(unsigned char volatile far *)0x7efd83)
+#define     I2CTOCR                 (*(unsigned char volatile far *)0x7efd84)
+#define     I2CTOSR                 (*(unsigned char volatile far *)0x7efd85)
+#define     I2CTOTH                 (*(unsigned char volatile far *)0x7efd86)
+#define     I2CTOTL                 (*(unsigned char volatile far *)0x7efd87)
+
+#define     I2SCR                   (*(unsigned char volatile far *)0x7efd98)
+#define     I2SSR                   (*(unsigned char volatile far *)0x7efd99)
+#define     I2SDRH                  (*(unsigned char volatile far *)0x7efd9a)
+#define     I2SDRL                  (*(unsigned char volatile far *)0x7efd9b)
+#define     I2SPRH                  (*(unsigned char volatile far *)0x7efd9c)
+#define     I2SPRL                  (*(unsigned char volatile far *)0x7efd9d)
+#define     I2SCFGH                 (*(unsigned char volatile far *)0x7efd9e)
+#define     I2SCFGL                 (*(unsigned char volatile far *)0x7efd9f)
+#define     I2SMD                   (*(unsigned char volatile far *)0x7efda0)
+
+#define     CRECR                   (*(unsigned char volatile far *)0x7efda8)
+#define     CRECNTH                 (*(unsigned char volatile far *)0x7efda9)
+#define     CRECNTL                 (*(unsigned char volatile far *)0x7efdaa)
+#define     CRERES                  (*(unsigned char volatile far *)0x7efdab)
 
 #define     S2CFG                   (*(unsigned char volatile far *)0x7efdb4)
 #define     S2ADDR                  (*(unsigned char volatile far *)0x7efdb5)
@@ -747,6 +814,21 @@ typedef struct TAG_PWM_STRUCT
 #define     CHIPID29                (*(unsigned char volatile far *)0x7efdfd)
 #define     CHIPID30                (*(unsigned char volatile far *)0x7efdfe)
 #define     CHIPID31                (*(unsigned char volatile far *)0x7efdff)
+
+#define     T22M_ADDR 				CHIPID11 //22.1184MHz
+#define     T24M_ADDR 				CHIPID12 //24MHz
+#define     T40M_ADDR 				CHIPID13 //40MHz
+#define     T45M_ADDR 				CHIPID14 //45.1584MHz
+#define     T48M_ADDR 				CHIPID15 //48MHz
+#define     T50M_ADDR 				CHIPID16 //50.8032MHz
+#define     T52M_ADDR 				CHIPID17 //52MHz
+#define     T56M_ADDR 				CHIPID18 //56MHz
+#define     T60M_ADDR 				CHIPID19 //60MHz
+#define     T64M_ADDR 				CHIPID20 //64MHz
+#define     VRT20M_ADDR 			CHIPID21 //VRTRIM_20M
+#define     VRT24M_ADDR 			CHIPID22 //VRTRIM_24M
+#define     VRT44M_ADDR 			CHIPID23 //VRTRIM_44M
+#define     VRT72M_ADDR 			CHIPID24 //VRTRIM_64M
 
 /////////////////////////////////////////////////
 //7E:FC00H-7E:FCFFH
@@ -960,6 +1042,28 @@ typedef struct TAG_PWM_STRUCT
 #define     DMA_I2C_ST1             (*(unsigned char volatile far *)0x7efaae)
 #define     DMA_I2C_ST2             (*(unsigned char volatile far *)0x7efaaf)
 
+#define     DMA_I2ST_CFG            (*(unsigned char volatile far *)0x7efab0)
+#define     DMA_I2ST_CR             (*(unsigned char volatile far *)0x7efab1)
+#define     DMA_I2ST_STA            (*(unsigned char volatile far *)0x7efab2)
+#define     DMA_I2ST_AMT            (*(unsigned char volatile far *)0x7efab3)
+#define     DMA_I2ST_DONE           (*(unsigned char volatile far *)0x7efab4)
+#define     DMA_I2ST_TXAH           (*(unsigned char volatile far *)0x7efab5)
+#define     DMA_I2ST_TXAL           (*(unsigned char volatile far *)0x7efab6)
+#define     DMA_I2SR_CFG            (*(unsigned char volatile far *)0x7efab8)
+#define     DMA_I2SR_CR             (*(unsigned char volatile far *)0x7efab9)
+#define     DMA_I2SR_STA            (*(unsigned char volatile far *)0x7efaba)
+#define     DMA_I2SR_AMT            (*(unsigned char volatile far *)0x7efabb)
+#define     DMA_I2SR_DONE           (*(unsigned char volatile far *)0x7efabc)
+#define     DMA_I2SR_TXAH           (*(unsigned char volatile far *)0x7efabd)
+#define     DMA_I2SR_TXAL           (*(unsigned char volatile far *)0x7efabe)
+
+#define     DMA_I2ST_AMTH           (*(unsigned char volatile far *)0x7efac0)
+#define     DMA_I2ST_DONEH          (*(unsigned char volatile far *)0x7efac1)
+#define     DMA_I2SR_AMTH           (*(unsigned char volatile far *)0x7efac2)
+#define     DMA_I2SR_DONEH          (*(unsigned char volatile far *)0x7efac3)
+
+#define     DMA_ARB_CFG             (*(unsigned char volatile far *)0x7efaf8)
+#define     DMA_ARB_STA             (*(unsigned char volatile far *)0x7efaf9)
 
 /////////////////////////////////////////////////
 
@@ -978,36 +1082,36 @@ typedef struct TAG_PWM_STRUCT
 #define     READ_CAN(reg)           (CANAR = (reg), CANDR)
 #define     WRITE_CAN(reg, dat)     (CANAR = (reg), CANDR = (dat))
 
-#define     MR                      0x00 
-#define     CMR                     0x01 
-#define     SR                      0x02 
-#define     ISR                     0x03 
-#define     IMR                     0x04 
-#define     RMC                     0x05 
-#define     BTR0                    0x06 
-#define     BTR1                    0x07 
-#define     TM0                     0x06 
-#define     TM1                     0x07 
-#define     TX_BUF0                 0x08 
-#define     TX_BUF1                 0x09 
-#define     TX_BUF2                 0x0a 
-#define     TX_BUF3                 0x0b 
-#define     RX_BUF0                 0x0c 
-#define     RX_BUF1                 0x0d 
-#define     RX_BUF2                 0x0e 
-#define     RX_BUF3                 0x0f 
-#define     ACR0                    0x10 
-#define     ACR1                    0x11 
-#define     ACR2                    0x12 
-#define     ACR3                    0x13 
-#define     AMR0                    0x14 
-#define     AMR1                    0x15 
-#define     AMR2                    0x16 
-#define     AMR3                    0x17 
-#define     ECC                     0x18 
-#define     RXERR                   0x19 
-#define     TXERR                   0x1a 
-#define     ALC                     0x1b 
+#define     MR                      0x00
+#define     CMR                     0x01
+#define     SR                      0x02
+#define     ISR                     0x03
+#define     IMR                     0x04
+#define     RMC                     0x05
+#define     BTR0                    0x06
+#define     BTR1                    0x07
+#define     TM0                     0x06
+#define     TM1                     0x07
+#define     TX_BUF0                 0x08
+#define     TX_BUF1                 0x09
+#define     TX_BUF2                 0x0a
+#define     TX_BUF3                 0x0b
+#define     RX_BUF0                 0x0c
+#define     RX_BUF1                 0x0d
+#define     RX_BUF2                 0x0e
+#define     RX_BUF3                 0x0f
+#define     ACR0                    0x10
+#define     ACR1                    0x11
+#define     ACR2                    0x12
+#define     ACR3                    0x13
+#define     AMR0                    0x14
+#define     AMR1                    0x15
+#define     AMR2                    0x16
+#define     AMR3                    0x17
+#define     ECC                     0x18
+#define     RXERR                   0x19
+#define     TXERR                   0x1a
+#define     ALC                     0x1b
 
 /////////////////////////////////////////////////
 //LIN Control Regiter
@@ -1026,18 +1130,18 @@ typedef struct TAG_PWM_STRUCT
 #define     READ_LIN(reg)           (LINAR = (reg), LINDR)
 #define     WRITE_LIN(reg, dat)     (LINAR = (reg), LINDR = (dat))
 
-#define     LBUF                    0x00 
-#define     LSEL                    0x01 
-#define     LID                     0x02 
-#define     LER                     0x03 
-#define     LIE                     0x04 
-#define     LSR                     0x05 
-#define     LCR                     0x05 
-#define     DLL                     0x06 
-#define     DLH                     0x07 
-#define     HDRL                    0x08 
-#define     HDRH                    0x09 
-#define     HDP                     0x0A 
+#define     LBUF                    0x00
+#define     LSEL                    0x01
+#define     LID                     0x02
+#define     LER                     0x03
+#define     LIE                     0x04
+#define     LSR                     0x05
+#define     LCR                     0x05
+#define     DLL                     0x06
+#define     DLH                     0x07
+#define     HDRL                    0x08
+#define     HDRH                    0x09
+#define     HDP                     0x0A
 
 /////////////////////////////////////////////////
 //USB Control Regiter
@@ -1069,36 +1173,108 @@ typedef struct TAG_PWM_STRUCT
                 USBDAT = (dat);         \
             }
 
-#define     FADDR                   0x00
-#define     POWER                   0x01
-#define     INTRIN1                 0x02
-#define     INTROUT1                0x04
-#define     INTRUSB                 0x06
-#define     INTRIN1E                0x07
-#define     INTROUT1E               0x09
-#define     INTRUSBE                0x0b
-#define     FRAME1                  0x0c
-#define     FRAME2                  0x0d
-#define     INDEX                   0x0e
-#define     INMAXP                  0x10
-#define     CSR0                    0x11
-#define     INCSR1                  0x11
-#define     INCSR2                  0x12
-#define     OUTMAXP                 0x13
-#define     OUTCSR1                 0x14
-#define     OUTCSR2                 0x15
-#define     COUNT0                  0x16
-#define     OUTCOUNT1               0x16
-#define     OUTCOUNT2               0x17
-#define     FIFO0                   0x20
-#define     FIFO1                   0x21
-#define     FIFO2                   0x22
-#define     FIFO3                   0x23
-#define     FIFO4                   0x24
-#define     FIFO5                   0x25
-#define     UTRKCTL                 0x30
-#define     UTRKSTS                 0x31
+#define     USBBASE                 0
+#define     FADDR                   (USBBASE + 0)
+#define     UPDATE                  0x80
+#define     POWER                   (USBBASE + 1)
+#define     ISOUD                   0x80
+#define     USBRST                  0x08
+#define     USBRSU                  0x04
+#define     USBSUS                  0x02
+#define     ENSUS                   0x01
+#define     INTRIN1                 (USBBASE + 2)
+#define     EP5INIF                 0x20
+#define     EP4INIF                 0x10
+#define     EP3INIF                 0x08
+#define     EP2INIF                 0x04
+#define     EP1INIF                 0x02
+#define     EP0IF                   0x01
+#define     INTROUT1                (USBBASE + 4)
+#define     EP5OUTIF                0x20
+#define     EP4OUTIF                0x10
+#define     EP3OUTIF                0x08
+#define     EP2OUTIF                0x04
+#define     EP1OUTIF                0x02
+#define     INTRUSB                 (USBBASE + 6)
+#define     SOFIF                   0x08
+#define     RSTIF                   0x04
+#define     RSUIF                   0x02
+#define     SUSIF                   0x01
+#define     INTRIN1E                (USBBASE + 7)
+#define     EP5INIE                 0x20
+#define     EP4INIE                 0x10
+#define     EP3INIE                 0x08
+#define     EP2INIE                 0x04
+#define     EP1INIE                 0x02
+#define     EP0IE                   0x01
+#define     INTROUT1E               (USBBASE + 9)
+#define     EP5OUTIE                0x20
+#define     EP4OUTIE                0x10
+#define     EP3OUTIE                0x08
+#define     EP2OUTIE                0x04
+#define     EP1OUTIE                0x02
+#define     INTRUSBE                (USBBASE + 11)
+#define     SOFIE                   0x08
+#define     RSTIE                   0x04
+#define     RSUIE                   0x02
+#define     SUSIE                   0x01
+#define     FRAME1                  (USBBASE + 12)
+#define     FRAME2                  (USBBASE + 13)
+#define     INDEX                   (USBBASE + 14)
+#define     INMAXP                  (USBBASE + 16)
+#define     CSR0                    (USBBASE + 17)
+#define     SSUEND                  0x80
+#define     SOPRDY                  0x40
+#define     SDSTL                   0x20
+#define     SUEND                   0x10
+#define     DATEND                  0x08
+#define     STSTL                   0x04
+#define     IPRDY                   0x02
+#define     OPRDY                   0x01
+#define     INCSR1                  (USBBASE + 17)
+#define     INCLRDT                 0x40
+#define     INSTSTL                 0x20
+#define     INSDSTL                 0x10
+#define     INFLUSH                 0x08
+#define     INUNDRUN                0x04
+#define     INFIFONE                0x02
+#define     INIPRDY                 0x01
+#define     INCSR2                  (USBBASE + 18)
+#define     INAUTOSET               0x80
+#define     INISO                   0x40
+#define     INMODEIN                0x20
+#define     INMODEOUT               0x00
+#define     INENDMA                 0x10
+#define     INFCDT                  0x08
+#define     OUTMAXP                 (USBBASE + 19)
+#define     OUTCSR1                 (USBBASE + 20)
+#define     OUTCLRDT                0x80
+#define     OUTSTSTL                0x40
+#define     OUTSDSTL                0x20
+#define     OUTFLUSH                0x10
+#define     OUTDATERR               0x08
+#define     OUTOVRRUN               0x04
+#define     OUTFIFOFUL              0x02
+#define     OUTOPRDY                0x01
+#define     OUTCSR2                 (USBBASE + 21)
+#define     OUTAUTOCLR              0x80
+#define     OUTISO                  0x40
+#define     OUTENDMA                0x20
+#define     OUTDMAMD                0x10
+#define     COUNT0                  (USBBASE + 22)
+#define     OUTCOUNT1               (USBBASE + 22)
+#define     OUTCOUNT2               (USBBASE + 23)
+#define     FIFO0                   (USBBASE + 32)
+#define     FIFO1                   (USBBASE + 33)
+#define     FIFO2                   (USBBASE + 34)
+#define     FIFO3                   (USBBASE + 35)
+#define     FIFO4                   (USBBASE + 36)
+#define     FIFO5                   (USBBASE + 37)
+#define     UTRKCTL                 (USBBASE + 48)
+#define     UTRKSTS                 (USBBASE + 49)
 
+/////////////////////////////////////////////////
+//Interrupt Vector
 /////////////////////////////////////////////////
 
 #define     INT0_VECTOR             0       //0003H
@@ -1108,26 +1284,31 @@ typedef struct TAG_PWM_STRUCT
 #define     UART1_VECTOR            4       //0023H
 #define     ADC_VECTOR              5       //002BH
 #define     LVD_VECTOR              6       //0033H
-#define     PCA_VECTOR              7       //003BH
+//#define   PCA_VECTOR              7       //003BH
 #define     UART2_VECTOR            8       //0043H
 #define     SPI_VECTOR              9       //004BH
 #define     INT2_VECTOR             10      //0053H
 #define     INT3_VECTOR             11      //005BH
 #define     TMR2_VECTOR             12      //0063H
 #define     USER_VECTOR             13      //006BH
+#define     BRK_VECTOR              14      //0073H
+#define     ICEP_VECTOR             15      //007BH
 #define     INT4_VECTOR             16      //0083H
 #define     UART3_VECTOR            17      //008BH
 #define     UART4_VECTOR            18      //0093H
 #define     TMR3_VECTOR             19      //009BH
 #define     TMR4_VECTOR             20      //00A3H
 #define     CMP_VECTOR              21      //00ABH
+//#define   PWM_VECTOR              22      //00B3H
+//#define   PWMFD_VECTOR            23      //00BBH
 #define     I2C_VECTOR              24      //00C3H
 #define     USB_VECTOR              25      //00CBH
 #define     PWMA_VECTOR             26      //00D3H
 #define     PWMB_VECTOR             27      //00DBH
-#define     CAN_VECTOR              28      //00E3H
+#define     CAN1_VECTOR             28      //00E3H
 #define     CAN2_VECTOR             29      //00EBH
 #define     LIN_VECTOR              30      //00F3H
+
 #define     RTC_VECTOR              36      //0123H
 #define     P0INT_VECTOR            37      //012BH
 #define     P1INT_VECTOR            38      //0133H
@@ -1137,42 +1318,73 @@ typedef struct TAG_PWM_STRUCT
 #define     P5INT_VECTOR            42      //0153H
 #define     P6INT_VECTOR            43      //015BH
 #define     P7INT_VECTOR            44      //0163H
-#define     M2MDMA_VECTOR           47      //017BH
-#define     ADCDMA_VECTOR           48      //0183H
-#define     SPIDMA_VECTOR           49      //018BH
-#define     U1TXDMA_VECTOR          50      //0193H
-#define     U1RXDMA_VECTOR          51      //019BH
-#define     U2TXDMA_VECTOR          52      //01A3H
-#define     U2RXDMA_VECTOR          53      //01ABH
-#define     U3TXDMA_VECTOR          54      //01B3H
-#define     U3RXDMA_VECTOR          55      //01BBH
-#define     U4TXDMA_VECTOR          56      //01C3H
-#define     U4RXDMA_VECTOR          57      //01CBH
-#define     LCMDMA_VECTOR           58      //01D3H
+#define     DMA_M2M_VECTOR          47      //017BH
+#define     DMA_ADC_VECTOR          48      //0183H
+#define     DMA_SPI_VECTOR          49      //018BH
+#define     DMA_UR1T_VECTOR         50      //0193H
+#define     DMA_UR1R_VECTOR         51      //019BH
+#define     DMA_UR2T_VECTOR         52      //01A3H
+#define     DMA_UR2R_VECTOR         53      //01ABH
+#define     DMA_UR3T_VECTOR         54      //01B3H
+#define     DMA_UR3R_VECTOR         55      //01BBH
+#define     DMA_UR4T_VECTOR         56      //01C3H
+#define     DMA_UR4R_VECTOR         57      //01CBH
+#define     DMA_LCM_VECTOR          58      //01D3H
 #define     LCM_VECTOR              59      //01DBH
-#define     I2CTXDMA_VECTOR         60      //01E3H
-#define     I2CRXDMA_VECTOR         61      //01EBH
+#define     DMA_I2CT_VECTOR         60      //01E3H
+#define     DMA_I2CR_VECTOR         61      //01EBH
 #define     I2S_VECTOR              62      //01F3H
-#define     I2STXDMA_VECTOR         63      //01FBH
-#define     I2SRXDMA_VECTOR         64      //0203H
+#define     DMA_I2ST_VECTOR         63      //01FBH
+#define     DMA_I2SR_VECTOR         64      //0203H
 
 /////////////////////////////////////////////////
+#define	EAXSFR()		EAXFR = 1		/* MOVX A,@DPTR/MOVX @DPTR,A指令的操作对象为扩展SFR(XSFR) */
+#define	EAXRAM()		EAXFR = 0		/* MOVX A,@DPTR/MOVX @DPTR,A指令的操作对象为扩展RAM(XRAM) */
 
 
-#define T22M_ADDR CHIPID11 //22.1184MHz
-#define T24M_ADDR CHIPID12 //24MHz
-#define T27M_ADDR CHIPID13 //27MHz
-#define T30M_ADDR CHIPID14 //30MHz
-#define T33M_ADDR CHIPID15 //33.1776MHz
-#define T35M_ADDR CHIPID16 //35MHz
-#define T36M_ADDR CHIPID17 //36.864MHz
-#define T40M_ADDR CHIPID18 //40MHz
-#define T44M_ADDR CHIPID19 //44.2368MHz
-#define T48M_ADDR CHIPID20 //48MHz
-#define VRT6M_ADDR CHIPID21 //VRTRIM_6M
-#define VRT10M_ADDR CHIPID22 //VRTRIM_10M
-#define VRT27M_ADDR CHIPID23 //VRTRIM_27M
-#define VRT44M_ADDR CHIPID24 //VRTRIM_44M
+/////////////////////////////////////////////////
+#define NOP1()  _nop_()
+#define NOP2()  NOP1(),NOP1()
+#define NOP3()  NOP2(),NOP1()
+#define NOP4()  NOP3(),NOP1()
+#define NOP5()  NOP4(),NOP1()
+#define NOP6()  NOP5(),NOP1()
+#define NOP7()  NOP6(),NOP1()
+#define NOP8()  NOP7(),NOP1()
+#define NOP9()  NOP8(),NOP1()
+#define NOP10() NOP9(),NOP1()
+#define NOP11() NOP10(),NOP1()
+#define NOP12() NOP11(),NOP1()
+#define NOP13() NOP12(),NOP1()
+#define NOP14() NOP13(),NOP1()
+#define NOP15() NOP14(),NOP1()
+#define NOP16() NOP15(),NOP1()
+#define NOP17() NOP16(),NOP1()
+#define NOP18() NOP17(),NOP1()
+#define NOP19() NOP18(),NOP1()
+#define NOP20() NOP19(),NOP1()
+#define NOP21() NOP20(),NOP1()
+#define NOP22() NOP21(),NOP1()
+#define NOP23() NOP22(),NOP1()
+#define NOP24() NOP23(),NOP1()
+#define NOP25() NOP24(),NOP1()
+#define NOP26() NOP25(),NOP1()
+#define NOP27() NOP26(),NOP1()
+#define NOP28() NOP27(),NOP1()
+#define NOP29() NOP28(),NOP1()
+#define NOP30() NOP29(),NOP1()
+#define NOP31() NOP30(),NOP1()
+#define NOP32() NOP31(),NOP1()
+#define NOP33() NOP32(),NOP1()
+#define NOP34() NOP33(),NOP1()
+#define NOP35() NOP34(),NOP1()
+#define NOP36() NOP35(),NOP1()
+#define NOP37() NOP36(),NOP1()
+#define NOP38() NOP37(),NOP1()
+#define NOP39() NOP38(),NOP1()
+#define NOP40() NOP39(),NOP1()
+#define NOP(N)  NOP##N()
+
 
 #endif
 

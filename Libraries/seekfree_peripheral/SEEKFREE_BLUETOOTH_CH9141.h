@@ -12,18 +12,18 @@
  * @author     		逐飞科技(QQ3184284598)
  * @version    		查看doc内version文件 版本说明
  * @Software 		MDK FOR C251 V5.60
- * @Target core		STC32G12K128
+ * @Target core		STC32F12K
  * @Taobao   		https://seekfree.taobao.com/
  * @date       		2021-08-27
  * @note		
 					接线定义：
 					------------------------------------ 
-					    蓝牙转串口      单片机                        
-    					RX              查看SEEKFREE_BLUETOOTH_CH9141.h文件中的BLUETOOTH_CH9141_UART_TX宏定义
-    					TX              查看SEEKFREE_BLUETOOTH_CH9141.h文件中的BLUETOOTH_CH9141_UART_RX宏定义
-    					RTS             查看SEEKFREE_BLUETOOTH_CH9141.h文件中的BLUETOOTH_CH9141_RTS_PIN宏定义
-                        CTS             悬空
-    					CMD             悬空或者上拉
+					蓝牙转串口      单片机                        
+					RX              查看SEEKFREE_BLUETOOTH_CH9141.h文件中的BLUETOOTH_CH9141_UART_TX宏定义
+					TX              查看SEEKFREE_BLUETOOTH_CH9141.h文件中的BLUETOOTH_CH9141_UART_RX宏定义
+					RTS             查看SEEKFREE_BLUETOOTH_CH9141.h文件中的BLUETOOTH_CH9141_RTS_PIN宏定义
+					CTS             悬空
+					CMD             悬空或者上拉
 					------------------------------------ 
  ********************************************************************************************************************/
  
@@ -37,12 +37,12 @@
 
 
 
-#define BLUETOOTH_CH9141_INDEX              UART_4                              // 蓝牙模块 1 对应使用的串口号
-#define BLUETOOTH_CH9141_TIMER              TIM_4                               // 蓝牙模块 1 对应使用的定时器
-#define BLUETOOTH_CH9141_BUAD_RATE          115200                              // 蓝牙模块 1 对应使用的串口波特率
-#define BLUETOOTH_CH9141_TX_PIN             UART4_RX_P02                         // 蓝牙模块 1 对应模块的 TX 要接到单片机的 RX
-#define BLUETOOTH_CH9141_RX_PIN             UART4_TX_P03                        // 蓝牙模块 1 对应模块的 RX 要接到单片机的 TX
-#define BLUETOOTH_CH9141_RTS_PIN            P07                                 // 蓝牙模块 1 对应模块的 RTS 引脚
+#define BLUETOOTH_CH9141_INDEX              UART_4                              // 蓝牙模块对应使用的串口号
+#define BLUETOOTH_CH9141_TIMER              TIM_4                               // 蓝牙模块对应使用的定时器
+#define BLUETOOTH_CH9141_BUAD_RATE          115200                              // 蓝牙模块对应使用的串口波特率
+#define BLUETOOTH_CH9141_TX_PIN             UART4_TX_P03                        // 蓝牙模块对应模块的 TX 要接到单片机的 RX
+#define BLUETOOTH_CH9141_RX_PIN             UART4_RX_P02                        // 蓝牙模块对应模块的 RX 要接到单片机的 TX
+#define BLUETOOTH_CH9141_RTS_PIN            P07                                 // 蓝牙模块对应模块的 RTS 引脚
 
 #define BLUETOOTH_CH9141_DATA_BUF       	S4BUF
 

@@ -7,12 +7,12 @@
  * 以下所有内容版权均属逐飞科技所有，未经允许不得用于商业用途，
  * 欢迎各位使用并传播本程序，修改内容时必须保留逐飞科技的版权声明。
  *
- * @file       		main
+ * @file       		IPS114_SPI
  * @company	   		成都逐飞科技有限公司
  * @author     		逐飞科技(QQ3184284598)
  * @version    		查看doc内version文件 版本说明
  * @Software 		MDK FOR C251 V5.60
- * @Target core		STC32G12K128
+ * @Target core		STC32F12K
  * @Taobao   		https://seekfree.taobao.com/
  * @date       		2019-11-15
  * @note		
@@ -21,7 +21,7 @@
 					1.14寸IPS模块管脚       单片机管脚
 					SCL                 	查看SEEKFREE_IPS114_SPI.h文件内的IPS114_SCL		宏定义     硬件SPI引脚不可随意切换
 					SDA                 	查看SEEKFREE_IPS114_SPI.h文件内的IPS114_SDA		宏定义     硬件SPI引脚不可随意切换
-					RES                 	查看SEEKFREE_IPS114_SPI.h文件内的IPS114_REST_PIN宏定义    
+					RES                 	查看SEEKFREE_IPS114_SPI.h文件内的IPS114_REST_PIN 宏定义    
 					DC                  	查看SEEKFREE_IPS114_SPI.h文件内的IPS114_DC_PIN	宏定义  
 					CS                  	查看SEEKFREE_IPS114_SPI.h文件内的IPS114_CS		宏定义     硬件SPI引脚不可随意切换
 					BL  					查看SEEKFREE_IPS114_SPI.h文件内的IPS114_BL_PIN	宏定义

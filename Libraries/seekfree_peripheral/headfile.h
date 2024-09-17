@@ -7,8 +7,8 @@
 #include "isr.h"
 #include <string.h>
 #include <stdio.h>
-#include <math.h>
 #include "intrins.h"
+#include <math.h>
 //------STC32G SDK等
 #include "STC32Gxx.h"
 #include "board.h"
@@ -26,21 +26,25 @@
 #include "zf_exti.h"
 #include "zf_delay.h"
 #include "zf_eeprom.h"
+#include "zf_fifo.h"
 
 //------逐飞科技产品驱动头文件
-#include "SEEKFREE_FONT.h"
-#include "SEEKFREE_18TFT.h"
-#include "SEEKFREE_IPS114_SPI.h"
+#include "SEEKFREE_ICM20602.h"
 #include "SEEKFREE_MPU6050.h"
 #include "SEEKFREE_ABSOLUTE_ENCODER.h"
 #include "SEEKFREE_WIRELESS.h"
-#include "SEEKFREE_PRINTF.h"
+#include "SEEKFREE_FUNCTION.h"
 #include "SEEKFREE_AT24C02.h"
 #include "SEEKFREE_BLUETOOTH_CH9141.h"
 #include "SEEKFREE_CONFIG.h"
-#include "SEEKFREE_IMU660RA.h"
 #include "SEEKFREE_DL1A.h"
-//自定义
-#include "MYCODE.h"
+#include "SEEKFREE_DL1B.h"
+
+
+
+//------逐飞科技组件层头文件
+#include "seekfree_assistant.h"
+
+
 
 #endif

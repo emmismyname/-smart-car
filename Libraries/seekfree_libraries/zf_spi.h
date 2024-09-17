@@ -12,7 +12,7 @@
  * @author     		逐飞科技(QQ790875685)
  * @version    		查看doc内version文件 版本说明
  * @Software 		MDK FOR C251 V5.60
- * @Target core		STC32G12K128
+ * @Target core		STC32F12K
  * @Taobao   		https://seekfree.taobao.com/
  * @date       		2020-4-14
  ********************************************************************************************************************/
@@ -64,7 +64,7 @@ typedef enum
 	SPI_SYSclk_DIV_4 = 0,
 	SPI_SYSclk_DIV_8,
 	SPI_SYSclk_DIV_16,
-	SPI_SYSclk_DIV_32,
+	SPI_SYSclk_DIV_2,
 }SPI_BAUD_enum;
 
 

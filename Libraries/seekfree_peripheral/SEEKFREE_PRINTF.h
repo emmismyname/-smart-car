@@ -10,7 +10,7 @@
  * @author     		逐飞科技(QQ3184284598)
  * @version    		查看doc内version文件 版本说明
  * @Software 		MDK FOR C251 V5.60
- * @Target core		STC32G12K128
+ * @Target core		STC32F12K
  * @Taobao   		https://seekfree.taobao.com/
  * @date       		2019-04-30
  ********************************************************************************************************************/
@@ -20,7 +20,7 @@
 #include "common.h"
 
 //void    printf(const char *format, ...);
-uint32  zf_sprintf(char *buf, const char *fmt, ...);
+//uint32  zf_sprintf(char *buf, const char *fmt, ...);
 
 
 

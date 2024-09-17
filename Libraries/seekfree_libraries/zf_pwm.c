@@ -12,7 +12,7 @@
  * @author     		逐飞科技(QQ790875685)
  * @version    		查看doc内version文件 版本说明
  * @Software 		MDK5.27
- * @Target core		STC32G12K128
+ * @Target core		STC32F12K
  * @Taobao   		https://seekfree.taobao.com/
  * @date       		2020-4-14
  ********************************************************************************************************************/
@@ -70,16 +70,16 @@ void pwm_set_gpio(PWMCH_enum pwmch)
 			gpio_mode(P2_1,GPO_PP);
 			break;
 		}
-		case PWMA_CH1P_P60:
-		{
-			gpio_mode(P6_0,GPO_PP);
-			break;
-		}
-		case PWMA_CH1N_P61:
-		{
-			gpio_mode(P6_1,GPO_PP);
-			break;
-		}
+//		case PWMA_CH1P_P60:
+//		{
+//			gpio_mode(P6_0,GPO_PP);
+//			break;
+//		}
+//		case PWMA_CH1N_P61:
+//		{
+//			gpio_mode(P6_1,GPO_PP);
+//			break;
+//		}
 		
 		case PWMA_CH2P_P12:
 		{
@@ -101,16 +101,16 @@ void pwm_set_gpio(PWMCH_enum pwmch)
 			gpio_mode(P2_3,GPO_PP);
 			break;
 		}
-		case PWMA_CH2P_P62:
-		{
-			gpio_mode(P6_2,GPO_PP);
-			break;
-		}
-		case PWMA_CH2N_P63:
-		{
-			gpio_mode(P6_3,GPO_PP);
-			break;
-		}
+//		case PWMA_CH2P_P62:
+//		{
+//			gpio_mode(P6_2,GPO_PP);
+//			break;
+//		}
+//		case PWMA_CH2N_P63:
+//		{
+//			gpio_mode(P6_3,GPO_PP);
+//			break;
+//		}
 		
 		case PWMA_CH3P_P14:
 		{
@@ -132,16 +132,16 @@ void pwm_set_gpio(PWMCH_enum pwmch)
 			gpio_mode(P2_5,GPO_PP);
 			break;
 		}
-		case PWMA_CH3P_P64:
-		{
-			gpio_mode(P6_4,GPO_PP);
-			break;
-		}
-		case PWMA_CH3N_P65:
-		{
-			gpio_mode(P6_5,GPO_PP);
-			break;
-		}
+//		case PWMA_CH3P_P64:
+//		{
+//			gpio_mode(P6_4,GPO_PP);
+//			break;
+//		}
+//		case PWMA_CH3N_P65:
+//		{
+//			gpio_mode(P6_5,GPO_PP);
+//			break;
+//		}
 		
 		
 		case PWMA_CH4P_P16:
@@ -164,16 +164,16 @@ void pwm_set_gpio(PWMCH_enum pwmch)
 			gpio_mode(P2_7,GPO_PP);
 			break;
 		}
-		case PWMA_CH4P_P66:
-		{
-			gpio_mode(P6_6,GPO_PP);
-			break;
-		}
-		case PWMA_CH4N_P67:
-		{
-			gpio_mode(P6_7,GPO_PP);
-			break;
-		}
+//		case PWMA_CH4P_P66:
+//		{
+//			gpio_mode(P6_6,GPO_PP);
+//			break;
+//		}
+//		case PWMA_CH4N_P67:
+//		{
+//			gpio_mode(P6_7,GPO_PP);
+//			break;
+//		}
 		case PWMA_CH4P_P34:
 		{
 			gpio_mode(P3_4,GPO_PP);
@@ -201,11 +201,11 @@ void pwm_set_gpio(PWMCH_enum pwmch)
 			gpio_mode(P0_0,GPO_PP);
 			break;
 		}
-		case PWMB_CH1_P74:
-		{
-			gpio_mode(P7_4,GPO_PP);
-			break;
-		}
+//		case PWMB_CH1_P74:
+//		{
+//			gpio_mode(P7_4,GPO_PP);
+//			break;
+//		}
 		
 		case PWMB_CH2_P21:
 		{
@@ -222,11 +222,11 @@ void pwm_set_gpio(PWMCH_enum pwmch)
 			gpio_mode(P0_1,GPO_PP);
 			break;
 		}
-		case PWMB_CH2_P75:
-		{
-			gpio_mode(P7_5,GPO_PP);
-			break;
-		}
+//		case PWMB_CH2_P75:
+//		{
+//			gpio_mode(P7_5,GPO_PP);
+//			break;
+//		}
 
 		
 		case PWMB_CH3_P22:
@@ -244,11 +244,11 @@ void pwm_set_gpio(PWMCH_enum pwmch)
 			gpio_mode(P0_2,GPO_PP);
 			break;
 		}
-		case PWMB_CH3_P76:
-		{
-			gpio_mode(P7_6,GPO_PP);
-			break;
-		}
+//		case PWMB_CH3_P76:
+//		{
+//			gpio_mode(P7_6,GPO_PP);
+//			break;
+//		}
 
 		
 		case PWMB_CH4_P23:
@@ -266,11 +266,11 @@ void pwm_set_gpio(PWMCH_enum pwmch)
 			gpio_mode(P0_3,GPO_PP);
 			break;
 		}
-		case PWMB_CH4_P77:
-		{
-			gpio_mode(P7_7,GPO_PP);
-			break;
-		}
+//		case PWMB_CH4_P77:
+//		{
+//			gpio_mode(P7_7,GPO_PP);
+//			break;
+//		}
 		
 	}
 	

@@ -12,7 +12,7 @@
  * @author     		逐飞科技(QQ790875685)
  * @version    		查看doc内version文件 版本说明
  * @Software 		MDK FOR C251 V5.60
- * @Target core		STC32G12K128
+ * @Target core		STC32F12K
  * @Taobao   		https://seekfree.taobao.com/
  * @date       		2020-4-14
  ********************************************************************************************************************/
@@ -24,6 +24,8 @@
 #include <stdio.h>
 #include "intrins.h"
 
+
+#define ee_printf printf  
 //数据类型声明
 typedef unsigned char   uint8  ;	//  8 bits 
 typedef unsigned int  	uint16 ;	// 16 bits 
@@ -56,6 +58,16 @@ typedef enum //无线模块
 
 extern WIRELESS_TYPE_enum wireless_type;
 
+
+//typedef enum
+//{
+//    SYSTEM_CLOCK_22_1184M        = 22118400,                                         // 24Mhz
+//    SYSTEM_CLOCK_48M        = 48000000,                                         // 48Mhz
+//    SYSTEM_CLOCK_72M        = 72000000,                                         // 72Mhz
+//    SYSTEM_CLOCK_96M        = 96000000,                                         // 96Mhz
+//    SYSTEM_CLOCK_120M       = 120000000,                                        // 120Mhz
+//    SYSTEM_CLOCK_144M       = 144000000,                                        // 144Mhz
+//}system_clock_enum;
 
 
 

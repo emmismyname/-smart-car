@@ -12,15 +12,15 @@
  * @author     		逐飞科技(QQ3184284598)
  * @version    		查看doc内version文件 版本说明
  * @Software 		MDK FOR C251 V5.60
- * @Target core		STC32G12K128
+ * @Target core		STC32F12K
  * @Taobao   		https://seekfree.taobao.com/
  * @date       		2019-04-30
  * @note		
 					接线定义：
 					------------------------------------ 
-						软件IIC
-                        SCL                 查看SEEKFREE_IIC文件内的SEEKFREE_SCL宏定义
-						SDA                 查看SEEKFREE_IIC文件内的SEEKFREE_SDA宏定义  
+					软件IIC
+					SCL                 查看SEEKFREE_MPU6050.H文件内的MPU6050_SCL_PIN宏定义
+					SDA                 查看SEEKFREE_MPU6050.H文件内的MPU6050_SDA_PIN宏定义  
 					------------------------------------ 
  ********************************************************************************************************************/
 
@@ -32,9 +32,9 @@
 #include "common.h"
 
 //=====================================================软件 IIC 驱动====================================================
-#define MPU6050_SCL_PIN 	P40						// 软件 IIC SCL 引脚
-#define MPU6050_SDA_PIN 	P41 					// 软件 IIC SDA 引脚
-#define MPU6050_IIC_DELAY 	(0)
+#define MPU6050_SCL_PIN 	( P40 )						// 软件 IIC SCL 引脚
+#define MPU6050_SDA_PIN 	( P41 ) 					// 软件 IIC SDA 引脚
+#define MPU6050_IIC_DELAY 	( 0 )
 //=====================================================软件 IIC 驱动====================================================
 
 // 定义MPU6050内部地址
