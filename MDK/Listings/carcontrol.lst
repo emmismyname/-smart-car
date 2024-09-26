@@ -1,0 +1,81 @@
+C251 COMPILER V5.60.0,  carcontrol                                                         25/04/24  13:33:29  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE carcontrol
+OBJECT MODULE PLACED IN .\Out_flie\carcontrol.obj
+COMPILER INVOKED BY: D:\Keil_80251\C251\BIN\C251.EXE ..\USER\src\carcontrol.c XSMALL INTR2 BROWSE INCDIR(..\LIB\startup;
+                    -..\LIB\libraries;..\LIB\peripheral;..\USER\inc) DEBUG PRINT(.\Listings\carcontrol.lst) TABS(2) OBJECT(.\Out_flie\carcont
+                    -rol.obj) 
+
+stmt  level    source
+
+    1          #include "carcontrol.h"
+    2          
+    3          int err_speed = 0;
+    4          int running_mode = 1;   // 1是待机motor等于0 2是停车 3普通寻迹（计时器）
+    5          uint8 trace_flag = 0;   // 寻迹开关
+    6          int current_number = 0; // 扫描开始标志位
+    7          int trigflag_beep = 1;  // 蜂鸣器防误触
+    8          int outward_basin = 0;  // 出库标志位
+    9          uint8 avoid_move = 0;   // 避障开关
+   10          uint8 TOF_object = 0;   // 未检测到 1检测到障碍物 2检测障碍物后开始处理 3避障结束
+   11          int TOF_barrier[9] = {0};
+   12          int OUTP_flag = 0;    // 定时器启动计算 0不启用运动控制 1右出库 2左出库 3上坡直行
+   13          uint8 start_flag = 0; // 发车标志位
+   14          uint8 stop_flag = 0;  // 停车标志位
+   15          uint8 small_radiu = 0;
+   16          
+   17          // 避障
+   18          float err_angle_rate = 0;
+   19          extern int outtoin_flag = 0;
+   20          float yaw_target = 0;    // 避障角度
+   21          float out_distance = 18; // 避障距离
+   22          float in_distance = 14;  // 回正距离
+   23          float out_angle = 65;    // 避障目标角度
+   24          float in_angle = -35;    // 回正目标角度
+   25          // 硅胶
+   26          //  float out_distance = 19; // 避障距离
+   27          //  float in_distance = 22;  // 回正距离
+   28          //  float out_angle = 65;    // 避障目标角度
+   29          //  float in_angle = -30;    // 回正目标角度
+   30          //  库状态
+   31          int pack_mode = 0;
+   32          int strategy_mode = 0;
+   33          
+   34          // 入库
+   35          float intop_angle = 80;   // 入库目标角度
+   36          float intop_distance = 15; // 入库距离
+   37          float intop_radiu = 0;    // 入库圆环
+   38          /***************************************************************************************/
+   39          
+   40          // 出库
+   41          float outp_angle = 70;     // 出库目标角度
+   42          float outp_distance = 13; // 入库距离
+   43          float outp_radiu = -22;    // 入库圆环
+   44          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =    ------     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =        90     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+C251 COMPILER V5.60.0,  carcontrol                                                         25/04/24  13:33:29  PAGE 2   
+
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =       202     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

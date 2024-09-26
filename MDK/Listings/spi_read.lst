@@ -1,0 +1,46 @@
+C251 COMPILER V5.60.0,  spi_read                                                           10/04/24  17:24:08  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE spi_read
+OBJECT MODULE PLACED IN .\Out_flie\spi_read.obj
+COMPILER INVOKED BY: D:\Keil_80251\C251\BIN\C251.EXE ..\USER\src\spi_read.c XSMALL INTR2 BROWSE INCDIR(..\LIB\startup;..
+                    -\LIB\libraries;..\LIB\peripheral;..\USER\inc) DEBUG PRINT(.\Listings\spi_read.lst) TABS(2) OBJECT(.\Out_flie\spi_read.ob
+                    -j) 
+
+stmt  level    source
+
+    1          
+    2          /********************************************************************************************************
+             -*************
+    3           * @file          spi_read
+    4           * @date          2024-03-10
+    5           * @note   
+    6           ********************************************************************************************************
+             -************/
+    7          
+    8          
+    9          #include "spi_read.h"
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =    ------     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,315 @@
+C251 COMPILER V5.60.0,  data_read                                                          25/04/24  13:33:29  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE data_read
+OBJECT MODULE PLACED IN .\Out_flie\data_read.obj
+COMPILER INVOKED BY: D:\Keil_80251\C251\BIN\C251.EXE ..\USER\src\data_read.c XSMALL INTR2 BROWSE INCDIR(..\LIB\startup;.
+                    -.\LIB\libraries;..\LIB\peripheral;..\USER\inc) DEBUG PRINT(.\Listings\data_read.lst) TABS(2) OBJECT(.\Out_flie\data_read
+                    -.obj) 
+
+stmt  level    source
+
+    1          #include "data_read.h"
+    2          
+    3          //----------------------data_readFrom_MotherBoard----------------------//
+    4          //----------------------data_readFrom_MotherBoard----------------------//
+    5          //----------------------data_readFrom_MOtherBoard----------------------//
+    6          
+    7          
+    8          
+    9          
+   10          
+   11          
+   12          
+   13          
+   14          
+   15          //---------------------------wireless_read----------------------------//
+   16          //---------------------------wireless_read----------------------------//
+   17          //---------------------------wireless_read----------------------------//
+   18          
+   19          uint8 send_flag = 0;
+   20          
+   21          void wireless_read(uint8 flag)
+   22          {
+   23   1      //  uart_putstr(UART_3,"reading!");
+   24   1      //  printf("wireless reading");
+   25   1          if (flag)
+   26   1          {
+   27   2              static uint8 read_buf[50];                  // 读取到的buffer
+   28   2              static uint8 read_len = 0;                  // 读取到的buffer长度
+   29   2              static char read_dat_string[50];            // 读取到的字符串
+   30   2              float read_dat_float;                // 读取到的字符串中的浮点数
+   31   2      //        char send_dat[20];                   // 发送回上位机检查数据
+   32   2              char mode1 = '0', mode2 = '0', mode3 = '0'; // 接收模式
+   33   2              
+   34   2            
+   35   2              read_len = wireless_uart_read_buff(read_buf, 50); // 读取buffer并得到长度
+   36   2              strcpy(read_dat_string, read_buf);                // buffer转换为字符串
+   37   2              read_dat_float = myatof(read_dat_string);         // 提取浮点数
+   38   2      
+   39   2              if (read_len != 0)// 当收到数据时
+   40   2              {
+   41   3      //          printf("1\n%s\n1\n",read_dat_string);
+   42   3      //          printf("2\nF:   %f\n2\n",read_dat_float);
+   43   3                  mode1 = read_dat_string[0];       // 模式位1
+   44   3                  switch (mode1)
+   45   3                  {
+   46   4                    case 'a':                       // 发送数据选择
+   47   4                        mode2 = read_dat_string[2]; // 模式位2
+   48   4                        send_flag = mode2 - 'a';
+   49   4                        break;
+   50   4                    case 'b':                       
+   51   4                        mode2 = read_dat_string[2]; // 模式位2
+   52   4                        switch (mode2)
+   53   4                        {
+   54   5                        case 'a':                   
+   55   5                            resetelec_flag = 1; 
+   56   5                            break;
+   57   5                        case 'b':                   
+C251 COMPILER V5.60.0,  data_read                                                          25/04/24  13:33:29  PAGE 2   
+
+   58   5      
+   59   5                            break;
+   60   5                        case 'c':       
+   61   5                          
+   62   5                            break;
+   63   5                        case 'd': 
+   64   5      
+   65   5                            break;
+   66   5                        default:
+   67   5                            break;
+   68   5                        }
+   69   4                        break;
+   70   4                    case 'c':                       
+   71   4                        mode2 = read_dat_string[2]; // 模式位2
+   72   4                        switch (mode2)
+   73   4                        {
+   74   5                        case 'a':     
+   75   5                            if(read_dat_float > 3.1415) printf("\nReceive!\n");             
+   76   5                            break;
+   77   5                        case 'b':                   
+   78   5                            ADC_OUTOFRANGE_LIMIT = read_dat_float;
+   79   5                            break;
+   80   5                        
+   81   5                        
+   82   5                        case 'c':     
+   83   5                            vector_ratio[0][0] = read_dat_float;            
+   84   5                            break;
+   85   5                        case 'd': 
+   86   5                            vector_ratio[0][1] = read_dat_float;
+   87   5                            break;
+   88   5                        case 'e': 
+   89   5                            vector_ratio[1][0] = read_dat_float;
+   90   5                            break;
+   91   5                        case 'f': 
+   92   5                            vector_ratio[1][1] = read_dat_float;
+   93   5                            break;
+   94   5                        
+   95   5                        
+   96   5                        case 'g': 
+   97   5                            curve_convert_ratio[0][0] = read_dat_float;
+   98   5                            break;
+   99   5                        case 'h': 
+  100   5                            curve_convert_ratio[0][1] = read_dat_float;
+  101   5                            break;
+  102   5                        case 'i': 
+  103   5                            curve_convert_ratio[0][2] = read_dat_float;
+  104   5                            break;
+  105   5                        case 'j': 
+  106   5                            curve_convert_ratio[0][3] = read_dat_float;
+  107   5                            break;
+  108   5                        
+  109   5                        
+  110   5                        case 'k': 
+  111   5                            straight_convert_ratio[0][0] = read_dat_float;
+  112   5                            break;
+  113   5                        case 'l': 
+  114   5                            straight_convert_ratio[0][1] = read_dat_float;
+  115   5                            break;
+  116   5                        case 'm': 
+  117   5                            straight_convert_ratio[0][2] = read_dat_float;
+  118   5                            break;                  
+  119   5                        default:
+  120   5                            break;
+  121   5                        }
+  122   4                        break;
+  123   4                    case 'e':                       
+C251 COMPILER V5.60.0,  data_read                                                          25/04/24  13:33:29  PAGE 3   
+
+  124   4                        mode2 = read_dat_string[2]; // 模式位2
+  125   4                        switch (mode2)
+  126   4                        {
+  127   5                        case 'a':                   
+  128   5                            
+  129   5                            break;
+  130   5                        case 'b':                   
+  131   5      
+  132   5                            break;
+  133   5                        case 'c':       
+  134   5                          
+  135   5                            break;
+  136   5                        case 'd': 
+  137   5      
+  138   5                            break;
+  139   5                        default:
+  140   5                            break;
+  141   5                        }
+  142   4                        break;
+  143   4                    case 'f':                       
+  144   4                        mode2 = read_dat_string[2]; // 模式位2
+  145   4                        switch (mode2)
+  146   4                        {
+  147   5                        case 'a':                   
+  148   5                            
+  149   5                            break;
+  150   5                        case 'b':                   
+  151   5      
+  152   5                            break;
+  153   5                        case 'c':       
+  154   5                          
+  155   5                            break;
+  156   5                        case 'd': 
+  157   5      
+  158   5                            break;
+  159   5                        default:
+  160   5                            break;
+  161   5                        }
+  162   4                        break;
+  163   4                    default:
+  164   4                        break;
+  165   4                  }
+  166   3                  memset(read_buf,'\0',sizeof(read_buf));
+  167   3                  memset(read_dat_string,'\0',sizeof(read_dat_string));
+  168   3              }
+  169   2          }
+  170   1      }
+  171          
+  172          
+  173          
+  174          //-------------------------------------------------------------------------------------------------------
+             -------------
+  175          //  @brief      字符串中的浮点数字符串转浮点数
+  176          //  @param      *str      输入的字符串
+  177          //  @param
+  178          //  @return     result      转换成的浮点数
+  179          //-------------------------------------------------------------------------------------------------------
+             -------------
+  180          double myatof(const char *str)
+  181          {
+  182   1          double part_int = 0.0;
+  183   1          double part_dec = 10.0;
+  184   1          double result;
+  185   1          int radix = 0;
+  186   1          int flag = 0;
+  187   1          // 如果非数字和负号则指针后移
+C251 COMPILER V5.60.0,  data_read                                                          25/04/24  13:33:29  PAGE 4   
+
+  188   1          while (!(*str >= '0' && *str <= '9') && !(*str == '-'))
+  189   1          {
+  190   2              str++;
+  191   2          }
+  192   1          // 记录数字正负
+  193   1          if (*str == '-')
+  194   1          {
+  195   2              flag = 1;
+  196   2              str++;
+  197   2          }
+  198   1          // 计算整数部分的值
+  199   1          while (*str >= '0' && *str <= '9' && *str != '.')
+  200   1          {
+  201   2              part_int = part_int * 10.0 + (*str - '0');
+  202   2              str++;
+  203   2          }
+  204   1          // 判断小数点
+  205   1          if (*str == '.')
+  206   1          {
+  207   2              str++;
+  208   2          }
+  209   1          // 计算小数部分的值
+  210   1          while (*str >= '0' && *str <= '9')
+  211   1          {
+  212   2              part_int = part_int + (*str - '0') / part_dec;
+  213   2              part_dec *= 10.0;
+  214   2              str++;
+  215   2          }
+  216   1          // 考虑科学计数法
+  217   1          if (*str == 'e' || *str == 'E')
+  218   1          {
+  219   2              str++;
+  220   2              // e+xx形式
+  221   2              if (*str == '+')
+  222   2              {
+  223   3                  str++;
+  224   3                  while (*str >= '0' && *str <= '9')
+  225   3                  {
+  226   4                      radix = radix * 10 + (*str - '0');
+  227   4                      str++;
+  228   4                  }
+  229   3                  while (radix > 0)
+  230   3                  {
+  231   4                      part_int *= 10;
+  232   4                      radix--;
+  233   4                  }
+  234   3              }
+  235   2              // e-xx形式
+  236   2              if (*str == '-')
+  237   2              {
+  238   3                  str++;
+  239   3                  while (*str >= '0' && *str <= '9')
+  240   3                  {
+  241   4                      radix = radix * 10 + (*str - '0');
+  242   4                      str++;
+  243   4                  }
+  244   3                  while (radix > 0)
+  245   3                  {
+  246   4                      part_int /= 10;
+  247   4                      radix--;
+  248   4                  }
+  249   3              }
+  250   2          }
+  251   1          result = part_int;
+  252   1          return result * (flag ? -1.0 : 1.0);
+  253   1      }
+C251 COMPILER V5.60.0,  data_read                                                          25/04/24  13:33:29  PAGE 5   
+
+  254          
+  255          
+  256          
+  257          
+  258          
+  259          
+  260          
+  261          
+  262          
+  263          
+  264          
+  265          
+  266          
+  267          
+  268          
+  269          
+  270          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       629     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =       102     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =        21     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

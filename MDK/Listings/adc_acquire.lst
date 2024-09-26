@@ -1,0 +1,517 @@
+C251 COMPILER V5.60.0,  adc_acquire                                                        25/04/24  13:33:29  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE adc_acquire
+OBJECT MODULE PLACED IN .\Out_flie\adc_acquire.obj
+COMPILER INVOKED BY: D:\Keil_80251\C251\BIN\C251.EXE ..\USER\src\adc_acquire.c XSMALL INTR2 BROWSE INCDIR(..\LIB\startup
+                    -;..\LIB\libraries;..\LIB\peripheral;..\USER\inc) DEBUG PRINT(.\Listings\adc_acquire.lst) TABS(2) OBJECT(.\Out_flie\adc_a
+                    -cquire.obj) 
+
+stmt  level    source
+
+    1          
+    2          /********************************************************************************************************
+             -*************
+    3           * @file          adc_acquire
+    4           * @date          2024-03-06
+    5           * @note   
+    6           ********************************************************************************************************
+             -************/
+    7          
+    8          #include "adc_acquire.h"
+    9          
+   10          
+   11          #define ADC_CHANNEL 10        // ADCÍ¨µÀÊý
+   12          #define ADC_CONVERT_TIMES 14  // ADC×ª»»×Ü´ÎÊý
+   13          #define ADC_CONVERT_DIV 7     // ADC×ª»»×Ó´ÎÊý
+   14          #define ADC_RESET_TIMES 500   // µç¸Ð×îÖµ²ÉÑù´ÎÊý
+   15          #define ADC_ACQUIRE_DELAY 25  // µç¸Ð×îÖµ²ÉÑù¼ä¸ô
+   16          uint8 ADC_OUTOFRANGE_LIMIT = 50; // ³ö½çÅÐ¶¨Öµ
+   17          
+   18          struct ADC adc[11];           // ADC½á¹¹Ìå
+   19          
+   20          float err = 0;                // Ñ°¼£Îó²î
+   21          float err_last = 0;           // Îó²îÇ°Öµ
+   22          
+   23          float adc1_L2_H, adc1_L1_V, adc1_M_H, adc1_R1_V, adc1_R2_H; // µç¸ÐÊýÖµ : ×óÍâ ×óÊú ÖÐ¼ä ÓÒÊú ÓÒÍâ
+   24          float adc2_L2_H, adc2_L1_V, adc2_M_H, adc2_R1_V, adc2_R2_H; // µç¸ÐÊýÖµ : ×óÍâ ×óÊú ÖÐ¼ä ÓÒÊú ÓÒÍâ
+   25          
+   26          float Err_Hori, Err_Vert, Err_2_Hori, Err_2_Vert,Err_1, Err_2,  // ²î±ÈºÍÎó²î
+   27          Err_Inclined_left=0,Err_Inclined_right=0,                       // ÔªËØÅÐ¶ÏÎó²î
+   28          compensation_left=40,compensation_right=40;                     // ÔªËØÅÐ¶ÏÏµÊý
+   29          
+   30          int resetelec_count = 0;                                        // É¨µç¸Ð¼ÆÊýÎ»
+   31          uint8 resetelec_flag = 0;                                       // É¨µç¸Ð±êÖ¾Î»
+   32          
+   33          float vector_ratio[2][2] = {{0.60,0.80},                        // ÏòÁ¿Îó²îÈÚºÏÏµÊý£¨Ç°£©
+   34                                      {0.70,0.90}};                       // ÏòÁ¿Îó²îÈÚºÏÏµÊý£¨ºó£©
+   35          
+   36          float straight_convert_ratio[2][3] = {{0.6,0.8,0.6},            // Ö±µÀÎó²îÄâºÏÏµÊý£¨1£©
+   37                                                {0.6,0.8,0.6}};           // Ö±µÀÎó²îÄâºÏÏµÊý£¨2£©
+   38          
+   39          float curve_convert_ratio[2][4] = {{1.1,0.5,0.8,0.5},           // Ö±µÀÎó²îÄâºÏÏµÊý£¨1£©
+   40                                             {1.1,0.5,0.8,0.5}};          // Ö±µÀÎó²îÄâºÏÏµÊý£¨2£©
+   41          
+   42          float adc1_L2H_withL1V ,adc1_MH_withL1V  ,adc1_R2H_withR1V ,adc1_MH_withR1V ,   // ÏòÁ¿Æ«ÒÆÎó²î
+   43                adc2_L2H_withL1V ,adc2_MH_withL1V  ,adc2_R2H_withR1V ,adc2_MH_withR1V ;
+   44          
+   45          
+   46          const ADCN_enum adc_pin[ADC_CHANNEL+1]=                         // ½ÓÏßÒý½Å
+   47          {
+   48            ADC_P00,  ADC_P05,  ADC_P03,  ADC_P01,  ADC_P00, ADC_P02,
+   49                      ADC_P15,  ADC_P14,  ADC_P17,  ADC_P16, ADC_P13,
+   50          };
+   51          
+   52          //-------------------------------------------------------------------------------------------------------
+             -------------
+   53          //  @brief      ¿ìËÙÅÅÐòº¯Êý
+   54          //  @param      array[]      ´ýÅÅÐòÊý×é  
+C251 COMPILER V5.60.0,  adc_acquire                                                        25/04/24  13:33:29  PAGE 2   
+
+   55          //  @param      low          ÅÅÐòÏÂÏÞ
+   56          //  @param      high         ÅÅÐòÉÏÏÞ
+   57          //  Sample usage:       quickSort(data, 0, ARRAY_SIZE - 1);    
+   58          //-------------------------------------------------------------------------------------------------------
+             -------------
+   59          //void quickSort(int array[], int low, int high) reentrant //¿ÉµÝ¹é¹Ø¼ü´Ê±êÊ¶
+   60          //{
+   61          //    if (low < high)
+   62          //    {
+   63          //        int pivotIndex = partition(array, low, high);    // Ñ¡¶¨»ù×¼
+   64          //        quickSort(array, low, pivotIndex - 1);           // »®·Ö×óÓÒÇøÓò½øÐÐµÝ¹éÅÅÐò
+   65          //        quickSort(array, pivotIndex + 1, high);
+   66          //    }
+   67          //}
+   68          
+   69          //-------------------------------------------------------------------------------------------------------
+             -------------
+   70          //  @brief      »®·Öº¯Êý
+   71          //  @param      array[]      ´ýÅÅÐòÊý×é  
+   72          //  @param      low          ÅÅÐòÏÂÏÞ
+   73          //  @param      high         ÅÅÐòÉÏÏÞ
+   74          //  Sample usage:       partition(data, 0, ARRAY_SIZE - 1);    
+   75          //-------------------------------------------------------------------------------------------------------
+             -------------
+   76          //int partition(int array[], int low, int high)
+   77          //{
+   78          //    int pivot = array[high];                    // Ñ¡Ôñ×îºóÒ»¸öÔªËØ×÷Îª»ù×¼
+   79          //    int i = low - 1, j;
+   80          
+   81          //    for (j = low; j < high; j++) {
+   82          //        if (array[j] < pivot) {
+   83          //            i++;
+   84          //            swap(&array[i], &array[j]);         // ½»»»ÔªËØ
+   85          //        }
+   86          //    }
+   87          //    swap(&array[i + 1], &array[high]);          // »ù×¼»Ø¹é
+   88          //    return i + 1;
+   89          //}
+   90          
+   91          
+   92          
+   93          ////-----------------------------------------------------------------------------------------------------
+             ---------------
+   94          //// @brief   ADC¾ùÖµÂË²¨
+   95          ////
+   96          ////-----------------------------------------------------------------------------------------------------
+             ---------------
+   97          void adc_acquire(uint8 count)
+   98          {
+   99   1        uint8 adc_i,adc_j;
+  100   1        uint32 sum[11];               
+  101   1        for(adc_i = 0; adc_i < count; adc_i++)
+  102   1        {
+  103   2            for(adc_j = 1; adc_j <= ADC_CHANNEL; adc_j++)
+  104   2            {
+  105   3              adc[adc_j].data_0  = adc_once(adc_pin[adc_j], ADC_12BIT);
+  106   3              sum[adc_j] += adc[adc_j].data_0;
+  107   3            } 
+  108   2        }
+  109   1        for(adc_i = 1; adc_i <= ADC_CHANNEL; adc_i++)
+  110   1        {
+  111   2          adc[adc_i].data_result = sum[adc_i] / count;
+  112   2          sum[adc_i] = 0;
+  113   2        }
+  114   1      }
+  115          
+C251 COMPILER V5.60.0,  adc_acquire                                                        25/04/24  13:33:29  PAGE 3   
+
+  116          //-------------------------------------------------------------------------------------------------------
+             -------------
+  117          //  @brief      »ñµÃ´¦Àíºóµç¸ÐÖµ¹éÒ»»¯´¦ÀíºÍ »ñµÃ²î±ÈºÍ
+  118          //  @param
+  119          //  @param
+  120          //  @return
+  121          //-------------------------------------------------------------------------------------------------------
+             -------------
+  122          void ADC_channel_quire(void) // »ñµÃ´¦Àíºóµç¸ÐÖµ¹éÒ»»¯´¦ÀíºÍ »ñµÃ²î±ÈºÍ
+  123          {
+  124   1        float adc_tmp = 0.0;
+  125   1        adc_acquire(ADC_CONVERT_TIMES);
+  126   1      //  adc_acquire(ADC_CONVERT_TIMES);
+  127   1      
+  128   1        // adc[1].data_0 = adc_mean_filter(ADC_P10,8);    //²É¼¯²¢´¦ÀíADC_P17µçÑ¹
+  129   1        // adc[2].data_0 = adc_mean_filter(ADC_P11,8);    //²É¼¯²¢´¦ÀíADC_P13µçÑ¹
+  130   1        // adc[3].data_0 = adc_mean_filter(ADC_P14,8);    //²É¼¯²¢´¦ÀíADC_P01µçÑ¹
+  131   1        // adc[4].data_0 = adc_mean_filter(ADC_P17,8);    //²É¼¯²¢´¦ÀíADC_P05µçÑ¹
+  132   1        // adc[5].data_0 = adc_mean_filter(ADC_P16,8);    //²É¼¯²¢´¦ÀíADC_P06µçÑ¹
+  133   1        // adc[6].data_0 = adc_mean_filter(ADC_P06,8);    //²É¼¯²¢´¦ÀíADC_P14µçÑ¹
+  134   1        // adc[7].data_0 = adc_mean_filter(ADC_P05,8);    //²É¼¯²¢´¦ÀíADC_P16µçÑ¹
+  135   1        // adc[8].data_0 = adc_mean_filter(ADC_P01,8);    //²É¼¯²¢´¦ÀíADC_P01µçÑ¹
+  136   1        // adc[9].data_0 = adc_mean_filter(ADC_P00,8);    //²É¼¯²¢´¦ÀíADC_P01µçÑ¹
+  137   1        // adc[10].data_0 = adc_mean_filter(ADC_P13,8);   //²É¼¯²¢´¦ÀíADC_P01µçÑ¹
+  138   1        // ¹éÒ»»¯´¦Àíµç¸ÐÖµ£¬¸÷Æ«ÒÆÁ¿¹éÒ»»¯µ½0--100ÒÔÄÚ
+  139   1        //  adc1_L1_V = adc[1].data_0;
+  140   1        //  adc1_L2_H = adc[2].data_0;
+  141   1        //  adc1_M_H  = adc[3].data_0;
+  142   1        //  adc1_R2_H = adc[4].data_0;
+  143   1        //  adc1_R1_V = adc[5].data_0;
+  144   1        //  adc2_L1_V = adc[6].data_0;
+  145   1        //  adc2_L2_H = adc[7].data_0;
+  146   1        //  adc2_M_H  = adc[8].data_0;
+  147   1        //  adc2_R2_H = adc[9].data_0;
+  148   1        //  adc2_R1_V = adc[10].data_0;
+  149   1        
+  150   1        adc1_L1_V = (adc[1].data_result - adc[1].data_min) * 100.0 / (adc[1].data_max - adc[1].data_min);
+  151   1        adc1_L2_H = (adc[2].data_result - adc[2].data_min) * 100.0 / (adc[2].data_max - adc[2].data_min);
+  152   1        adc1_M_H = (adc[3].data_result - adc[3].data_min) * 100.0 / (adc[3].data_max - adc[3].data_min);
+  153   1        adc1_R1_V = (adc[4].data_result - adc[4].data_min) * 100.0 / (adc[4].data_max - adc[4].data_min);
+  154   1        adc1_R2_H = (adc[5].data_result - adc[5].data_min) * 100.0 / (adc[5].data_max - adc[5].data_min);
+  155   1      
+  156   1         adc2_L1_V = (adc[6].data_result - adc[6].data_min) * 100.0 / (adc[6].data_max - adc[6].data_min);
+  157   1        adc2_L2_H = (adc[7].data_result - adc[7].data_min) * 100.0 / (adc[7].data_max - adc[7].data_min);
+  158   1        adc2_M_H = (adc[8].data_result - adc[8].data_min) * 100.0 / (adc[8].data_max - adc[8].data_min);
+  159   1        adc2_R1_V = (adc[9].data_result - adc[9].data_min) * 100.0 / (adc[9].data_max - adc[9].data_min);
+  160   1        adc2_R2_H = (adc[10].data_result - adc[10].data_min) * 100.0 / (adc[10].data_max - adc[10].data_min);
+  161   1      
+  162   1        if (adc1_L2_H < 0)  adc1_L2_H = 0;
+  163   1        if (adc1_L1_V < 0)  adc1_L1_V = 0;
+  164   1        if (adc1_M_H < 0)   adc1_M_H = 0;
+  165   1        if (adc1_R1_V < 0)  adc1_R1_V = 0;
+  166   1        if (adc1_R2_H < 0)  adc1_R2_H = 0;
+  167   1        
+  168   1        if (adc2_L2_H < 0)  adc2_L2_H = 0;
+  169   1        if (adc2_L1_V < 0)  adc1_L1_V = 0;
+  170   1        if (adc2_M_H < 0)   adc2_M_H = 0;
+  171   1        if (adc2_R1_V < 0)  adc2_R1_V = 0;
+  172   1        if (adc2_R2_H < 0)  adc2_R2_H = 0;
+  173   1      
+  174   1        // µÃµ½µç¸ÐµÄ²î±ÈºÍ²î
+  175   1        //  Err_1=Diff_Ratio_Sum_Diff(adc1_L1_V,adc1_L2_H,0,0,adc1_R2_H,adc1_R1_V,0,0.2,0.6,20);
+  176   1        //  Err_2=Diff_Ratio_Sum_Diff(adc2_L1_V,adc2_L2_H,0,0,adc2_R2_H,adc2_R1_V,0,0.4,0.6,20);
+  177   1        if( adc1_L2_H + adc1_L1_V + adc1_M_H + adc1_R1_V + adc1_R2_H 
+  178   1          + adc2_L2_H + adc2_L1_V + adc2_M_H + adc2_R1_V + adc2_R2_H < ADC_OUTOFRANGE_LIMIT)
+  179   1        err = 800;
+C251 COMPILER V5.60.0,  adc_acquire                                                        25/04/24  13:33:29  PAGE 4   
+
+  180   1        else 
+  181   1      ERR_process(); // Îó²é´¦Àí¸³Öµ
+  182   1      }
+  183          
+  184          //-------------------------------------------------------------------------------------------------------
+             -------------
+  185          //  @brief      ²î±ÈºÍ²î¹«Ê½
+  186          //  @param
+  187          //  @param
+  188          //  @return
+  189          //-------------------------------------------------------------------------------------------------------
+             -------------
+  190          float Diff_Ratio_Sum_Diff(float adc1, float adc2, float adc3, float adc4, float adc5, float adc6, float a
+             -, float b, float c, int Limit)
+  191          {
+  192   1      
+  193   1        float ans, fz, fm;
+  194   1        int16 Diff_Inner, Diff_Mid, Diff_Outer;
+  195   1        int16 Sum_Inner, Sum_Mid, Sum_Outer;
+  196   1      
+  197   1        Diff_Inner = adc3 - adc4;
+  198   1        Diff_Mid = adc2 - adc5;
+  199   1        Diff_Outer = adc1 - adc6;
+  200   1      
+  201   1        Sum_Inner = adc3 + adc4;
+  202   1        Sum_Mid = adc2 + adc5;
+  203   1        Sum_Outer = adc1 + adc6;
+  204   1      
+  205   1        fz = a * Diff_Inner + b * Diff_Mid + c * Diff_Outer;
+  206   1        fm = a * Sum_Inner + b * Sum_Mid + c * Sum_Outer;
+  207   1      
+  208   1        ans = (float)(Limit * (fz * 1.0 / (fm+0.1))); // ²î±ÈºÍ²î
+  209   1        return ans;
+  210   1      }
+  211          
+  212          //-------------------------------------------------------------------------------------------------------
+             -------------
+  213          //  @brief      ²î±ÈºÍ²î¹«Ê½
+  214          //  @param
+  215          //  @param
+  216          //  @return
+  217          //-------------------------------------------------------------------------------------------------------
+             -------------
+  218          float Diff_Hori_Sum_Diff(float adc1, float adc2, float a, int Limit)
+  219          {
+  220   1      
+  221   1        float ans, fz, fm;
+  222   1        int16 Diff_Mid;
+  223   1        int16 Sum_Mid;
+  224   1        if (adc1 > 5 || adc2 > 5)
+  225   1        {
+  226   2          Diff_Mid = adc1 - adc2;
+  227   2          Sum_Mid = adc1 + adc2;
+  228   2          fz = a * Diff_Mid;
+  229   2          fm = a * Sum_Mid;
+  230   2          ans = (float)(Limit * (fz * 1.0 / (fm+0.1))); // ²î±ÈºÍ²î
+  231   2        }
+  232   1        else  ans = 0;
+  233   1        return ans;
+  234   1      }
+  235          
+  236          //-------------------------------------------------------------------------------------------------------
+             -------------
+  237          //  @brief      ²î±ÈºÍ²î¹«Ê½
+  238          //  @param
+  239          //  @param
+C251 COMPILER V5.60.0,  adc_acquire                                                        25/04/24  13:33:29  PAGE 5   
+
+  240          //  @return
+  241          //-------------------------------------------------------------------------------------------------------
+             -------------
+  242          float Diff_Vert_Sum_Diff(float adc1, float adc2, float a, int Limit)
+  243          {
+  244   1      
+  245   1        float ans, fz, fm;
+  246   1        int16 Diff_Mid;
+  247   1        int16 Sum_Mid;
+  248   1        if (adc1 > 1 || adc2 > 1)
+  249   1        {
+  250   2          Diff_Mid = adc1 - adc2;
+  251   2          Sum_Mid = adc1 + adc2;
+  252   2          fz = a * Diff_Mid;
+  253   2          fm = a * Sum_Mid;
+  254   2          ans = (float)(Limit * (fz * 1.0 / (fm+0.1))); // ²î±ÈºÍ²î
+  255   2        }
+  256   1        else  ans = 0;
+  257   1        return ans;
+  258   1      }
+  259          
+  260          //-------------------------------------------------------------------------------------------------------
+             -------------
+  261          //  @brief      µç¸Ð×î´ó×îÐ¡Öµ»ñÈ¡
+  262          //  @param
+  263          //  @param
+  264          //  @return
+  265          //-------------------------------------------------------------------------------------------------------
+             ------------
+  266          void resetelec_Init() // ÖØÐÂÑ§Ï°¸³Öµµç¸ÐµÄ×î´ó×îÐ¡Öµ
+  267          {
+  268   1        if (resetelec_flag == 1)
+  269   1        {
+  270   2          uint16 i;
+  271   2          resetelec_count = 0;
+  272   2          // trace_flag = 1;
+  273   2          // brusheless_flag = 1;
+  274   2          // brusheless_duty = 800;
+  275   2          // delay_ms(1200);
+  276   2          delay_ms(6000);
+  277   2          P50 = 0;
+  278   2          printf("ready!\n");
+  279   2          delay_ms(3000);
+  280   2          P50 = 1;
+  281   2          printf("start!\n");
+  282   2          if (resetelec_count == 0)
+  283   2          {
+  284   3            for(i=1;i<=ADC_CHANNEL;i++)
+  285   3            {
+  286   4              adc[i].data_max = 0;
+  287   4              adc[i].data_min = 5000;
+  288   4            }
+  289   3          }
+  290   2          while (resetelec_count < ADC_RESET_TIMES)
+  291   2          {
+  292   3            adc_acquire(ADC_CONVERT_TIMES);
+  293   3            for (i = 1; i <= 10; i++)
+  294   3            {
+  295   4              if (adc[i].data_result > adc[i].data_max)
+  296   4                adc[i].data_max = adc[i].data_result;
+  297   4              if (adc[i].data_result < adc[i].data_min)
+  298   4                adc[i].data_min = adc[i].data_result;
+  299   4              
+  300   4            }
+  301   3              printf("%d\n",resetelec_count);
+  302   3              delay_ms(ADC_ACQUIRE_DELAY);
+C251 COMPILER V5.60.0,  adc_acquire                                                        25/04/24  13:33:29  PAGE 6   
+
+  303   3            resetelec_count++;
+  304   3          }
+  305   2          P50 = 0;
+  306   2          printf("stop!\n");
+  307   2          delay_ms(3000);
+  308   2          P50 = 1;
+  309   2          printf("go!\n");
+  310   2          resetelec_count = 0;
+  311   2          resetelec_flag = 0;
+  312   2        }
+  313   1      }
+  314          
+  315          //-------------------------------------------------------------------------------------------------------
+             -------------
+  316          //  @brief      Îó²î´¦Àí
+  317          //  @param
+  318          //  @param
+  319          //  @return
+  320          //-------------------------------------------------------------------------------------------------------
+             -------------
+  321          void ERR_process() // Îó²î´¦Àí
+  322          {
+  323   1        adc1_L2H_withL1V = sqrt(vector_ratio[0][0] * adc1_L2_H*adc1_L2_H + (1-vector_ratio[0][0]) * adc1_L1_V*ad
+             -c1_L1_V);      // ¼ÆËãÏòÁ¿Æ«ÒÆÎó²î
+  324   1        adc1_R2H_withR1V = sqrt(vector_ratio[0][0] * adc1_R2_H*adc1_R2_H + (1-vector_ratio[0][0]) * adc1_R1_V*ad
+             -c1_R1_V);
+  325   1        
+  326   1        adc1_MH_withL1V  = sqrt(vector_ratio[0][1] * adc1_M_H *adc1_M_H  + (1-vector_ratio[0][1]) * adc1_L1_V*ad
+             -c1_L1_V);
+  327   1        adc1_MH_withR1V  = sqrt(vector_ratio[0][1] * adc1_M_H *adc1_M_H  + (1-vector_ratio[0][1]) * adc1_R1_V*ad
+             -c1_R1_V);
+  328   1        
+  329   1        adc2_L2H_withL1V = sqrt(vector_ratio[1][0] * adc2_L2_H*adc2_L2_H + (1-vector_ratio[1][0]) * adc2_L1_V*ad
+             -c2_L1_V);
+  330   1        adc2_R2H_withR1V = sqrt(vector_ratio[1][0] * adc2_R2_H*adc2_R2_H + (1-vector_ratio[1][0]) * adc2_R1_V*ad
+             -c2_R1_V);
+  331   1        
+  332   1        adc2_MH_withL1V  = sqrt(vector_ratio[1][1] * adc2_M_H *adc2_M_H  + (1-vector_ratio[1][1]) * adc2_L1_V*ad
+             -c2_L1_V);
+  333   1        adc2_MH_withR1V  = sqrt(vector_ratio[1][1] * adc2_M_H *adc2_M_H  + (1-vector_ratio[1][1]) * adc2_R1_V*ad
+             -c2_R1_V);
+  334   1        
+  335   1        
+  336   1      //  Err_Hori = Diff_Hori_Sum_Diff(adc1_L2_H, adc1_R2_H, 1, 20);
+  337   1      //  Err_2_Hori = Diff_Hori_Sum_Diff(adc2_L2_H, adc2_R2_H, 1, 20);
+  338   1      //  
+  339   1      //  Err_Vert = Diff_Vert_Sum_Diff(adc1_L1_V, adc1_R1_V, 1, 20);
+  340   1      //  Err_2_Vert = Diff_Vert_Sum_Diff(adc2_L1_V, adc2_R1_V, 1, 20);
+  341   1      //  
+  342   1      //  Err_Inclined_left=Diff_Vert_Sum_Diff(adc1_L2_H+compensation_left,adc1_M_H, 1, 20)*4;
+  343   1      //  Err_Inclined_right=Diff_Vert_Sum_Diff(adc1_M_H, adc1_R2_H+compensation_right, 1, 20)*4;
+  344   1        
+  345   1        Err_Hori = Diff_Hori_Sum_Diff(adc1_L2H_withL1V, adc1_R2H_withR1V, 1, 20);                     // ¼ÆËã²î±ÈºÍÎó²î
+  346   1        Err_2_Hori = Diff_Hori_Sum_Diff(adc2_L2H_withL1V, adc2_R2H_withR1V, 1, 20);
+  347   1        
+  348   1        Err_Vert = Diff_Vert_Sum_Diff(adc1_L1_V, adc1_R1_V, 1, 20);
+  349   1        Err_2_Vert = Diff_Vert_Sum_Diff(adc2_L1_V, adc2_R1_V, 1, 20);
+  350   1        
+  351   1        Err_Inclined_left=Diff_Vert_Sum_Diff(adc1_L2_H+compensation_left,adc1_M_H, 1, 20)*4;
+  352   1        Err_Inclined_right=Diff_Vert_Sum_Diff(adc1_M_H, adc1_R2_H+compensation_right, 1, 20)*4;
+  353   1        
+  354   1        // Err_Inclined_left=(Diff_Vert_Sum_Diff(adc1_L2_H, adc1_R2_H, 1, 20)+Diff_Vert_Sum_Diff(adc2_L2_H, adc2
+             -_R2_H, 1, 20));
+  355   1        // Err_Inclined_right=(Diff_Vert_Sum_Diff(adc1_L2_H, adc1_R2_H, 1, 20)+Diff_Vert_Sum_Diff(adc2_L2_H, adc
+             -2_R2_H, 1, 20));
+  356   1        //  Err_Hori=Diff_Ratio_Sum_Diff(adc1_L1_V,0,0,0,0,adc1_R1_V,0,0,1,20);
+C251 COMPILER V5.60.0,  adc_acquire                                                        25/04/24  13:33:29  PAGE 7   
+
+  357   1        //  Err_2_Hori=Diff_Ratio_Sum_Diff(adc2_L1_V,0,0,0,0,adc2_R1_V,0,0,1,20);
+  358   1        //  Err_Vert=Diff_Ratio_Sum_Diff(0,adc1_L2_H,0,0,adc1_R2_H,0,0,1,0,20);
+  359   1        //  Err_2_Vert=Diff_Ratio_Sum_Diff(0,adc2_L2_H,0,0,adc2_R2_H,0,0,1,0,20);
+  360   1        
+  361   1        err_last = err;
+  362   1        if (Swerve_flag == 0 && ((adc1_L2_H > 80 || adc1_R2_H > 80) && adc1_M_H > 60&&adc2_M_H<120)) // µ±ÊýÖµµç
+             -¸Ðµ½´ïÒ»¶¨ÊýÖµµÄÊ±ºòÖ±µÀ×ª»»µÄÊ±ºò
+  363   1        {
+  364   2          Swerve_flag = 1;
+  365   2          err = curve_convert_ratio[0][0] * Err_Hori   + curve_convert_ratio[0][1] * Err_Vert         // Îó²îÄâºÏ
+  366   2              + curve_convert_ratio[0][2] * Err_2_Hori + curve_convert_ratio[0][3] * Err_2_Vert;
+  367   2        }
+  368   1        else if (Swerve_flag == 1)
+  369   1        {
+  370   2          err = curve_convert_ratio[0][0] * Err_Hori   + curve_convert_ratio[0][1] * Err_Vert 
+  371   2              + curve_convert_ratio[0][2] * Err_2_Hori + curve_convert_ratio[0][3] * Err_2_Vert;
+  372   2        }
+  373   1        
+  374   1        if (Swerve_flag == 1 && (adc2_R2_H < 15 && adc2_L2_H < 15 && adc2_M_H > 30 && adc1_M_H > 30)) // Ö±µÀµÄÎ
+             -ó²îÊýÖµ
+  375   1        {
+  376   2          Swerve_flag = 0;
+  377   2          err = straight_convert_ratio[0][0] * Err_Hori  + straight_convert_ratio[0][1] * Err_2_Hori 
+  378   2              + straight_convert_ratio[0][2] * Err_Vert;
+  379   2        }
+  380   1        if (Swerve_flag == 0)
+  381   1        {
+  382   2          err = straight_convert_ratio[1][0] * Err_Hori  + straight_convert_ratio[1][1] * Err_2_Hori 
+  383   2              + straight_convert_ratio[1][2] * Err_Vert;
+  384   2        }
+  385   1        
+  386   1        // if (Swerve_flag == 0 && ((adc1_L2_H > 80 || adc1_R2_H > 80)&&adc2_M_H<120)) // µ±ÊýÖµµç¸Ðµ½´ïÒ»¶¨ÊýÖµ
+             -µÄÊ±ºòÖ±µÀ×ª»»µÄÊ±ºò
+  387   1        // {
+  388   1        //  Swerve_flag = 1;
+  389   1        //  BEEP=1;
+  390   1        //  err = 1.1 * Err_Hori + 0.5 * Err_Vert + 0.8 * Err_2_Hori + 0.5 * Err_2_Vert;
+  391   1        // }
+  392   1        // else if (Swerve_flag == 1)
+  393   1        // {
+  394   1        //  BEEP=1;
+  395   1        //  err = 1.1 * Err_Hori + 0.5 * Err_Vert + 0.8 * Err_2_Hori + 0.5 * Err_2_Vert;
+  396   1        // }
+  397   1        // if (Swerve_flag == 1 && (adc2_R2_H < 15 && adc2_L2_H < 15 && adc2_M_H > 30)) // Ö±µÀµÄÎó²îÊýÖµ
+  398   1        // {
+  399   1        //  BEEP=0;
+  400   1        //  Swerve_flag = 0;
+  401   1        //  err = 0.6 * Err_Hori + 0.6 * Err_Vert + 0.8 * Err_2_Hori;
+  402   1        // }
+  403   1        // if (Swerve_flag == 0)
+  404   1        // {
+  405   1        //  BEEP=0;
+  406   1        //  err = 0.6 * Err_Hori + 0.6 * Err_Vert + 0.8 * Err_2_Hori;
+  407   1        // }
+  408   1        
+  409   1        
+  410   1        //  if(RoundAbout==3)
+  411   1        //    {
+  412   1        //       if(err>6)
+  413   1        //      {err=6;}
+  414   1        //      else if(err<-6)
+  415   1        //      {err=-6;}
+  416   1        //  }
+  417   1        // else if(Swerve_flag==1)
+  418   1        //  err=0.6*Err_Hori+0.6*Err_Vert;
+  419   1        // else if(adc1_R2_H>40||adc1_L2_H>40)//Ö±µÀµÄÎó²îÊýÖµ
+C251 COMPILER V5.60.0,  adc_acquire                                                        25/04/24  13:33:29  PAGE 8   
+
+  420   1        // err=0.6*Err_Hori+0.5*Err_Vert;
+  421   1        // err = Err_1 + Err_2;
+  422   1        //   if(Err_2_Hori>6&&Err_Hori>8)
+  423   1        //  {
+  424   1        //      err=1.1*Err_Hori+0.5*Err_Vert+0.8*Err_2_Hori+0.5*Err_2_Vert;
+  425   1        //  }
+  426   1        //  else if(Err_2_Hori<-4&&Err_Hori<-6)
+  427   1        //  {
+  428   1        //      err=1.1*Err_Hori+0.5*Err_Vert+0.8*Err_2_Hori+0.5*Err_2_Vert;
+  429   1        //  }
+  430   1        //    else
+  431   1        //  {
+  432   1      
+  433   1        //  }
+  434   1      }
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =      2707     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =       306         86
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =       202     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

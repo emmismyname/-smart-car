@@ -1,0 +1,437 @@
+C251 COMPILER V5.60.0,  iic                                                                25/04/24  13:33:28  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE iic
+OBJECT MODULE PLACED IN .\Out_flie\iic.obj
+COMPILER INVOKED BY: D:\Keil_80251\C251\BIN\C251.EXE ..\LIB\libraries\iic.c XSMALL INTR2 BROWSE INCDIR(..\LIB\startup;..
+                    -\LIB\libraries;..\LIB\peripheral;..\USER\inc) DEBUG PRINT(.\Listings\iic.lst) TABS(2) OBJECT(.\Out_flie\iic.obj) 
+
+stmt  level    source
+
+    1          
+    2          /********************************************************************************************************
+             -*************
+    3           * @file          iic
+    4           * @date          2024-03-06
+    5           * @note    
+    6           ********************************************************************************************************
+             -************/
+    7          
+    8          
+    9          #pragma warning disable = 47
+   10          #include "iic.h"
+   11          
+   12          
+   13          //-------------------------------------------------------------------------------------------------------
+             -------------
+   14          //  @brief      内部使用用户无需关心
+   15          //  @param      NULL              
+   16          //  @return     void
+   17          //  Sample usage:               无需用户调用，用户请使用h文件中的宏定义
+   18          //-------------------------------------------------------------------------------------------------------
+             -------------
+   19          void iic_delay_us(uint16 x) //33.1776Mhz
+   20          {
+   21   1          uint8 i;
+   22   1          while(x--)
+   23   1          {
+   24   2          i = 9;
+   25   2          while (--i);
+   26   2          }
+   27   1      }
+   28          
+   29          
+   30          //-------------------------------------------------------------------------------------------------------
+             -------------
+   31          //  @brief      内部使用用户无需关心
+   32          //  @param      NULL              
+   33          //  @return     void
+   34          //  Sample usage:               无需用户调用，用户请使用h文件中的宏定义
+   35          //-------------------------------------------------------------------------------------------------------
+             -------------
+   36          uint8 wait(void)
+   37          {
+   38   1          uint16 count = 0;
+   39   1          uint8 ret = IIC_SEND_OK;
+   40   1          while (!(I2CMSST & 0x40))
+   41   1          {
+   42   2              iic_delay_us(1);
+   43   2              if(count++ >= 30)//等待超过30us，则退出等待。
+   44   2              {
+   45   3                  ret = IIC_SEND_FAIL;
+   46   3                  break;
+   47   3              }
+   48   2          }
+   49   1          I2CMSST &= ~0x40;
+   50   1          return ret;
+   51   1      }
+   52          
+C251 COMPILER V5.60.0,  iic                                                                25/04/24  13:33:28  PAGE 2   
+
+   53          //-------------------------------------------------------------------------------------------------------
+             -------------
+   54          //  @brief      内部使用用户无需关心
+   55          //  @param      NULL              
+   56          //  @return     void
+   57          //  Sample usage:               无需用户调用，用户请使用h文件中的宏定义
+   58          //-------------------------------------------------------------------------------------------------------
+             -------------
+   59          uint8 start(void)
+   60          {
+   61   1          uint8 ret;
+   62   1          I2CMSCR = 0x01;                             //发送start命令
+   63   1          ret = wait();
+   64   1          return ret;
+   65   1      }
+   66          
+   67          //-------------------------------------------------------------------------------------------------------
+             -------------
+   68          //  @brief      内部使用用户无需关心
+   69          //  @param      NULL              
+   70          //  @return     void
+   71          //  Sample usage:               无需用户调用，用户请使用h文件中的宏定义
+   72          //-------------------------------------------------------------------------------------------------------
+             -------------
+   73          uint8 send_data(char dat)
+   74          {
+   75   1          uint8 ret;
+   76   1          I2CTXD = dat;                               //写数据到数据缓冲区
+   77   1          I2CMSCR = 0x02;                             //发送SEND命令
+   78   1          ret = wait();
+   79   1          return ret;
+   80   1      }
+   81          
+   82          //-------------------------------------------------------------------------------------------------------
+             -------------
+   83          //  @brief      内部使用用户无需关心
+   84          //  @param      NULL              
+   85          //  @return     void
+   86          //  Sample usage:               无需用户调用，用户请使用h文件中的宏定义
+   87          //-------------------------------------------------------------------------------------------------------
+             -------------
+   88          uint8 recv_ack(void)
+   89          {
+   90   1          uint8 ret;
+   91   1          I2CMSCR = 0x03;                             //发送读ACK命令
+   92   1          ret = wait();
+   93   1          return ret;
+   94   1      }
+   95          
+   96          //-------------------------------------------------------------------------------------------------------
+             -------------
+   97          //  @brief      内部使用用户无需关心
+   98          //  @param      NULL              
+   99          //  @return     void
+  100          //  Sample usage:               无需用户调用，用户请使用h文件中的宏定义
+  101          //-------------------------------------------------------------------------------------------------------
+             -------------
+  102          char recv_data(void)              //接收数据
+  103          {
+  104   1          I2CMSCR = 0x04;                             //发送RECV命令
+  105   1          wait();
+  106   1          return I2CRXD;
+  107   1      }
+  108          
+  109          //-------------------------------------------------------------------------------------------------------
+             -------------
+C251 COMPILER V5.60.0,  iic                                                                25/04/24  13:33:28  PAGE 3   
+
+  110          //  @brief      内部使用用户无需关心
+  111          //  @param      NULL              
+  112          //  @return     void
+  113          //  Sample usage:               无需用户调用，用户请使用h文件中的宏定义
+  114          //-------------------------------------------------------------------------------------------------------
+             -------------
+  115          uint8 send_ack(void)
+  116          {
+  117   1        uint8 ret;
+  118   1          I2CMSST = 0x00;                             //设置ACK信号
+  119   1          I2CMSCR = 0x05;                             //发送ACK命令
+  120   1          ret = wait();
+  121   1          return ret;
+  122   1      }
+  123          
+  124          //-------------------------------------------------------------------------------------------------------
+             -------------
+  125          //  @brief      内部使用用户无需关心
+  126          //  @param      NULL              
+  127          //  @return     void
+  128          //  Sample usage:               无需用户调用，用户请使用h文件中的宏定义
+  129          //-------------------------------------------------------------------------------------------------------
+             -------------
+  130          void send_nak(void)
+  131          {
+  132   1          I2CMSST = 0x01;                             //设置NAK信号
+  133   1          I2CMSCR = 0x05;                             //发送ACK命令
+  134   1          wait();
+  135   1      }
+  136          
+  137          //-------------------------------------------------------------------------------------------------------
+             -------------
+  138          //  @brief      内部使用用户无需关心
+  139          //  @param      NULL              
+  140          //  @return     void
+  141          //  Sample usage:               无需用户调用，用户请使用h文件中的宏定义
+  142          //-------------------------------------------------------------------------------------------------------
+             -------------
+  143          uint8 stop(void)
+  144          {
+  145   1          uint8 ret;
+  146   1          I2CMSCR = 0x06;                             //发送stop命令
+  147   1          ret = wait();
+  148   1          return ret;
+  149   1      }
+  150          
+  151          
+  152          
+  153          
+  154          //#define UNUSED(expr1, expr2) do { if(scl_pin == sda_pin); } while (0)
+  155          //-------------------------------------------------------------------------------------------------------
+             -------------
+  156          //  @brief      硬件IIC初始化
+  157          //  @param      iic_n           选择IIC模块
+  158          //  @param      wait_time       I2C总线速度（等待时钟数）控制: 速度设置为等待wait_time*2+1个时钟
+  159          //  @return     void
+  160          //  Sample usage:              
+  161          //-------------------------------------------------------------------------------------------------------
+             -------------
+  162          void iic_init(IICN_enum iic_n, IIC_PIN_enum scl_pin, IIC_PIN_enum sda_pin, uint32 wait_time)
+  163          {
+  164   1        //UNUSED(scl_pin);
+  165   1        //__attribute__ ((unused))(sda_pin);
+  166   1        //UNUSED(scl_pin, sda_pin);
+  167   1      
+  168   1          P_SW2 &= ~(0x03<<4);
+C251 COMPILER V5.60.0,  iic                                                                25/04/24  13:33:28  PAGE 4   
+
+  169   1          P_SW2 |= 1<<7;  //将EAXFR寄存器置1，这样才能使用特殊功能寄存器为扩展SFR，访问逻辑地址位于 XDATA 区域
+  170   1          switch(iic_n)
+  171   1          {
+  172   2          case IIC_1:
+  173   2              P_SW2 |= (0x00<<4); //SCL:P1.5  SDA:P1.4
+  174   2              break;
+  175   2          case IIC_2:
+  176   2              P_SW2 |= (0x01<<4); //SCL:P2.5  SDA:P2.4
+  177   2              break;
+  178   2          case IIC_3:
+  179   2              P_SW2 |= (0x02<<4); //SCL:P7.7  SDA:P7.6
+  180   2              break;
+  181   2          case IIC_4:
+  182   2              P_SW2 |= (0x03<<4); //SCL:P3.2  SDA:P3.3
+  183   2              break;
+  184   2          }
+  185   1      
+  186   1          I2CCFG |= 1<<6;   //主机模式
+  187   1          I2CCFG |= 1<<7;   //使能IIC
+  188   1          I2CCFG |= wait_time;//速度设置为等待wait_time*2+1个时钟
+  189   1          I2CMSST = 0x00;   //主机状态寄存器
+  190   1      
+  191   1      }
+  192          
+  193          //-------------------------------------------------------------------------------------------------------
+             -------------
+  194          //  @brief      写入一个字节数据到I2C设备指定寄存器地址
+  195          //  @param      iic_n       IIC模块(IIC_1,IIC_2,IIC_3,IIC_0)
+  196          //  @param      slaveid     从机地址(7位地址)
+  197          //  @param      reg         从机寄存器地址
+  198          //  @param      dat         需要发送的数据
+  199          //  @return                 返回的状态值 0：成功  1：失败
+  200          //  @since      v2.0
+  201          //  Sample usage:         iic_write_reg(0x2D, 0x50,2);     //写入数据2到0x50地址，从机地址为0x2D
+  202          //-------------------------------------------------------------------------------------------------------
+             -------------
+  203          uint8 iic_write_reg(uint8 dev_add, uint8 reg, uint8 dat)
+  204          {
+  205   1          if(start() != IIC_SEND_OK)
+  206   1              return IIC_SEND_FAIL;
+  207   1          if(send_data((dev_add<<1) | 0x00) != IIC_SEND_OK)
+  208   1              return IIC_SEND_FAIL;
+  209   1          if(recv_ack() != IIC_SEND_OK)
+  210   1              return IIC_SEND_FAIL;
+  211   1          if(send_data(reg) != IIC_SEND_OK)
+  212   1              return IIC_SEND_FAIL;
+  213   1          if(recv_ack() != IIC_SEND_OK)
+  214   1              return IIC_SEND_FAIL;
+  215   1          if(send_data(dat) != IIC_SEND_OK)
+  216   1              return IIC_SEND_FAIL;
+  217   1          if(recv_ack() != IIC_SEND_OK)
+  218   1              return IIC_SEND_FAIL;
+  219   1          if(stop() != IIC_SEND_OK)
+  220   1              return IIC_SEND_FAIL;
+  221   1      
+  222   1      
+  223   1          return IIC_SEND_OK;
+  224   1      }
+  225          
+  226          //-------------------------------------------------------------------------------------------------------
+             -------------
+  227          //  @brief      读取I2C设备指定地址寄存器的数据
+  228          //  @param      iic_n        I2C通道号及引脚
+  229          //  @param      dev_add     从机地址(7位地址)
+  230          //  @param      reg         从机寄存器地址
+  231          //  @param      dat         数据地址
+C251 COMPILER V5.60.0,  iic                                                                25/04/24  13:33:28  PAGE 5   
+
+  232          //  @return                 读取的寄存器值
+  233          
+  234          //  Sample usage:         uint8 value = iic_read_reg(i2c0, 0x2D, 0x50);//读取0x50地址的数据，从机地址为0x2
+             -D
+  235          //-------------------------------------------------------------------------------------------------------
+             -------------
+  236          uint8 iic_read_reg(uint8 dev_add, uint8 reg, uint8 *dat)
+  237          {
+  238   1        if(start() != IIC_SEND_OK)
+  239   1              return IIC_SEND_FAIL;
+  240   1        
+  241   1          if(send_data((dev_add<<1) | 0x00) != IIC_SEND_OK)
+  242   1              return IIC_SEND_FAIL;
+  243   1          if(recv_ack() != IIC_SEND_OK)
+  244   1              return IIC_SEND_FAIL;
+  245   1        
+  246   1          if(send_data(reg) != IIC_SEND_OK)
+  247   1              return IIC_SEND_FAIL;
+  248   1          if(recv_ack() != IIC_SEND_OK)
+  249   1              return IIC_SEND_FAIL;
+  250   1        
+  251   1        
+  252   1      //   if(start() != IIC_SEND_OK)
+  253   1      //        return IIC_SEND_FAIL;
+  254   1         
+  255   1          if(send_data((dev_add<<1) | 0x01) != IIC_SEND_OK)
+  256   1              return IIC_SEND_FAIL;
+  257   1        
+  258   1          if(recv_ack() != IIC_SEND_OK)
+  259   1              return IIC_SEND_FAIL;
+  260   1        
+  261   1      
+  262   1          *dat = recv_data(); //读取数据
+  263   1      
+  264   1        
+  265   1          if(send_ack() != IIC_SEND_OK)
+  266   1              return IIC_SEND_FAIL;
+  267   1        
+  268   1          if(stop() != IIC_SEND_OK)
+  269   1              return IIC_SEND_FAIL;
+  270   1        
+  271   1          return IIC_SEND_OK;
+  272   1      }
+  273          
+  274          //-------------------------------------------------------------------------------------------------------
+             -------------
+  275          //  @brief      读取I2C设备指定地址寄存器的数据
+  276          //  @param      iic_n       I2C通道号及引脚
+  277          //  @param      dev_add     从机地址(7位地址)
+  278          //  @param      reg         从机寄存器地址
+  279          //  @param      dat         读取的数据存储的地址
+  280          //  @param      num         读取字节数
+  281          //  @return     void
+  282          
+  283          //  Sample usage:         uint8 value = i2c_read_reg(i2c0, 0x2D, 0x50, 10, buf);//读取0x50地址的数据，从机
+             -地址为0x2D开始的10个字节
+  284          //-------------------------------------------------------------------------------------------------------
+             -------------
+  285          uint8 iic_read_reg_bytes(uint8 dev_add, uint8 reg
+  286                      , uint8 *dat, uint8 num)
+  287          {
+  288   1      
+  289   1        if(start() != IIC_SEND_OK)
+  290   1              return IIC_SEND_FAIL;
+  291   1        
+  292   1          if(send_data((dev_add<<1) | 0x00) != IIC_SEND_OK)
+C251 COMPILER V5.60.0,  iic                                                                25/04/24  13:33:28  PAGE 6   
+
+  293   1              return IIC_SEND_FAIL;
+  294   1          if(recv_ack() != IIC_SEND_OK)
+  295   1              return IIC_SEND_FAIL;
+  296   1        
+  297   1          if(send_data(reg) != IIC_SEND_OK)
+  298   1              return IIC_SEND_FAIL;
+  299   1          if(recv_ack() != IIC_SEND_OK)
+  300   1              return IIC_SEND_FAIL;
+  301   1      
+  302   1        if(send_data((dev_add<<1) | 0x01) != IIC_SEND_OK)
+  303   1          return IIC_SEND_FAIL;
+  304   1        if(recv_ack() != IIC_SEND_OK)
+  305   1          return IIC_SEND_FAIL;
+  306   1      
+  307   1          while(--num)
+  308   1          {
+  309   2              *dat = recv_data(); //读取数据
+  310   2          if(send_ack() != IIC_SEND_OK)
+  311   2          {
+  312   3            return IIC_SEND_FAIL;
+  313   3          }
+  314   2              dat++;
+  315   2          }
+  316   1        
+  317   1        *dat = recv_data();
+  318   1        
+  319   1        if(send_ack() != IIC_SEND_OK)
+  320   1          return IIC_SEND_FAIL;
+  321   1        
+  322   1        if(stop() != IIC_SEND_OK)
+  323   1          return IIC_SEND_FAIL;
+  324   1        
+  325   1        return IIC_SEND_OK;
+  326   1      }
+  327          
+  328          
+  329          //-------------------------------------------------------------------------------------------------------
+             -------------
+  330          //  @brief      硬件IIC引脚切换函数
+  331          //  @param      iic_n         I2C通道号及引脚
+  332          //  @param      scl_pin         选择SCL引脚
+  333          //  @param      sda_pin         选择SDA引脚
+  334          //  Sample usage:       
+  335          //-------------------------------------------------------------------------------------------------------
+             -------------
+  336          void iic_change_pin(IICN_enum iic_n,IIC_PIN_enum scl_pin,IIC_PIN_enum sda_pin)
+  337          {
+  338   1          P_SW2 |= 1<<7;  //将EAXFR寄存器置1，这样才能使用特殊功能寄存器为扩展SFR，访问逻辑地址位于 XDATA 区域
+  339   1        
+  340   1        P_SW2 &= ~(0x03<<4);  //清除引脚切换位
+  341   1          switch(iic_n) 
+  342   1          {
+  343   2          case IIC_1:
+  344   2              P_SW2 |= (0x00<<4); //SCL:P1.5  SDA:P1.4
+  345   2              break;
+  346   2          case IIC_2:
+  347   2              P_SW2 |= (0x01<<4); //SCL:P2.5  SDA:P2.4
+  348   2              break;
+  349   2          case IIC_3:
+  350   2              P_SW2 |= (0x02<<4); //SCL:P7.7  SDA:P7.6 STC8H 48脚核心板没有该组引脚。
+  351   2              break;
+  352   2          case IIC_4:
+  353   2              P_SW2 |= (0x03<<4); //SCL:P3.2  SDA:P3.3
+  354   2              break;
+  355   2          }
+  356   1        
+C251 COMPILER V5.60.0,  iic                                                                25/04/24  13:33:28  PAGE 7   
+
+  357   1        P_SW2 &= ~(1<<7);
+  358   1      
+  359   1      }
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       748     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------         11
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

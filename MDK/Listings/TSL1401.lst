@@ -1,0 +1,137 @@
+C251 COMPILER V5.60.0,  TSL1401                                                            25/04/24  13:33:30  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE TSL1401
+OBJECT MODULE PLACED IN .\Out_flie\TSL1401.obj
+COMPILER INVOKED BY: D:\Keil_80251\C251\BIN\C251.EXE ..\LIB\peripheral\TSL1401.c XSMALL INTR2 BROWSE INCDIR(..\LIB\start
+                    -up;..\LIB\libraries;..\LIB\peripheral;..\USER\inc) DEBUG PRINT(.\Listings\TSL1401.lst) TABS(2) OBJECT(.\Out_flie\TSL1401
+                    -.obj) 
+
+stmt  level    source
+
+    1          
+    2          /********************************************************************************************************
+             -*************
+    3           * @file          线性CCD TSL1401
+    4           * @date          2024-03-06
+    5           * @note  
+    6                    TSL1401接线定义：
+    7                    ------------------------------------ 
+    8                    模块管脚        单片机管脚
+    9                    CCD_AO        查看TSL1401.h文件中的AD_CHANNEL 宏定义
+   10                    CCD_CLK       查看TSL1401.h文件中的CCD_CLK_PIN宏定义
+   11                    CCD_SI        查看TSL1401.h文件中的CCD_SI_PIN 宏定义
+   12                    ------------------------------------ 
+   13           ********************************************************************************************************
+             -************/
+   14          
+   15          
+   16          #include "TSL1401.h"
+   17          #include "adc.h"
+   18          #include "uart.h"
+   19          #include "board.h"
+   20          
+   21          
+   22          
+   23          uint8 tsl1401_finish_flag;
+   24          uint16 ccd_data_ch1[128];                           //CCD数据
+   25          uint16 ccd_data_ch2[128];                       //CCD数据通道2
+   26          
+   27          //-------------------------------------------------------------------------------------------------------
+             -------------
+   28          //  @brief      TSL1401线阵CCD初始化
+   29          //  @param      NULL
+   30          //  @return     void
+   31          
+   32          //  Sample usage:     
+   33          //-------------------------------------------------------------------------------------------------------
+             -------------
+   34          void ccd_init(void)     
+   35          {       
+   36   1          adc_init(AD_CHANNEL_CH1,0X01);
+   37   1          adc_init(AD_CHANNEL_CH2,0X01);     
+   38   1        pit_timer_ms(TIM_4,10);
+   39   1      }
+   40          
+   41          //-------------------------------------------------------------------------------------------------------
+             -------------
+   42          //  @brief      TSL1401线阵CCD图像发送至上位机查看图像
+   43          //  @param      uart_n      串口号
+   44          //  @param      uart_n      线性CCD数据指针
+   45          //  @return     void      
+   46          
+   47          //  Sample usage:       调用该函数前请先初始化串口
+   48          //-------------------------------------------------------------------------------------------------------
+             -------------
+   49          void ccd_send_data(UARTN_enum uart_n ,uint16 *dat)
+   50          {
+   51   1         uint8 i = 0;
+C251 COMPILER V5.60.0,  TSL1401                                                            25/04/24  13:33:30  PAGE 2   
+
+   52   1         uart_putchar(uart_n,0x00); 
+   53   1         uart_putchar(uart_n,0xff);
+   54   1         uart_putchar(uart_n,0x01);
+   55   1         uart_putchar(uart_n,0x00);
+   56   1         
+   57   1        for(i=0; i<128; i++)        
+   58   1        {
+   59   2          uart_putchar(uart_n, (uint8)(dat[i]>>8));   //发送高8位
+   60   2          uart_putchar(uart_n, (uint8)(dat[i]&0XFF)); //发送高低8位    
+   61   2        }
+   62   1      }
+   63          
+   64          
+   65          //-------------------------------------------------------------------------------------------------------
+             -------------
+   66          //  @brief      TSL1401线阵CCD数据采集
+   67          //  @param      NULL
+   68          //  @return     void
+   69          
+   70          //  Sample usage:       在isr.c里面先创建对应的中断函数，然后调用该函数(之后别忘记
+             -清除中断标志位)
+   71          //-------------------------------------------------------------------------------------------------------
+             -------------
+   72          void ccd_collect(void)
+   73          {
+   74   1          uint8 i = 0;
+   75   1      
+   76   1          CCD_CLK(1);
+   77   1          CCD_SI(0);
+   78   1        CCD_CLK(0);
+   79   1          CCD_SI(1);
+   80   1          CCD_CLK(1);
+   81   1          CCD_SI(0);
+   82   1        
+   83   1          for(i=0;i<128;i++)
+   84   1          {
+   85   2          CCD_CLK(0);  
+   86   2          ccd_data_ch1[i] = adc_once(AD_CHANNEL_CH1, AD_RESOLUTION); 
+   87   2              ccd_data_ch2[i] = adc_once(AD_CHANNEL_CH2, AD_RESOLUTION);
+   88   2          CCD_CLK(1); 
+   89   2          }
+   90   1        tsl1401_finish_flag = 1;
+   91   1      }
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       215     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =       513          3
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

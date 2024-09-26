@@ -1,0 +1,250 @@
+C251 COMPILER V5.60.0,  WIRELESS                                                           25/04/24  13:33:30  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE WIRELESS
+OBJECT MODULE PLACED IN .\Out_flie\WIRELESS.obj
+COMPILER INVOKED BY: D:\Keil_80251\C251\BIN\C251.EXE ..\LIB\peripheral\WIRELESS.c XSMALL INTR2 BROWSE INCDIR(..\LIB\star
+                    -tup;..\LIB\libraries;..\LIB\peripheral;..\USER\inc) DEBUG PRINT(.\Listings\WIRELESS.lst) TABS(2) OBJECT(.\Out_flie\WIREL
+                    -ESS.obj) 
+
+stmt  level    source
+
+    1          
+    2          /********************************************************************************************************
+             -*************
+    3           * @file          ÎÞÏß´®¿ÚÄ£¿é
+    4           * @date          2024-03-06
+    5           * @note    
+    6                      ½ÓÏß¶¨Òå£º
+    7                      ------------------------------------ 
+    8                      ÎÞÏß´®¿Ú      µ¥Æ¬»ú                        
+    9                      RX              ²é¿´WIRELESS.hÎÄ¼þÖÐµÄWIRELESS_UART_TXºê¶¨Òå
+   10                      TX              ²é¿´WIRELESS.hÎÄ¼þÖÐµÄWIRELESS_UART_RXºê¶¨Òå
+   11                      RTS             ²é¿´WIRELESS.hÎÄ¼þÖÐµÄRTS_PINºê¶¨Òå
+   12                      CMD             ²é¿´WIRELESS.hÎÄ¼þÖÐµÄCMD_PINºê¶¨Òå
+   13                      ------------------------------------ 
+   14           ********************************************************************************************************
+             -************/
+   15          
+   16          
+   17          #include "WIRELESS.h"
+   18          #include "uart.h"
+   19          #include "fifo.h"
+   20          
+   21          
+   22          static  fifo_struct     wireless_uart_fifo;
+   23          static  uint8           wireless_uart_buffer[WIRELESS_BUFFER_SIZE];  // Êý¾Ý´æ·ÅÊý×é
+   24          static          uint8   wireless_uart_data;
+   25          
+   26          //float dat[32];                               // ¶¨ÒåÊý¾ÝÌå
+   27          char datetail[4] = {0x00, 0x00, 0x80, 0x7f}; // ¶¨ÒåÖ¡Î²
+   28          int uart_mode = 0; // ÉèÖÃ´®¿Ú´«ÊäÄ£Ê½
+   29          
+   30          
+   31          //-------------------------------------------------------------------------------------------------------
+             -------------
+   32          //  @brief      ÎÞÏß×ª´®¿ÚÄ£¿é»Øµ÷º¯Êý
+   33          //  @param      NULL
+   34          //  @return     void          
+   35          
+   36          //  Sample usage: 
+   37          //  @note       
+   38          //-------------------------------------------------------------------------------------------------------
+             -------------
+   39          void wireless_uart_callback(void)
+   40          {
+   41   1          //½Óµ½Ò»¸ö×Ö½Úºóµ¥Æ¬»ú½«»á½øÈë´®¿ÚÖÐ¶Ï£¬Í¨¹ýÔÚ´Ë´¦¶ÁÈ¡wireless_uart_data¿ÉÒÔÈ¡×ßÊý¾Ý
+   42   1          wireless_uart_data = WIRELESS_DATA_BUF;
+   43   1          fifo_write_buffer(&wireless_uart_fifo, &wireless_uart_data, 1);       // ´æÈë FIFO
+   44   1      }
+   45          
+   46          
+   47          //-------------------------------------------------------------------------------------------------------
+             -------------
+   48          //  @brief      ÎÞÏß×ª´®¿ÚÄ£¿é ·¢ËÍº¯Êý
+   49          //  @param      buff        ÐèÒª·¢ËÍµÄÊý¾ÝµØÖ·
+   50          //  @param      len         ·¢ËÍ³¤¶È
+   51          //  @return     uint32      Ê£ÓàÎ´·¢ËÍµÄ×Ö½ÚÊý   
+   52          
+C251 COMPILER V5.60.0,  WIRELESS                                                           25/04/24  13:33:30  PAGE 2   
+
+   53          //  Sample usage: 
+   54          //  @note       
+   55          //-------------------------------------------------------------------------------------------------------
+             -------------
+   56          void wireless_uart_send_byte(uint8 dat)
+   57          {
+   58   1      //  if(WIRELESS_RTS_PIN == 0)  
+   59   1      //  {
+   60   1          uart_putbuff(WIRELESS_UART, &dat, 1);
+   61   1      //  }
+   62   1      }
+   63          
+   64          
+   65          //-------------------------------------------------------------------------------------------------------
+             -------------
+   66          //  @brief      ÎÞÏß×ª´®¿ÚÄ£¿é ·¢ËÍº¯Êý
+   67          //  @param      buff        ÐèÒª·¢ËÍµÄÊý¾ÝµØÖ·
+   68          //  @param      len         ·¢ËÍ³¤¶È
+   69          //  @return     uint32      Ê£ÓàÎ´·¢ËÍµÄ×Ö½ÚÊý   
+   70          
+   71          //  Sample usage: 
+   72          //  @note       
+   73          //-------------------------------------------------------------------------------------------------------
+             -------------
+   74          uint32 wireless_uart_send_buff(uint8 *buff, uint32 len)
+   75          {
+   76   1          while(len>30)
+   77   1          {
+   78   2      //        if(WIRELESS_RTS_PIN == 1)  
+   79   2      //        {
+   80   2      //            return len;//Ä£¿éÃ¦,Èç¹ûÔÊÐíµ±Ç°³ÌÐòÊ¹ÓÃwhileµÈ´ý Ôò¿ÉÒÔÊ¹ÓÃºóÃæ×¢ÊÍµÄwhileµÈ´ýÓï¾äÌæ»»±¾if
+             -Óï¾ä
+   81   2      //        }
+   82   2              //while(RTS_PIN);  //Èç¹ûRTSÎªµÍµçÆ½£¬Ôò¼ÌÐø·¢ËÍÊý¾Ý
+   83   2              uart_putbuff(WIRELESS_UART,buff,30);
+   84   2      
+   85   2              buff += 30; //µØÖ·Æ«ÒÆ
+   86   2              len -= 30;//ÊýÁ¿
+   87   2          }
+   88   1          
+   89   1      //    if(WIRELESS_RTS_PIN == 1)  
+   90   1      //    {
+   91   1      //        return len;//Ä£¿éÃ¦,Èç¹ûÔÊÐíµ±Ç°³ÌÐòÊ¹ÓÃwhileµÈ´ý Ôò¿ÉÒÔÊ¹ÓÃºóÃæ×¢ÊÍµÄwhileµÈ´ýÓï¾äÌæ»»±¾ifÓï¾ä
+   92   1      //    }
+   93   1          //while(WIRELESS_RTS_PIN);  //Èç¹ûRTSÎªµÍµçÆ½£¬Ôò¼ÌÐø·¢ËÍÊý¾Ý
+   94   1          uart_putbuff(WIRELESS_UART,buff,len);//·¢ËÍ×îºóµÄÊý¾Ý
+   95   1          
+   96   1          return 0;
+   97   1      }
+   98          
+   99          
+  100          //-------------------------------------------------------------------------------------------------------
+             -------------
+  101          //  @brief      ÎÞÏß×ª´®¿ÚÄ£¿é ¶ÁÈ¡º¯Êý
+  102          //  @param      buff            ´æ´¢µÄÊý¾ÝµØÖ·
+  103          //  @param      len             ³¤¶È
+  104          //  @return     uint32          Êµ¼Ê¶ÁÈ¡×Ö½ÚÊý
+  105          //  Sample usage:
+  106          //-------------------------------------------------------------------------------------------------------
+             -------------
+  107          uint32 wireless_uart_read_buff (uint8 *buff, uint32 len)
+  108          {
+  109   1          uint32 data_len = len;
+  110   1          fifo_read_buffer(&wireless_uart_fifo, buff, &data_len, FIFO_READ_AND_CLEAN);
+  111   1      //    fifo_read_buffer(&wireless_uart_fifo, buff, &data_len, FIFO_READ);
+  112   1      //    if(data_len >= 6)  fifo_read_buffer(&wireless_uart_fifo, buff, &data_len, FIFO_READ_AND_CLEAN);
+C251 COMPILER V5.60.0,  WIRELESS                                                           25/04/24  13:33:30  PAGE 3   
+
+  113   1      //    else data_len = 0;
+  114   1          return data_len;
+  115   1      }
+  116          
+  117          
+  118          //-------------------------------------------------------------------------------------------------------
+             -------------
+  119          //  @brief      ÎÞÏß×ª ´®¿ÚÄ£¿é³õÊ¼»¯
+  120          //  @param      NULL
+  121          //  @return     void          
+  122          
+  123          //  Sample usage: 
+  124          //  @note       
+  125          //-------------------------------------------------------------------------------------------------------
+             -------------
+  126          void wireless_uart_init(void)
+  127          {
+  128   1      //    WIRELESS_RTS_PIN = 0;
+  129   1          wireless_type = WIRELESS_SI24R1;
+  130   1          //±¾º¯ÊýÊ¹ÓÃµÄ²¨ÌØÂÊÎª115200£¬ÎªÎÞÏß×ª´®¿ÚÄ£¿éµÄÄ¬ÈÏ²¨ÌØÂÊ£¬ÈçÐèÆäËû²¨ÌØÂÊÇë×ÔÐÐÅäÖÃÄ£¿é²¢ÐÞ¸Ä´®¿ÚµÄ²
+             -¨ÌØÂÊ
+  131   1          fifo_init(&wireless_uart_fifo, FIFO_DATA_8BIT, wireless_uart_buffer, WIRELESS_BUFFER_SIZE);
+  132   1          uart_init(WIRELESS_UART, WIRELESS_UART_RX_PIN, WIRELESS_UART_TX_PIN, WIRELESS_UART_BAUD, WIRELESS_TIMER
+             -_N);  //³õÊ¼»¯´®¿Ú    
+  133   1      }
+  134          
+  135          //-------------------------------------------------------------------------------------------------------
+             -------------
+  136          //  @brief      ÎÞÏß´®¿Ú·¢ËÍ×Ö·û´®
+  137          //  @param      *str ×Ö·û´®
+  138          //  @return     void          
+  139          //  Sample usage: 
+  140          //  @note       
+  141          //-------------------------------------------------------------------------------------------------------
+             -------------
+  142          void wireless_sendstr(uint8 *str)
+  143          {
+  144   1          while(*str)
+  145   1          {
+  146   2              uart_putchar(WIRELESS_UART, *str++);
+  147   2          }
+  148   1      }
+  149          
+  150          //-------------------------------------------------------------------------------------------------------
+             -------------
+  151          //  @brief      ¸¡µãÊý×ª¶þ½øÖÆÊý
+  152          //  @param      fnum      ÊäÈëµÄ¸¡µãÊý
+  153          //  @param      byte[]      ×ª»»³ÉµÄ¶þ½øÖÆÊý×é
+  154          //  @return
+  155          //-------------------------------------------------------------------------------------------------------
+             -------------
+  156          void floatToByte(float fnum, unsigned char byte[]) // ¸¡µãÊý×ª¶þ½øÖÆÊý
+  157          {
+  158   1          FloatLongType fl;
+  159   1          fl.fdata = fnum;
+  160   1          byte[0] = (unsigned char)(fl.ldata);
+  161   1          byte[1] = (unsigned char)(fl.ldata >> 8);
+  162   1          byte[2] = (unsigned char)(fl.ldata >> 16);
+  163   1          byte[3] = (unsigned char)(fl.ldata >> 24);
+  164   1      }
+  165          
+  166          //-------------------------------------------------------------------------------------------------------
+             -------------
+  167          //  @brief      ¸¡µãÊý×é×ª»¯Îª¶þ½øÖÆÊý×é²¢·¢ËÍ
+  168          //  @param      num[]     ÊäÈëÊý×é
+  169          //  @param      len             Êý×é³¤¶È
+C251 COMPILER V5.60.0,  WIRELESS                                                           25/04/24  13:33:30  PAGE 4   
+
+  170          //  @return
+  171          //-------------------------------------------------------------------------------------------------------
+             -------------
+  172          void wireless_uart_send(float num[], uint8 len) // ´®¿Ú·¢ËÍº¯Êý
+  173          {
+  174   1          int i, j;
+  175   1          char hexdats[256];
+  176   1          // ¸¡µãÊý×é×ª»¯Îª¶þ½øÖÆÊý×é
+  177   1          for (i = 0; i < len; i++)
+  178   1          {
+  179   2              uint8 bytedat[4] = {0};
+  180   2              floatToByte(num[i], bytedat);
+  181   2              for (j = i * 4; j <= i * 4 + 3; j++)
+  182   2              hexdats[j] = bytedat[j % 4];
+  183   2          }
+  184   1          // ·¢ËÍÊý¾ÝÌå
+  185   1          wireless_uart_send_buff(hexdats, sizeof(float) * len);
+  186   1          // ·¢ËÍÖ¡Î²
+  187   1          wireless_uart_send_buff(datetail, 4);
+  188   1      }
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       432     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =       158        278
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =        18     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

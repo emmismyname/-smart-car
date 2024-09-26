@@ -1,0 +1,351 @@
+C251 COMPILER V5.60.0,  data_send                                                          25/04/24  13:33:29  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE data_send
+OBJECT MODULE PLACED IN .\Out_flie\data_send.obj
+COMPILER INVOKED BY: D:\Keil_80251\C251\BIN\C251.EXE ..\USER\src\data_send.c XSMALL INTR2 BROWSE INCDIR(..\LIB\startup;.
+                    -.\LIB\libraries;..\LIB\peripheral;..\USER\inc) DEBUG PRINT(.\Listings\data_send.lst) TABS(2) OBJECT(.\Out_flie\data_send
+                    -.obj) 
+
+stmt  level    source
+
+    1          #include "data_send.h"
+    2          
+    3          #define DATA_SIZE 32
+    4          
+    5          bit spi_busy = 0;
+    6          
+    7          uint8 Receive_buff[RecBufSize] = {0};
+    8          uint8 Receive_ptr = 0;
+    9          
+   10          const uint8 SPIFrameFloat[2] = {0x07,0x0a};
+   11          const uint8 SPIFrameUint[2]  = {0x08,0x0b};
+   12          const uint8 SPIFrameUchar[2] = {0x09,0x0c};
+   13          
+   14          float SPI_float = 0.0;
+   15          uint16 SPI_uint = 0;
+   16          uint8 SPI_uchar = 0;
+   17          
+   18          float dat[DATA_SIZE] = {0.0};
+   19          
+   20          
+   21          //----------------------data_sendTo_MotherBoard----------------------//
+   22          //----------------------data_sendTo_MptherBoard----------------------//
+   23          //----------------------data_sendTo_MotherBoard----------------------//
+   24          
+   25          //-------------------------------------------------------------------------------------------------------
+             -------------
+   26          //  @brief      spi发送字节
+   27          //  @param      dat
+   28          //  @return     void
+   29          //  Sample usage:   spi_send_byte(0x40);
+   30          //-------------------------------------------------------------------------------------------------------
+             -------------
+   31          void spi_send_byte(uint8 dat)
+   32          { 
+   33   1          while(spi_busy);
+   34   1          spi_busy=1;
+   35   1          SS_2=0;//
+   36   1          SPDAT = dat;          //DATA寄存器赋值
+   37   1      }
+   38          
+   39          
+   40          //-------------------------------------------------------------------------------------------------------
+             -------------
+   41          //  @brief      spi发送数组
+   42          //  @param      buff        需要发送的数据地址
+   43          //  @param      len         发送长度
+   44          //  @return     uint32      剩余未发送的字节数   
+   45          //  Sample usage:     
+   46          //-------------------------------------------------------------------------------------------------------
+             -------------
+   47          void spi_send_buffer(unsigned char buff[], uint8 len)
+   48          {   
+   49   1          int i=0;
+   50   1          for(i=0;i<len;i++)
+   51   1          {
+   52   2            spi_send_byte(buff[i]);
+   53   2          }
+C251 COMPILER V5.60.0,  data_send                                                          25/04/24  13:33:29  PAGE 2   
+
+   54   1      }
+   55          
+   56          
+   57          //-------------------------------------------------------------------------------------------------------
+             -------------
+   58          //  @brief      spi发送浮点数
+   59          //  @param      num         待发浮点数
+   60          //  @return     void
+   61          //  Sample usage:   spi_send_float(123.987);
+   62          //-------------------------------------------------------------------------------------------------------
+             -------------
+   63          void spi_send_float(float num)
+   64          {
+   65   1          // 浮点数转化为二进制数组
+   66   1          uint8 bytedat[4] = {0};
+   67   1          floatToByte(num, bytedat);
+   68   1          // 发送帧头
+   69   1          spi_send_byte(SPIFrameFloat[0]);
+   70   1          // 发送数据体
+   71   1          spi_send_buffer(bytedat, sizeof(float));
+   72   1          // 发送帧尾
+   73   1          spi_send_byte(SPIFrameFloat[1]);
+   74   1      }
+   75          
+   76          
+   77          //-------------------------------------------------------------------------------------------------------
+             -------------
+   78          //  @brief      spi发送无符号整型
+   79          //  @param      num         待发无符号整型
+   80          //  @return     void
+   81          //  Sample usage:   spi_send_uint(1234);
+   82          //-------------------------------------------------------------------------------------------------------
+             -------------
+   83          void spi_send_uint(uint16 num)
+   84          {
+   85   1          // 无符号整型转化为二进制数组
+   86   1          uint8 bytedat[2] = {0};
+   87   1          bytedat[0] = (unsigned char)(num);
+   88   1          bytedat[1] = (unsigned char)(num >> 8);
+   89   1          // 发送帧头
+   90   1          spi_send_byte(SPIFrameUint[0]);
+   91   1          // 发送数据体
+   92   1          spi_send_buffer(bytedat, sizeof(int));
+   93   1          // 发送帧尾
+   94   1          spi_send_byte(SPIFrameUint[1]);
+   95   1      }
+   96          
+   97          
+   98          //-------------------------------------------------------------------------------------------------------
+             -------------
+   99          //  @brief      spi发送无符号字符型
+  100          //  @param      num         待发无符号字符型
+  101          //  @return     void
+  102          //  Sample usage:   spi_send_uchar(234);
+  103          //-------------------------------------------------------------------------------------------------------
+             -------------
+  104          void spi_send_uchar(uint8 num)
+  105          {
+  106   1          // 发送帧头
+  107   1        spi_send_byte(SPIFrameUchar[0]);
+  108   1          // 发送数据
+  109   1          spi_send_byte(num);
+  110   1          // 发送帧尾
+  111   1          spi_send_byte(SPIFrameUchar[1]);
+  112   1      }
+  113          
+C251 COMPILER V5.60.0,  data_send                                                          25/04/24  13:33:29  PAGE 3   
+
+  114          
+  115          
+  116          //---------------------------wireless_send----------------------------//
+  117          //---------------------------wireless_send----------------------------//
+  118          //---------------------------wireless_send----------------------------//
+  119          
+  120          void wireless_send_SBtoPC(void)
+  121          {
+  122   1        
+  123   1      //  dat[0] = adc[1].data_max;
+  124   1      //  dat[1] = adc[1].data_min;
+  125   1      //  dat[2] = adc[2].data_max;
+  126   1      //  dat[3] = adc[2].data_min;
+  127   1      //  dat[4] = adc[3].data_max;
+  128   1      //  
+  129   1      //  dat[5] = adc[3].data_min;
+  130   1      //  dat[6] = adc[4].data_max;
+  131   1      //  dat[7] = adc[4].data_min;
+  132   1      //  dat[8] = adc[5].data_max;
+  133   1      //  dat[9] = adc[5].data_min;
+  134   1        
+  135   1      //  dat[10] = adc[6].data_max;
+  136   1      //  dat[11] = adc[6].data_min;
+  137   1      //  dat[12] = adc[7].data_max;
+  138   1      //  dat[13] = adc[7].data_min;
+  139   1      //  dat[14] = adc[8].data_max;
+  140   1      
+  141   1      //  dat[15] = adc[8].data_min;
+  142   1      //  dat[16] = adc[9].data_max;
+  143   1      //  dat[17] = adc[9].data_min;
+  144   1      //  dat[18] = adc[10].data_max;
+  145   1      //  dat[19] = adc[10].data_min;
+  146   1        
+  147   1        
+  148   1      //    dat[0] = adc_once(ADC_P00, ADC_12BIT);
+  149   1      //    dat[1] = adc_once(ADC_P01, ADC_12BIT);
+  150   1      //    dat[2] = adc_once(ADC_P03, ADC_12BIT);
+  151   1      //    dat[3] = adc_once(ADC_P02, ADC_12BIT);
+  152   1      //    dat[4] = adc_once(ADC_P05, ADC_12BIT);
+  153   1      
+  154   1      //    dat[5] = adc_once(ADC_P16, ADC_12BIT);
+  155   1      //    dat[6] = adc_once(ADC_P17, ADC_12BIT);
+  156   1      //    dat[7] = adc_once(ADC_P14, ADC_12BIT);
+  157   1      //    dat[8] = adc_once(ADC_P13, ADC_12BIT);
+  158   1      //    dat[9] = adc_once(ADC_P15, ADC_12BIT);
+  159   1      
+  160   1      //      dat[0] = adc[1].data_result;
+  161   1      //      dat[1] = adc[2].data_result;
+  162   1      //      dat[2] = adc[3].data_result;
+  163   1      //      dat[3] = adc[4].data_result;
+  164   1      //      dat[4] = adc[5].data_result;
+  165   1      //      
+  166   1      //      dat[5] = adc[6].data_result;
+  167   1      //      dat[6] = adc[7].data_result;
+  168   1      //      dat[7] = adc[8].data_result;
+  169   1      //      dat[8] = adc[9].data_result;
+  170   1      //      dat[9] = adc[10].data_result;
+  171   1      //    
+  172   1      //      dat[10] = err;
+  173   1      //      dat[11] = ADC_OUTOFRANGE_LIMIT;
+  174   1      //      
+  175   1      //      wireless_uart_send(dat,12);
+  176   1        
+  177   1          switch(send_flag)
+  178   1          {
+  179   2              case 0:
+C251 COMPILER V5.60.0,  data_send                                                          25/04/24  13:33:29  PAGE 4   
+
+  180   2              {
+  181   3                  dat[0] = adc[1].data_result;
+  182   3                  dat[1] = adc[2].data_result;
+  183   3                  dat[2] = adc[3].data_result;
+  184   3                  dat[3] = adc[4].data_result;
+  185   3                  dat[4] = adc[5].data_result;
+  186   3                  
+  187   3                  dat[5] = adc[6].data_result;
+  188   3                  dat[6] = adc[7].data_result;
+  189   3                  dat[7] = adc[8].data_result;
+  190   3                  dat[8] = adc[9].data_result;
+  191   3                  dat[9] = adc[10].data_result;
+  192   3                
+  193   3                  dat[10] = err;
+  194   3                  dat[11] = ADC_OUTOFRANGE_LIMIT;
+  195   3                  wireless_uart_send(dat,12);
+  196   3              }
+  197   2              break;
+  198   2              case 2:
+  199   2              {
+  200   3                  dat[0] = adc1_L2_H;
+  201   3                  dat[1] = adc1_L1_V;
+  202   3                  dat[2] = adc1_M_H;
+  203   3                  dat[3] = adc1_R1_V;
+  204   3                  dat[4] = adc1_R2_H;
+  205   3      
+  206   3                  dat[5] = adc2_L2_H;
+  207   3                  dat[6] = adc2_L1_V;
+  208   3                  dat[7] = adc2_M_H;
+  209   3                  dat[8] = adc2_R1_V;
+  210   3                  dat[9] = adc2_R2_H;
+  211   3                
+  212   3                  dat[10] = err;
+  213   3                  dat[11] = ADC_OUTOFRANGE_LIMIT;
+  214   3                  
+  215   3                  wireless_uart_send(dat,12);
+  216   3              } 
+  217   2              break;
+  218   2              case 3:
+  219   2              {
+  220   3                  dat[0] = adc1_L2H_withL1V;
+  221   3                  dat[1] = adc1_R2H_withR1V;
+  222   3                  dat[2] = adc1_MH_withL1V;
+  223   3                  dat[3] = adc1_MH_withR1V;
+  224   3                  dat[4] = adc1_L1_V;
+  225   3                  dat[5] = adc1_R1_V;
+  226   3      
+  227   3                  dat[6] = adc2_L2H_withL1V;
+  228   3                  dat[7] = adc2_R2H_withR1V;
+  229   3                  dat[8] = adc2_MH_withL1V;
+  230   3                  dat[9] = adc2_MH_withR1V;
+  231   3                  dat[10] = adc2_L1_V;
+  232   3                  dat[11] = adc2_R1_V;
+  233   3                
+  234   3                  dat[12] = err;
+  235   3                  dat[13] = ADC_OUTOFRANGE_LIMIT;
+  236   3                  
+  237   3                  wireless_uart_send(dat,14);
+  238   3              }
+  239   2              case 4:
+  240   2              {
+  241   3                  dat[0] = vector_ratio[0][0];
+  242   3                  dat[1] = vector_ratio[0][1];
+  243   3                
+  244   3                  dat[2] = vector_ratio[1][0];
+  245   3                  dat[3] = vector_ratio[1][1];
+C251 COMPILER V5.60.0,  data_send                                                          25/04/24  13:33:29  PAGE 5   
+
+  246   3                
+  247   3                  dat[4] = Err_Hori;
+  248   3                  dat[5] = Err_2_Hori;
+  249   3                
+  250   3                  dat[6] = Err_Vert;
+  251   3                  dat[7] = Err_2_Vert;
+  252   3                
+  253   3                  dat[8] = Err_Inclined_left;
+  254   3                  dat[9] = Err_Inclined_right;
+  255   3                
+  256   3                  dat[10] = curve_convert_ratio[0][0];
+  257   3                  dat[11] = curve_convert_ratio[0][1];
+  258   3                  dat[12] = curve_convert_ratio[0][2];
+  259   3                  dat[13] = curve_convert_ratio[0][3];
+  260   3                
+  261   3                  dat[14] = straight_convert_ratio[0][0];
+  262   3                  dat[15] = straight_convert_ratio[0][1];
+  263   3                  dat[16] = straight_convert_ratio[0][2];
+  264   3                  
+  265   3                  dat[17] = err;
+  266   3                  
+  267   3                  wireless_uart_send(dat,18);
+  268   3              }
+  269   2              break;  
+  270   2          }
+  271   1      }
+  272          
+  273          
+  274          
+  275          
+  276          
+  277          
+  278          
+  279          
+  280          
+  281          
+  282          
+  283          
+  284          
+  285          
+  286          
+  287          
+  288          
+  289          
+  290          
+  291          
+  292          
+  293          
+  294          
+  295          
+  296          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       726     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =       156          9
+  bit size             =         1     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+C251 COMPILER V5.60.0,  data_send                                                          25/04/24  13:33:29  PAGE 6   
+
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =       192     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
