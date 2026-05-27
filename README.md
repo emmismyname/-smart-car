@@ -20,7 +20,8 @@ Handles signal processing from induction coils and controls the motors.
 
 ### 2. Power Module
 Regulates 2S/3S LiPo battery input to stable 5V and 3.3V rails.
-![Power Module 3D](hardware/Images/Power_Module.png)
+
+<img width="218" height="116" alt="image" src="https://github.com/user-attachments/assets/14cce93b-8421-4630-aefb-345ca688b350" />
 
 ---
 
