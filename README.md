@@ -16,7 +16,7 @@ The hardware files are located in the `/hardware` directory.
 
 ### 1. Driver Board
 Handles signal processing from induction coils and controls the motors.
-![Driver Board 3D](hardware/Images/Driver_Board_V2.png)
+
 
 ### 2. Power Module
 Regulates 2S/3S LiPo battery input to stable 5V and 3.3V rails.
